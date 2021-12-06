@@ -23,7 +23,7 @@ namespace StockDealBusiness.Business
 
 
 
-        protected BaseResponse BadRequestResponse(string message)
+        protected BaseResponse BadRequestResponse(string message = "")
         {
             return new BaseResponse()
             {
@@ -34,7 +34,7 @@ namespace StockDealBusiness.Business
 
 
 
-        protected BaseResponse NotFoundResponse(string message)
+        protected BaseResponse NotFoundResponse(string message = "")
         {
             return new BaseResponse()
             {
