@@ -86,7 +86,7 @@ namespace StockDealBusiness.Business
         /// <param name="curPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealDetailAsync(Guid stockDetailId, Guid loginedContactId, bool isPaging, int ? curPage = null, int perPage = 20)
+        public async Task<BaseResponse> ListStockDealDetailAsync(Guid stockDetailId, Guid loginedContactId, bool isPaging, int? curPage = null, int perPage = 20)
         {
             var _context = new StockDealServiceContext();
             var stockDeal = _context.StockDeals
@@ -104,8 +104,8 @@ namespace StockDealBusiness.Business
             {
                 paging.TotalItems = await list.CountAsync();
                 paging.PerPage = perPage;
-                paging.CurPage = curPage ?? paging.TotalPages + 1;
-                paging.Data = await list.Skip((paging.CurPage - 1) * perPage).Take(perPage).ToListAsync();
+                paging.CurPage = curPage ?? paging.TotalPages;
+                paging.Data = await list.Skip( (paging.CurPage + (curPage.HasValue ? -1 : 0) ) * perPage).Take(perPage).ToListAsync();
             }
             else
             {

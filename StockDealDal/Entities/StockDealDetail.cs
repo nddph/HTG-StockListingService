@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -31,6 +32,7 @@ namespace StockDealDal.Entities
         [Required]
         public Guid StockDetailId { get; set; }
 
+        [JsonIgnore]
         [ForeignKey(nameof(StockDetailId))]
         public StockDeal StockDeal { get; set; }
 

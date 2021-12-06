@@ -81,7 +81,7 @@ namespace StockDealService.Controllers
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDealDetail")]
-        public async Task<ObjectResult> ListStockDealDetailAsync([Required] Guid? stockDetailId, bool isPaging = true, int? curPage = null, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealDetailAsync([Required] Guid? stockDetailId, bool isPaging = true, [Range(1, int.MaxValue)] int? curPage = null, int perPage = 20)
         {
             try
             {
