@@ -58,7 +58,6 @@ namespace StockDealService
 
                         var result = new BadRequestObjectResult(response);
 
-                        // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
                         result.ContentTypes.Add(MediaTypeNames.Application.Json);
                         result.ContentTypes.Add(MediaTypeNames.Application.Xml);
 
