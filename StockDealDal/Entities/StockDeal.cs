@@ -24,5 +24,8 @@ namespace StockDealDal.Entities
         public Guid ReceiverId { get; set; }
 
         public ICollection<StockDealDetail> StockDealDetails { get; set; }
+
+        [Required]
+        public DateTime? CreatedDate { get; set; }
     }
 }

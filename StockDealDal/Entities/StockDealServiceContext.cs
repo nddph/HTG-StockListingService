@@ -10,6 +10,11 @@ namespace StockDealDal.Entities
 {
     public class StockDealServiceContext : DbContext
     {
+
+        public DbSet<StockDeal> StockDeals { get; set; }
+
+        public DbSet<StockDealDetail> StockDealDetails { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
