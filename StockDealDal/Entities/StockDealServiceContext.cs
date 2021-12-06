@@ -1,0 +1,38 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StockDealDal.Entities
+{
+    public class StockDealServiceContext : DbContext
+    {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.LogTo(Console.WriteLine);
+                optionsBuilder.UseSqlServer(GetSessionByName("StockDealConn", "ConnectionStrings"));
+            }
+        }
+
+        private static IConfiguration _configuration = null;
+        public static string GetSessionByName(string key, string sessionName)
+        {
+            if (_configuration == null)
+            {
+                var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
+                _configuration = builder.Build();
+            }
+            return _configuration.GetSection(sessionName).GetValue<string>(key);
+        }
+        public static void ResetStaticConfig()
+        {
+            _configuration = null;
+            GetSessionByName("", "");
+        }
+    }
+}
