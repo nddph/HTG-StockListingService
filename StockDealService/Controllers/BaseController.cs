@@ -36,36 +36,29 @@ namespace StockDealService.Controllers
 
 
 
-        protected ObjectResult SuccessResponse(object data = null)
+        protected ObjectResult SuccessResponse(BaseResponse response)
         {
-            return StatusCode(StatusCodes.Status200OK, data);
+            return StatusCode(StatusCodes.Status200OK, response);
         }
 
-
-
-        protected ObjectResult BadRequestResponse(string message = null)
+        protected ObjectResult BadRequestResponse(BaseResponse response)
         {
-            return StatusCode(StatusCodes.Status400BadRequest, createModel(message));
+            return StatusCode(StatusCodes.Status400BadRequest, response);
         }
 
-
-
-        protected ObjectResult NotFoundResponse(string message = null)
+        protected ObjectResult NotFoundResponse(BaseResponse response)
         {
-            return StatusCode(StatusCodes.Status404NotFound, createModel(message));
+            return StatusCode(StatusCodes.Status404NotFound, response);
         }
-
-
 
         protected ObjectResult CatchErrorResponse(Exception e, ILogger logger)
         {
             var _logger = logger;
-            _logger.LogError(e.ToString());
+            _logger.LogError(e.Message);
+            _logger.LogError(e.StackTrace);
 
-            return StatusCode(StatusCodes.Status500InternalServerError, createModel(e.Message));
+            return StatusCode(StatusCodes.Status500InternalServerError, createModel(null, e.Message, 500));
         }
-
-
 
         protected ObjectResult ReturnData(BaseResponse response)
         {
@@ -73,34 +66,28 @@ namespace StockDealService.Controllers
             {
                 case 200:
                     {
-                        return SuccessResponse(response.Data);
+                        return SuccessResponse(response);
                     };
                 case 400:
                     {
-                        return BadRequestResponse(response.Message?.ToString());
+                        return BadRequestResponse(response);
                     };
                 case 404:
                     {
-                        return NotFoundResponse(response.Message?.ToString());
-                    };
-                case 415:
-                    {
-                        return StatusCode(response.StatusCode, response.Message?.ToString());
+                        return NotFoundResponse(response);
                     };
                 default: return null;
             }
         }
 
-
-
-        private ErrorMessage createModel(string message)
+        protected BaseResponse createModel(object data = null, string message = "", int statusCode = 200)
         {
-            var errMessage = new ErrorMessage()
+            return new BaseResponse()
             {
-                error = message,
-                error_description = message
+                StatusCode = statusCode,
+                Data = data,
+                Message = message,
             };
-            return errMessage;
         }
 
     }
