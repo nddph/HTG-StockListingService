@@ -16,27 +16,15 @@ namespace StockDealService.Controllers
         {
             _chatHubBusiness = new();
         }
+
+
+
         public async Task SendMessage([Required] Guid groupId, [Required] Guid userId, [Required] string message)
         {
-
-            //using var _context = new StockDealServiceContext();
-
-            //var group = await _context.StockDeals.FindAsync(groupId);
-            //if (group == null) return;
-            //if (!(userId == group.SenderId || userId == group.ReceiverId)) return;
-
-            await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), userId, message);
-
-            //StockDealDetail stockDealDetail = new()
-            //{
-            //    Id = Guid.NewGuid(),
-            //    SenderId = userId,
-            //    Message = message,
-            //    StockDetailId = groupId,
-            //    CreatedDate = DateTime.Now
-            //};
-            //_context.Add(stockDealDetail);
-            //await _context.SaveChangesAsync();
+            if (await _chatHubBusiness.CreateStockDetail(groupId, userId, message))
+            {
+                await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), userId, message);
+            }
         }
 
 
