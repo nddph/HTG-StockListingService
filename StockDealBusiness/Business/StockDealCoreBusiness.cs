@@ -18,21 +18,21 @@ namespace StockDealBusiness.Business
         /// <param name="receiverId"></param>
         /// <param name="tickeId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateStockDealAsync(Guid loginContact, Guid receiverId, Guid? tickeId)
+        public async Task<BaseResponse> CreateStockDealAsync(Guid loginContact, CreateStockDetailDto input)
         {
             var _context = new StockDealServiceContext();
 
             if (await _context.StockDeals.AnyAsync(e =>
-                ((e.SenderId == loginContact && e.ReceiverId == receiverId)
-                || (e.SenderId == receiverId && e.ReceiverId == loginContact))
-                && e.TickeId == tickeId)) return BadRequestResponse("StockDeal_Exits");
+                ((e.SenderId == loginContact && e.ReceiverId == input.ReceiverId)
+                || (e.SenderId == input.ReceiverId && e.ReceiverId == loginContact))
+                && e.TickeId == input.TickeId)) return BadRequestResponse("StockDeal_Exits");
 
             var stockDeal = new StockDeal
             {
                 Id = Guid.NewGuid(),
                 SenderId = loginContact,
-                ReceiverId = receiverId,
-                TickeId = tickeId,
+                ReceiverId = input.ReceiverId.Value,
+                TickeId = input.TickeId,
                 CreatedDate = DateTime.Now
             };
 

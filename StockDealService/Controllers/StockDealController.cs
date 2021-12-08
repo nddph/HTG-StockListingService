@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
+using StockDealDal.Dto;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -31,11 +32,11 @@ namespace StockDealService.Controllers
         /// <param name="tickeId"></param>
         /// <returns></returns>
         [HttpPost("v1/CreateStockDeal")]
-        public async Task<ObjectResult> CreateStockDealAsync([Required] Guid? receiverId, Guid? tickeId)
+        public async Task<ObjectResult> CreateStockDealAsync(CreateStockDetailDto input)
         {
             try
             {
-                var result = await _stockDealBusiness.CreateStockDealAsync(LoginedContactId, receiverId.Value, tickeId);
+                var result = await _stockDealBusiness.CreateStockDealAsync(LoginedContactId, input);
 
                 return ReturnData(result);
 

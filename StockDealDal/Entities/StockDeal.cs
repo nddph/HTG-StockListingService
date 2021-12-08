@@ -27,5 +27,9 @@ namespace StockDealDal.Entities
 
         [Required]
         public DateTime? CreatedDate { get; set; }
+
+        public ulong StockQuantity { get; set; }
+
+        public decimal NegotiatePrice { get; set; }
     }
 }
