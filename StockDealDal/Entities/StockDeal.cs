@@ -20,16 +20,17 @@ namespace StockDealDal.Entities
         [Required]
         public Guid SenderId { get; set; }
 
+        public string SenderName { get; set; }
+
         [Required]
         public Guid ReceiverId { get; set; }
+
+        public string ReceiverName { get; set; }
 
         public ICollection<StockDealDetail> StockDealDetails { get; set; }
 
         [Required]
         public DateTime? CreatedDate { get; set; }
 
-        public ulong StockQuantity { get; set; }
-
-        public decimal NegotiatePrice { get; set; }
     }
 }

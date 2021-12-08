@@ -32,11 +32,13 @@ namespace StockDealService.Controllers
         /// <param name="tickeId"></param>
         /// <returns></returns>
         [HttpPost("v1/CreateStockDeal")]
-        public async Task<ObjectResult> CreateStockDealAsync(CreateStockDetailDto input)
+        public async Task<ObjectResult> CreateStockDealAsync(CreateStockDealDto input)
         {
             try
             {
-                var result = await _stockDealBusiness.CreateStockDealAsync(LoginedContactId, input);
+                input.SenderId = LoginedContactId;
+
+                var result = await _stockDealBusiness.CreateStockDealAsync(input);
 
                 return ReturnData(result);
 

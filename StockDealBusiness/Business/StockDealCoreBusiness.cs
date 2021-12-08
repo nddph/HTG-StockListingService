@@ -18,28 +18,34 @@ namespace StockDealBusiness.Business
         /// <param name="receiverId"></param>
         /// <param name="tickeId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateStockDealAsync(Guid loginContact, CreateStockDetailDto input)
+        public async Task<BaseResponse> CreateStockDealAsync(CreateStockDealDto input)
         {
             var _context = new StockDealServiceContext();
 
-            if (await _context.StockDeals.AnyAsync(e =>
-                ((e.SenderId == loginContact && e.ReceiverId == input.ReceiverId)
-                || (e.SenderId == input.ReceiverId && e.ReceiverId == loginContact))
-                && e.TickeId == input.TickeId)) return BadRequestResponse("StockDeal_Exits");
+            var stockDeal = await _context.StockDeals.FirstOrDefaultAsync(e =>
+                ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
+                || (e.SenderId == input.ReceiverId && e.ReceiverId == input.SenderId))
+                && e.TickeId == input.TickeId);
 
-            var stockDeal = new StockDeal
+            if (stockDeal == null)
             {
-                Id = Guid.NewGuid(),
-                SenderId = loginContact,
-                ReceiverId = input.ReceiverId.Value,
-                TickeId = input.TickeId,
-                CreatedDate = DateTime.Now
-            };
+                stockDeal = new StockDeal
+                {
+                    Id = Guid.NewGuid(),
+                    SenderId = input.SenderId.Value,
+                    ReceiverId = input.ReceiverId.Value,
+                    TickeId = input.TickeId,
+                    CreatedDate = DateTime.Now,
+                    SenderName = input.SenderName,
+                    ReceiverName = input.ReceiverName
+                };
+                _context.StockDeals.Add(stockDeal);
+                await _context.SaveChangesAsync();
+            }
 
-            _context.Add(stockDeal);
-            await _context.SaveChangesAsync();
-
-            return SuccessResponse(stockDeal);
+            await CreateStockDealDetailAsync(stockDeal.Id, input.StockDetail);
+            
+            return SuccessResponse(stockDeal.Id);
         }
 
 
@@ -105,7 +111,7 @@ namespace StockDealBusiness.Business
                 paging.TotalItems = await list.CountAsync();
                 paging.PerPage = perPage;
                 paging.CurPage = curPage ?? paging.TotalPages;
-                paging.Data = await list.Skip( (paging.CurPage + (curPage.HasValue ? -1 : 0) ) * perPage).Take(perPage).ToListAsync();
+                paging.Data = await list.Skip( (paging.CurPage + (paging.CurPage > 0 ? -1 : 0) ) * perPage).Take(perPage).ToListAsync();
             }
             else
             {
@@ -117,5 +123,33 @@ namespace StockDealBusiness.Business
 
             return SuccessResponse(paging);
         }
+
+
+
+        /// <summary>
+        /// tạo stock deal detail
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> CreateStockDealDetailAsync(Guid stockDealId, CreateStockDetailDto input)
+        {
+            var _context = new StockDealServiceContext();
+
+            var stockDetail = new StockDealDetail()
+            {
+                Id = Guid.NewGuid(),
+                CreatedDate = DateTime.Now,
+                StockDetailId = stockDealId
+            };
+
+            var stockDetailDb = _context.Add(stockDetail);
+            stockDetailDb.CurrentValues.SetValues(input);
+
+            await _context.SaveChangesAsync();
+
+            return SuccessResponse(data: stockDetail.Id);
+        }
+
     }
 }

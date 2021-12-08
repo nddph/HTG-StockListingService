@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using StockDealBusiness.Business;
+using StockDealDal.Dto;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,19 +12,21 @@ namespace StockDealService.Controllers
     public class ChatHub : Hub
     {
         private readonly ChatHubBusiness _chatHubBusiness;
+        private readonly StockDealCoreBusiness _stockDealCoreBusiness;
 
         public ChatHub()
         {
             _chatHubBusiness = new();
+            _stockDealCoreBusiness = new();
         }
 
 
 
-        public async Task SendMessage([Required] Guid groupId, [Required] Guid userId, [Required] string message)
+        public async Task SendMessage([Required] Guid groupId, [Required] CreateStockDetailDto input)
         {
-            if (await _chatHubBusiness.CreateStockDetail(groupId, userId, message))
+            if ((await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, input))?.StatusCode == 200)
             {
-                await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), userId, message);
+                await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), input);
             }
         }
 
@@ -32,7 +35,6 @@ namespace StockDealService.Controllers
         public override async Task<Task> OnConnectedAsync()
         {
             
-
             var userId = Guid.Empty;
 
             var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);

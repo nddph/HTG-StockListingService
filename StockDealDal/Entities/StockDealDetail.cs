@@ -16,11 +16,9 @@ namespace StockDealDal.Entities
         [Required]
         public Guid Id { get; set; }
 
-        [Required]
-        public Guid SenderId { get; set; }
+        public string SenderName { get; set; }
 
-        [Required]
-        public string Message { get; set; }
+        public string Description { get; set; }
 
         [Required]
         public DateTime CreatedDate { get; set; }
@@ -35,6 +33,12 @@ namespace StockDealDal.Entities
         [JsonIgnore]
         [ForeignKey(nameof(StockDetailId))]
         public StockDeal StockDeal { get; set; }
+
+        public ulong Quantity { get; set; }
+
+        public decimal UnitPrice { get; set; }
+
+        public decimal TotalPrice { get; set; }
 
     }
 }
