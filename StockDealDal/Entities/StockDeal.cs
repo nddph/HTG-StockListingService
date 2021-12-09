@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Entities
 {
-    [Table("StockDeal")]
-    public class StockDeal
+    [Table("ST_StockDeal")]
+    public class StockDeal : IEntity
     {
         [Key]
         [Required]
@@ -28,9 +28,6 @@ namespace StockDealDal.Entities
         public string ReceiverName { get; set; }
 
         public ICollection<StockDealDetail> StockDealDetails { get; set; }
-
-        [Required]
-        public DateTime? CreatedDate { get; set; }
 
     }
 }

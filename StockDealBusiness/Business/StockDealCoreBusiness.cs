@@ -22,6 +22,8 @@ namespace StockDealBusiness.Business
         {
             var _context = new StockDealServiceContext();
 
+            var _transaction = await _context.Database.BeginTransactionAsync();
+
             var stockDeal = await _context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
                 || (e.SenderId == input.ReceiverId && e.ReceiverId == input.SenderId))
@@ -35,7 +37,6 @@ namespace StockDealBusiness.Business
                     SenderId = input.SenderId.Value,
                     ReceiverId = input.ReceiverId.Value,
                     TickeId = input.TickeId,
-                    CreatedDate = DateTime.Now,
                     SenderName = input.SenderName,
                     ReceiverName = input.ReceiverName
                 };
@@ -44,7 +45,9 @@ namespace StockDealBusiness.Business
             }
 
             await CreateStockDealDetailAsync(stockDeal.Id, input.StockDetail);
-            
+
+            await _transaction.CommitAsync();
+
             return SuccessResponse(stockDeal.Id);
         }
 
@@ -139,7 +142,6 @@ namespace StockDealBusiness.Business
             var stockDetail = new StockDealDetail()
             {
                 Id = Guid.NewGuid(),
-                CreatedDate = DateTime.Now,
                 StockDetailId = stockDealId
             };
 

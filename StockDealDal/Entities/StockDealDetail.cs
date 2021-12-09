@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Entities
 {
-    [Table("StockDealDetail")]
-    public class StockDealDetail
+    [Table("ST_StockDealDetail")]
+    public class StockDealDetail : IEntity
     {
         [Key]
         [Required]
@@ -19,13 +19,6 @@ namespace StockDealDal.Entities
         public string SenderName { get; set; }
 
         public string Description { get; set; }
-
-        [Required]
-        public DateTime CreatedDate { get; set; }
-
-        public DateTime? DeletedDate { get; set; }
-
-        public DateTime? ModifiedDate { get; set; }
 
         [Required]
         public Guid StockDetailId { get; set; }

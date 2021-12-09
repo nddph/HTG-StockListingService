@@ -11,6 +11,8 @@ namespace StockDealDal.Dto
     {
         public string SenderName { get; set; }
 
+        public string Description { get; set; }
+
         [Range(0, ulong.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public ulong Quantity { get; set; }
 
