@@ -44,7 +44,7 @@ namespace StockDealBusiness.Business
                 await _context.SaveChangesAsync();
             }
 
-            await CreateStockDealDetailAsync(stockDeal.Id, input.StockDetail);
+            await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
 
             await _transaction.CommitAsync();
 
@@ -135,14 +135,15 @@ namespace StockDealBusiness.Business
         /// <param name="stockDealId"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateStockDealDetailAsync(Guid stockDealId, CreateStockDetailDto input)
+        public async Task<BaseResponse> CreateStockDealDetailAsync(Guid stockDealId, Guid senderId, CreateStockDetailDto input)
         {
             var _context = new StockDealServiceContext();
 
             var stockDetail = new StockDealDetail()
             {
                 Id = Guid.NewGuid(),
-                StockDealId = stockDealId
+                StockDealId = stockDealId,
+                CreatedBy = senderId
             };
 
             var stockDetailDb = _context.Add(stockDetail);

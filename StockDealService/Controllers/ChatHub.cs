@@ -30,7 +30,9 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, input);
+                var userId = Guid.Empty;
+
+                var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
                 if (stockDetail?.StatusCode == 200)
                 {
                     await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(stockDetail));
