@@ -27,7 +27,7 @@ namespace StockDealBusiness.Business
             var stockDeal = await _context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
                 || (e.SenderId == input.ReceiverId && e.ReceiverId == input.SenderId))
-                && e.TickeId == input.TickeId);
+                && e.TicketId == input.TickeId);
 
             if (stockDeal == null)
             {
@@ -36,7 +36,7 @@ namespace StockDealBusiness.Business
                     Id = Guid.NewGuid(),
                     SenderId = input.SenderId.Value,
                     ReceiverId = input.ReceiverId.Value,
-                    TickeId = input.TickeId,
+                    TicketId = input.TickeId,
                     SenderName = input.SenderName,
                     ReceiverName = input.ReceiverName
                 };
@@ -105,7 +105,7 @@ namespace StockDealBusiness.Business
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
             var list = _context.StockDealDetails
-                .Where(e => e.StockDetailId == stockDetailId)
+                .Where(e => e.StockDealId == stockDetailId)
                 .OrderBy(e => e.CreatedDate);
 
             var paging = new PaginateDto();
@@ -142,7 +142,7 @@ namespace StockDealBusiness.Business
             var stockDetail = new StockDealDetail()
             {
                 Id = Guid.NewGuid(),
-                StockDetailId = stockDealId
+                StockDealId = stockDealId
             };
 
             var stockDetailDb = _context.Add(stockDetail);

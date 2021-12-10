@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using StockDealBusiness.Business;
 using StockDealDal.Dto;
 using System;
@@ -13,20 +15,29 @@ namespace StockDealService.Controllers
     {
         private readonly ChatHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
+        private readonly ILogger _logger;
 
-        public ChatHub()
+        public ChatHub(ILogger<ChatHub> logger)
         {
             _chatHubBusiness = new();
             _stockDealCoreBusiness = new();
+            _logger = logger;
         }
 
 
 
         public async Task SendMessage([Required] Guid groupId, [Required] CreateStockDetailDto input)
         {
-            if ((await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, input))?.StatusCode == 200)
+            try
             {
-                await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), input);
+                var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, input);
+                if (stockDetail?.StatusCode == 200)
+                {
+                    await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(stockDetail));
+                }
+            } catch(Exception e)
+            {
+                _logger.LogError(e.ToString());
             }
         }
 
@@ -34,17 +45,24 @@ namespace StockDealService.Controllers
 
         public override async Task<Task> OnConnectedAsync()
         {
-            
-            var userId = Guid.Empty;
-
-            var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
-
-            foreach (var room in rooms)
+            try
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, room.ToString());
-            }
+                var userId = Guid.Empty;
 
-            return base.OnConnectedAsync();
+                var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
+
+                foreach (var room in rooms)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, room.ToString());
+                }
+
+                return base.OnConnectedAsync();
+            } catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                throw;
+            }
+            
         }
 
 
@@ -52,16 +70,24 @@ namespace StockDealService.Controllers
         public override async Task<Task> OnDisconnectedAsync(Exception exception)
         {
 
-            var userId = Guid.Empty;
-
-            var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
-
-            foreach (var room in rooms)
+            try
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, room.ToString());
-            }
+                var userId = Guid.Empty;
 
-            return base.OnDisconnectedAsync(exception);
+                var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
+
+                foreach (var room in rooms)
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, room.ToString());
+                }
+
+                return base.OnDisconnectedAsync(exception);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                throw;
+            }
         }
     }
 }

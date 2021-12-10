@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 namespace StockDealDal.Entities
 {
     [Table("ST_StockDeal")]
-    public class StockDeal : IEntity
+    public class StockDeal : Ientity
     {
         [Key]
         [Required]
         public Guid Id { get; set; }
 
-        public Guid? TickeId { get; set; }
+        public Guid? TicketId { get; set; }
+
+        [ForeignKey(nameof(TicketId))]
+        public Ticket Ticket { get; set; }
 
         [Required]
         public Guid SenderId { get; set; }

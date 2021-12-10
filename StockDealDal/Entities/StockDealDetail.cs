@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace StockDealDal.Entities
 {
     [Table("ST_StockDealDetail")]
-    public class StockDealDetail : IEntity
+    public class StockDealDetail : Ientity
     {
         [Key]
         [Required]
@@ -21,13 +21,13 @@ namespace StockDealDal.Entities
         public string Description { get; set; }
 
         [Required]
-        public Guid StockDetailId { get; set; }
+        public Guid StockDealId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey(nameof(StockDetailId))]
+        [ForeignKey(nameof(StockDealId))]
         public StockDeal StockDeal { get; set; }
 
-        public ulong Quantity { get; set; }
+        public int Quantity { get; set; }
 
         public decimal UnitPrice { get; set; }
 

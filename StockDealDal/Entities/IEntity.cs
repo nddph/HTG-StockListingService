@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Entities
 {
-    public class IEntity
+    public class Ientity
     {
-        [Required]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? ModifiedDate { get; set; }
         public DateTime? DeletedDate { get; set; }
