@@ -36,6 +36,16 @@ namespace StockDealService.Controllers
 
 
 
+        protected string LoginedContactFullName
+        {
+            get
+            {
+                return _currentUser?.Claims?.FirstOrDefault(claim => claim.Type == "fullName")?.Value;
+            }
+        }
+
+
+
         protected ObjectResult SuccessResponse(BaseResponse response)
         {
             return StatusCode(StatusCodes.Status200OK, response);

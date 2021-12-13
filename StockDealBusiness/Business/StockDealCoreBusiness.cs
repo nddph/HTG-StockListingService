@@ -105,7 +105,7 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="loginedContactId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, bool isPaging, int curPage, int perPage)
+        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, bool isPaging, int currentPage, int perPage)
         {
             var _context = new StockDealServiceContext();
             var listStockDeal = _context.StockDeals
@@ -117,13 +117,13 @@ namespace StockDealBusiness.Business
             var paging = new PaginateDto();
             if (isPaging)
             {
-                paging.CurPage = curPage;
+                paging.CurrentPage = currentPage;
                 paging.PerPage = perPage;
                 paging.TotalItems = await listStockDeal.CountAsync();
-                paging.Data = await listStockDeal.Skip((curPage - 1) * perPage).Take(perPage).ToListAsync();
+                paging.Data = await listStockDeal.Skip((currentPage - 1) * perPage).Take(perPage).ToListAsync();
             } else
             {
-                paging.CurPage = 1;
+                paging.CurrentPage = 1;
                 paging.TotalItems = await listStockDeal.CountAsync();
                 paging.PerPage = paging.TotalItems;
                 paging.Data = await listStockDeal.ToListAsync();
@@ -137,25 +137,25 @@ namespace StockDealBusiness.Business
         /// <summary>
         /// Danh sách StockDealDetail
         /// </summary>
-        /// <param name="stockDetailId"></param>
+        /// <param name="stockDealId"></param>
         /// <param name="loginedContactId"></param>
         /// <param name="isPaging"></param>
-        /// <param name="curPage"></param>
+        /// <param name="currentPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealDetailAsync(Guid stockDetailId, Guid loginedContactId, bool isPaging, int? curPage = null, int perPage = 20)
+        public async Task<BaseResponse> ListStockDealDetailAsync(Guid stockDealId, Guid loginedContactId, bool isPaging, int? currentPage = null, int perPage = 20)
         {
             var _context = new StockDealServiceContext();
             var stockDeal = _context.StockDeals
                 .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => e.Id == stockDetailId)
+                .Where(e => e.Id == stockDealId)
                 .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
 
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
             var list = _context.StockDealDetails
                 .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => e.StockDealId == stockDetailId)
+                .Where(e => e.StockDealId == stockDealId)
                 .OrderBy(e => e.CreatedDate);
 
             var paging = new PaginateDto();
@@ -163,12 +163,12 @@ namespace StockDealBusiness.Business
             {
                 paging.TotalItems = await list.CountAsync();
                 paging.PerPage = perPage;
-                paging.CurPage = curPage ?? paging.TotalPages;
-                paging.Data = await list.Skip( (paging.CurPage + (paging.CurPage > 0 ? -1 : 0) ) * perPage).Take(perPage).ToListAsync();
+                paging.CurrentPage = currentPage ?? paging.TotalPages;
+                paging.Data = await list.Skip( (paging.CurrentPage + (paging.CurrentPage > 0 ? -1 : 0) ) * perPage).Take(perPage).ToListAsync();
             }
             else
             {
-                paging.CurPage = 1;
+                paging.CurrentPage = 1;
                 paging.Data = await list.ToListAsync();
                 paging.TotalItems = await list.CountAsync();
                 paging.PerPage = paging.TotalItems;

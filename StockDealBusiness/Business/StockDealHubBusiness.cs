@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace StockDealBusiness.Business
 {
-    public class ChatHubBusiness
+    public class StockDealHubBusiness : BaseBusiness
     {
         /// <summary>
         /// Lấy danh sách stockdeal của user
@@ -19,6 +19,19 @@ namespace StockDealBusiness.Business
         {
             using var _context = new StockDealServiceContext();
             return await _context.StockDeals.Where(u => u.SenderId == userId || u.ReceiverId == userId).ToListAsync();
+        }
+
+
+
+        /// <summary>
+        /// Lấy chi tiết stock detail
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <returns></returns>
+        public async Task<StockDealDetail> GetStockDetailAsync(Guid stockDetailId)
+        {
+            var _context = new StockDealServiceContext();
+            return await _context.StockDealDetails.FindAsync(stockDetailId);
         }
 
     }

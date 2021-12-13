@@ -95,15 +95,15 @@ namespace StockDealService.Controllers
         /// Danh sách stock deal cho user
         /// </summary>
         /// <param name="isPaging"></param>
-        /// <param name="curPage"></param>
+        /// <param name="currentPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDeal")]
-        public async Task<ObjectResult> ListStockDealAsync(bool isPaging = true, int curPage = 1, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealAsync(bool isPaging = true, int currentPage = 1, int perPage = 20)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, isPaging, curPage, perPage);
+                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, isPaging, currentPage, perPage);
 
                 return ReturnData(result);
 
@@ -119,17 +119,17 @@ namespace StockDealService.Controllers
         /// <summary>
         /// Danh sách stock deal detail
         /// </summary>
-        /// <param name="stockDetailId"></param>
+        /// <param name="stockDealId"></param>
         /// <param name="isPaging"></param>
-        /// <param name="curPage"></param>
+        /// <param name="currentPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDealDetail")]
-        public async Task<ObjectResult> ListStockDealDetailAsync([Required] Guid? stockDetailId, bool isPaging = true, [Range(1, int.MaxValue)] int? curPage = null, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealDetailAsync([Required] Guid? stockDealId, bool isPaging = true, [Range(1, int.MaxValue)] int? currentPage = null, int perPage = 20)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealDetailAsync(stockDetailId.Value, LoginedContactId, isPaging, curPage, perPage);
+                var result = await _stockDealBusiness.ListStockDealDetailAsync(stockDealId.Value, LoginedContactId, isPaging, currentPage, perPage);
 
                 return ReturnData(result);
 

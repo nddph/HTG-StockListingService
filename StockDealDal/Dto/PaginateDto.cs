@@ -17,7 +17,7 @@ namespace StockDealDal.Dto
                 return (TotalItems / PerPage) + ((TotalItems % PerPage == 0) ? 0 : 1);
             }
         }
-        public int CurPage { get; set; } = 1;
+        public int CurrentPage { get; set; } = 1;
         public int PerPage { get; set; } = 20;
         public object Data { get; set; }
 
