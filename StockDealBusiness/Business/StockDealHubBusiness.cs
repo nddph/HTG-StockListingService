@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace StockDealBusiness.Business
 {
-    public class ChatHubBusiness : BaseBusiness
+    public class StockDealHubBusiness : BaseBusiness
     {
         /// <summary>
         /// Lấy danh sách stockdeal của user

@@ -16,7 +16,7 @@ namespace StockDealService.Controllers
     [Authorize]
     public class StockDealHub : Hub
     {
-        private readonly ChatHubBusiness _chatHubBusiness;
+        private readonly StockDealHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
         private readonly ILogger _logger;
 
