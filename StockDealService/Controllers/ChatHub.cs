@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StockDealBusiness.Business;
 using StockDealDal.Dto;
+using StockDealDal.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,11 +13,39 @@ using System.Threading.Tasks;
 
 namespace StockDealService.Controllers
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private readonly ChatHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
         private readonly ILogger _logger;
+
+
+
+        protected string LoginedContactFullName
+        {
+            get
+            {
+                return Context.User?.Claims?.FirstOrDefault(claim => claim.Type == "fullName")?.Value;
+            }
+        }
+
+
+
+        private Guid LoginedContactId
+        {
+            get
+            {
+                var id = Guid.Empty;
+                if (Context.User.Identity.IsAuthenticated)
+                {
+                    Guid.TryParse(Context.User.Claims.FirstOrDefault(claim => claim.Type == "contactId")?.Value, out id);
+                }
+                return id;
+            }
+        }
+
+
 
         public ChatHub(ILogger<ChatHub> logger)
         {
@@ -30,13 +60,17 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var userId = Guid.Empty;
+                var userId = LoginedContactId;
+
+                input.SenderName = LoginedContactFullName;
 
                 var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
                 if (stockDetail?.StatusCode == 200)
                 {
-                    await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(stockDetail));
+                    var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
+                    await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
                 }
+
             } catch(Exception e)
             {
                 _logger.LogError(e.ToString());
@@ -49,14 +83,19 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var userId = Guid.Empty;
+                var userId = LoginedContactId;
 
-                var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
+                var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
 
-                foreach (var room in rooms)
-                {
-                    await Groups.AddToGroupAsync(Context.ConnectionId, room.ToString());
-                }
+                var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId);
+
+                if (response.StatusCode != 200) throw new Exception();
+
+                var room = response.Data as StockDeal;
+
+                if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId))) throw new Exception();
+
+                await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
                 return base.OnConnectedAsync();
             } catch (Exception e)
@@ -74,14 +113,10 @@ namespace StockDealService.Controllers
 
             try
             {
-                var userId = Guid.Empty;
 
-                var rooms = (await _chatHubBusiness.ListStockDealAsync(userId)).Select(e => e.Id);
+                var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
 
-                foreach (var room in rooms)
-                {
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, room.ToString());
-                }
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
                 return base.OnDisconnectedAsync(exception);
             }
