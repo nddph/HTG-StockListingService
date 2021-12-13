@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace StockDealService.Controllers
 {
+    [Authorize]
     public class StockDealController : BaseController
     {
         private readonly ILogger _logger;
@@ -21,6 +23,45 @@ namespace StockDealService.Controllers
         {
             _logger = logger;
             _stockDealBusiness = new();
+        }
+
+
+        [HttpDelete("v1/DeleteStockDetail/{stockDetailId}")]
+        public async Task<ObjectResult> DeleteStockDetailAsync(Guid stockDetailId)
+        {
+            try
+            {
+                var result = await _stockDealBusiness.DeleteStockDetailAsync(stockDetailId, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
+        /// Lấy chi tiết stock deal
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <returns></returns>
+        [HttpGet("v1/GetStockDeal/{stockDealId}")]
+        public async Task<ObjectResult> GetStockDealAsync(Guid stockDealId)
+        {
+            try
+            {
+                var result = await _stockDealBusiness.GetStockDealAsync(stockDealId);
+
+                return ReturnData(result);
+
+            } catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
         }
 
 
