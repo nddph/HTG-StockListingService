@@ -23,16 +23,6 @@ namespace StockDealDal.Entities
 
         public string Description { get; set; }
 
-        public Guid? StockId { get; set; }
-
-        public Guid? StockTypeId { get; set; }
-
-        [MaxLength(255)]
-        public string StockName { get; set; }
-
-        [MaxLength(255)]
-        public string StockTypeName { get; set; }
-
         public DateTime? PublishDate { get; set; }
 
         public decimal? PriceFrom { get; set; }
