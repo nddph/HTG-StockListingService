@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace StockDealService.Controllers
 {
     [Authorize]
-    public class ChatHub : Hub
+    public class StockDealHub : Hub
     {
         private readonly ChatHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
@@ -47,7 +47,7 @@ namespace StockDealService.Controllers
 
 
 
-        public ChatHub(ILogger<ChatHub> logger)
+        public StockDealHub(ILogger<StockDealHub> logger)
         {
             _chatHubBusiness = new();
             _stockDealCoreBusiness = new();
