@@ -23,8 +23,6 @@ namespace StockDealDal.Entities
 
         public string Description { get; set; }
 
-        public DateTime? PublishDate { get; set; }
-
         public decimal? PriceFrom { get; set; }
 
         public decimal? PriceTo { get; set; }
@@ -43,11 +41,6 @@ namespace StockDealDal.Entities
         public int Status { get; set; }
 
         public DateTime? DueDate { get; set; }
-
-        public Guid TicketTypeId { get; set; }
-
-        [ForeignKey(nameof(TicketTypeId))]
-        public TicketType TicketType { get; set; }
 
     }
 }
