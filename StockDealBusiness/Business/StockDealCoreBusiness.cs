@@ -12,6 +12,50 @@ namespace StockDealBusiness.Business
     public class StockDealCoreBusiness : BaseBusiness
     {
         /// <summary>
+        /// Xóa stock detail
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <param name="loginedContactId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> DeleteStockDetailAsync(Guid stockDetailId, Guid loginedContactId)
+        {
+            var _context = new StockDealServiceContext();
+            var stockDetail = await _context.StockDealDetails
+                .Where(e => !e.DeletedDate.HasValue)
+                .Where(e => e.CreatedBy == loginedContactId)
+                .Where(e => e.Id == stockDetailId)
+                .FirstOrDefaultAsync();
+                
+            if (stockDetail == null) return NotFoundResponse();
+
+            stockDetail.DeletedDate = DateTime.Now;
+            stockDetail.DeletedBy = loginedContactId;
+
+            await _context.SaveChangesAsync();
+
+            return SuccessResponse(data: stockDetailId);
+        }
+
+
+
+        /// <summary>
+        /// lấy thông tin Stock Deal
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> GetStockDealAsync(Guid stockDealId)
+        {
+            var _context = new StockDealServiceContext();
+            var stockDeal = await _context.StockDeals.Include(e => e.Ticket).FirstOrDefaultAsync(e => e.Id == stockDealId);
+
+            if (stockDeal == null) return NotFoundResponse();
+
+            return SuccessResponse(data: stockDeal);
+        }
+
+
+
+        /// <summary>
         /// tạo stock deal
         /// </summary>
         /// <param name="loginContact"></param>
@@ -44,7 +88,10 @@ namespace StockDealBusiness.Business
                 await _context.SaveChangesAsync();
             }
 
-            await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
+            if (input.StockDetail != null)
+            {
+                await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
+            }
 
             await _transaction.CommitAsync();
 
@@ -62,6 +109,7 @@ namespace StockDealBusiness.Business
         {
             var _context = new StockDealServiceContext();
             var listStockDeal = _context.StockDeals
+                .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
 
             listStockDeal = listStockDeal.OrderByDescending(e => e.CreatedDate);
@@ -99,12 +147,14 @@ namespace StockDealBusiness.Business
         {
             var _context = new StockDealServiceContext();
             var stockDeal = _context.StockDeals
+                .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.Id == stockDetailId)
                 .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
 
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
             var list = _context.StockDealDetails
+                .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.StockDealId == stockDetailId)
                 .OrderBy(e => e.CreatedDate);
 

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealService.Controllers;
 using System;
@@ -129,6 +130,9 @@ namespace StockDealService
             });
 
             services.AddSignalR();
+
+            services.AddHostedService<EventBusPublisher>();
+            services.AddHostedService<EventBusConsumer>();
 
         }
 
