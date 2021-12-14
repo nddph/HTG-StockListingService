@@ -14,7 +14,7 @@ namespace StockDealBusiness.EventBus
 
         public async Task<byte[]> ResponseResult(string method, string message)
         {
-            Byte[] responseBytes = { };
+            var responseBytes = Array.Empty<byte>();
             switch (method)
             {
                 default:
