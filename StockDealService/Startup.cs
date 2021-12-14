@@ -49,7 +49,7 @@ namespace StockDealService
                     {
                         var invalid = context.ModelState.FirstOrDefault(e => e.Value.ValidationState == ModelValidationState.Invalid);
 
-                        var errorKey = string.Join('.', invalid.Key.Split('.').AsEnumerable().Select(e => e.Substring(0, 1).ToLower() + e.Substring(1)));
+                        var errorKey = string.Join('.', invalid.Key.Split('.').AsEnumerable().Select(e => e.Length > 0 ? (e.Substring(0, 1).ToLower() + e[1..]) : ""));
                         var errorValue = invalid.Value.Errors.FirstOrDefault()?.ErrorMessage;
 
                         var response = new ErrorMessage
