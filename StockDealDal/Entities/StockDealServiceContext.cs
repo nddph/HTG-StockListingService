@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,23 @@ namespace StockDealDal.Entities
     {
 
         public DbSet<StockDeal> StockDeals { get; set; }
-
         public DbSet<StockDealDetail> StockDealDetails { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<SaleTicket> SaleTickets { get; set; }
+        public DbSet<BuyTicket> BuyTickets { get; set; }
+
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<BuyTicket>().Property(e => e.StockCode).HasConversion(
+                e => JsonConvert.SerializeObject(e),
+                e => JsonConvert.DeserializeObject<List<string>>(e));
+        }
+
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
