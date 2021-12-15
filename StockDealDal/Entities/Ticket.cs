@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace StockDealDal.Entities
 {
     [Table("ST_Ticket")]
-    public class Ticket : Ientity
+    public class Ticket : BaseEntity
     {
         [Key]
         [Required]
@@ -40,7 +40,9 @@ namespace StockDealDal.Entities
 
         public int Status { get; set; }
 
-        public DateTime? DueDate { get; set; }
+        public DateTime? ExpDate { get; set; }
+
+        public string EmployeeCode { get; set; }
 
     }
 }

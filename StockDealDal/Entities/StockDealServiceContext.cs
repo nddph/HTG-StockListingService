@@ -58,11 +58,5 @@ namespace StockDealDal.Entities
 
 
 
-        //[DbFunction("ListTickets")]
-        //public IQueryable<Ticket> ListTickets(List<string> stockCode, int? ticketType = null, int? status = null,
-        //    int? quantityFrom = null, int? quantityTo = null,
-        //    decimal? priceFrom = null, decimal? priceTo = null)
-        //=> FromExpression(() => ListTickets(stockCode, ticketType, status,
-        //    quantityFrom, quantityTo, priceFrom, priceTo));
-    }
+        }
 }

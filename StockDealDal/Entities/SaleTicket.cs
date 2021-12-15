@@ -20,5 +20,7 @@ namespace StockDealDal.Entities
 
         [MaxLength(255)]
         public string StockTypeName { get; set; }
+
+        public bool IsNegotiate { get; set; } = false;
     }
 }
