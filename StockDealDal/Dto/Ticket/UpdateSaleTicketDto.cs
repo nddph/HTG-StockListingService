@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Dto.Ticket
 {
-    public class UpdateSaleTicketDto : UpdateTicketDto
+    public class UpdateSaleTicketDto : UpdateTicketDto, IValidatableObject
     {
         [MaxLength(50, ErrorMessage = "ERR_MAX_LENGTH_50")]
         public string Title { get; set; }
@@ -21,18 +21,31 @@ namespace StockDealDal.Dto.Ticket
         [Required(ErrorMessage = "ERR_REQUIRED")]
         public Guid? StockId { get; set; }
 
-        public Guid? StockTypeId { get; set; }
-
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
         public string StockName { get; set; }
 
-        [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
-        public string StockTypeName { get; set; }
-
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [Range(0, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int? Quantity { get; set; }
+
+        public bool IsNegotiate { get; set; } = false;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!IsNegotiate)
+            {
+                if (!PriceFrom.HasValue)
+                {
+                    yield return new ValidationResult("ERR_REQUIRED", new[] { nameof(PriceFrom) });
+                }
+                else
+                {
+                    PriceTo = PriceFrom;
+                    yield return ValidationResult.Success;
+                }
+            }
+        }
 
     }
 }

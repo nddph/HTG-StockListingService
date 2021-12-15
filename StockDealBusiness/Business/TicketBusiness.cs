@@ -171,41 +171,89 @@ namespace StockDealBusiness.Business
 
         public async Task<BaseResponse> ListTicketAsync(ListTicketDto listTicketDto, Guid loginContactId)
         {
-            var _context = new StockDealServiceContext();
+            using var _context = new StockDealServiceContext();
 
-            var query = _context.Tickets.Where(e => !e.DeletedDate.HasValue);
+            var query = _context.Tickets
+                .Where(e => !e.DeletedDate.HasValue)
+                .Where(e => e.ExpDate >= DateTime.Now);
 
             if (listTicketDto.TicketType.HasValue)
             {
                 if (listTicketDto.TicketType.Value == (int)TicketType.Sale)
                 {
-                    query.Where(e => e is SaleTicket);
+                    query = query.Where(e => e is SaleTicket);
                 }
                 else if (listTicketDto.TicketType.Value == (int)TicketType.Buy)
                 {
-                    query.Where(e => e is BuyTicket);
+                    query = query.Where(e => e is BuyTicket);
                 }
             }
 
 
             if (listTicketDto.Status.HasValue)
             {
-                query.Where(e => e.Status.Equals(listTicketDto.Status.Value));
+                query = query.Where(e => e.Status.Equals(listTicketDto.Status.Value));
             }
-
 
             if (listTicketDto.IsUser)
             {
-                query.Where(e => e.CreatedBy.Value.Equals(loginContactId));
+                query = query.Where(e => e.CreatedBy.Value.Equals(loginContactId));
             }
+
+
+            if (listTicketDto.PriceFrom.HasValue)
+            {
+                query = query.Where(e => e is SaleTicket && (e as SaleTicket).PriceFrom.HasValue && (e as SaleTicket).PriceFrom >= listTicketDto.PriceFrom);
+            }
+            
+
+            if (listTicketDto.PriceTo.HasValue)
+            {
+                query = query.Where(e => e is SaleTicket && (e as SaleTicket).PriceFrom.HasValue && (e as SaleTicket).PriceFrom <= listTicketDto.PriceTo);
+            }
+            
+
+            if (listTicketDto.QuantityFrom.HasValue)
+            {
+                query = query.Where(e => e is SaleTicket && (e as SaleTicket).Quantity >= listTicketDto.QuantityFrom);
+            }
+            
+
+            if (listTicketDto.QuantityTo.HasValue)
+            {
+                query = query.Where(e => e is SaleTicket && (e as SaleTicket).Quantity <= listTicketDto.QuantityTo);
+            }
+
+            if (listTicketDto.StockCode != null && listTicketDto.StockCode.Count > 0)
+            {
+                query = query.Where(e => !(e is SaleTicket) || listTicketDto.StockCode.Contains((e as SaleTicket).StockName));
+            }
+
+
+            List<Ticket> listTicket = await query.AsNoTracking().ToListAsync();
+
+            if (listTicketDto.StockCode != null && listTicketDto.StockCode.Count > 0)
+            {
+                listTicket = listTicket.Where(e => !(e is BuyTicket) || (e as BuyTicket).StockCode.Any(f => listTicketDto.StockCode.Contains(f))).ToList();
+            }
+
 
             PaginateDto paginate = new();
             paginate.CurrentPage = listTicketDto.CurrentPage;
             paginate.PerPage = listTicketDto.PerPage;
-            paginate.TotalItems = await query.CountAsync();
-            paginate.Data = await query.AsNoTracking().ToListAsync();
+            paginate.TotalItems = listTicket.Count;
+
+            if (listTicketDto.byNewer)
+            {
+                listTicket = listTicket.OrderByDescending(e => e.CreatedDate)
+                    .Skip((listTicketDto.CurrentPage - 1) * listTicketDto.PerPage)
+                    .Take(listTicketDto.PerPage).ToList();
+            }
+
+            paginate.Data = listTicket;
 
             return SuccessResponse(data: paginate);
         }
+
     }
 }
