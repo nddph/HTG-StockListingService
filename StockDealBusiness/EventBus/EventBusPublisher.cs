@@ -120,7 +120,7 @@ namespace StockDealBusiness.EventBus
 
 
 
-        public static async Task<string> CallRabbitMQAsync(string routingKey, string messagestring, string exchangeName, bool isReply)
+        public static async Task<string> CallEventBusAsync(string routingKey, string messagestring, string exchangeName, bool isReply)
         {
             var rabbitMQPublisher = new EventBusPublisher();
             return await rabbitMQPublisher.SendAsync(routingKey, messagestring, exchangeName, isReply);

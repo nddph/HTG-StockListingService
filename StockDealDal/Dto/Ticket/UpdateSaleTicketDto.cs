@@ -23,7 +23,7 @@ namespace StockDealDal.Dto.Ticket
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
-        public string StockName { get; set; }
+        public string StockCode { get; set; }
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [Range(0, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]

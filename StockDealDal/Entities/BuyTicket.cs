@@ -10,6 +10,6 @@ namespace StockDealDal.Entities
     [Table("ST_BuyTicket")]
     public class BuyTicket : Ticket
     {
-        public List<string> StockCode { get; set; }
+        public string StockCodes { get; set; }
     }
 }
