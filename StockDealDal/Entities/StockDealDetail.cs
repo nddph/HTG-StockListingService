@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace StockDealDal.Entities
 {
     [Table("ST_StockDealDetail")]
-    public class StockDealDetail : Ientity
+    public class StockDealDetail : BaseEntity
     {
         [Key]
         [Required]
