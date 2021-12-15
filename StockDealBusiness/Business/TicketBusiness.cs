@@ -28,7 +28,7 @@ namespace StockDealBusiness.Business
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                DueDate = DateTime.Now.AddDays(180),
+                ExpDate = DateTime.Now.AddDays(180),
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}"
             });
 
@@ -57,7 +57,7 @@ namespace StockDealBusiness.Business
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                DueDate = DateTime.Now.AddDays(180),
+                ExpDate = DateTime.Now.AddDays(180),
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}"
             });
 
@@ -131,7 +131,7 @@ namespace StockDealBusiness.Business
             var _context = new StockDealServiceContext();
             var ticket = await _context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => !e.DueDate.HasValue || e.DueDate.Value >= DateTime.Now)
+                .Where(e => !e.ExpDate.HasValue || e.ExpDate.Value >= DateTime.Now)
                 .Where(e => e.Id == ticketId)
                 .FirstOrDefaultAsync();
 

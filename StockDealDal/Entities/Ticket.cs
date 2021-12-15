@@ -40,7 +40,9 @@ namespace StockDealDal.Entities
 
         public int Status { get; set; }
 
-        public DateTime? DueDate { get; set; }
+        public DateTime? ExpDate { get; set; }
+
+        public string EmployeeCode { get; set; }
 
     }
 }
