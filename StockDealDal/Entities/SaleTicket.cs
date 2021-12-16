@@ -16,11 +16,17 @@ namespace StockDealDal.Entities
         public Guid? StockTypeId { get; set; }
 
         [MaxLength(255)]
-        public string StockName { get; set; }
+        public string StockCode { get; set; }
 
         [MaxLength(255)]
         public string StockTypeName { get; set; }
 
         public bool IsNegotiate { get; set; } = false;
+
+        public decimal? PriceFrom { get; set; }
+
+        public decimal? PriceTo { get; set; }
+
+        public int? Quantity { get; set; }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Dto.Ticket
 {
-    public class ListTicketDto
+    public class TicketSearchCriteria
     {
         /// <summary>
         /// sắp sếp theo tin đăng mới nhất hoặc cổ phiếu quan tâm

@@ -168,7 +168,7 @@ namespace StockDealService.Controllers
         /// <param name="listTicketDto"></param>
         /// <returns></returns>
         [HttpPost("v1/ListTicket")]
-        public async Task<ObjectResult> ListTicketAsync(ListTicketDto listTicketDto)
+        public async Task<ObjectResult> ListTicketAsync(TicketSearchCriteria listTicketDto)
         {
             try
             {

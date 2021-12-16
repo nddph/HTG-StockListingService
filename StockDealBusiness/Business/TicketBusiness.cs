@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
@@ -21,20 +22,26 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto, Guid loginContactId, string loginContactName)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = _context.Add(new SaleTicket
+            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
+            if (stockHolderInfo == null) return BadRequestResponse();
+
+            var context = new StockDealServiceContext();
+            var ticket = context.Add(new SaleTicket
             {
                 Id = Guid.NewGuid(),
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
                 ExpDate = DateTime.Now.AddDays(180),
-                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}"
+                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
+                Email = stockHolderInfo.WorkingEmail,
+                EmployeeCode = stockHolderInfo.EmployeeCode,
+                Phone = stockHolderInfo.Phone
             });
 
             ticket.CurrentValues.SetValues(saleTicketDto);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: ticket.Entity.Id);
         }
@@ -50,20 +57,27 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto, Guid loginContactId, string loginContactName)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = _context.Add(new BuyTicket
+            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
+            if (stockHolderInfo == null) return BadRequestResponse();
+
+            var context = new StockDealServiceContext();
+            var ticket = context.Add(new BuyTicket
             {
                 Id = Guid.NewGuid(),
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
                 ExpDate = DateTime.Now.AddDays(180),
-                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}"
+                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
+                Email = stockHolderInfo.WorkingEmail,
+                EmployeeCode = stockHolderInfo.EmployeeCode,
+                Phone = stockHolderInfo.Phone,
+                StockCodes = string.Join(",", buyTicketDto.StockCode)
             });
 
             ticket.CurrentValues.SetValues(buyTicketDto);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: ticket.Entity.Id);
         }
@@ -77,18 +91,18 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> UpdateSaleTicketAsync(UpdateSaleTicketDto saleTicketDto, Guid loginContactId)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = await _context.SaleTickets.FindAsync(saleTicketDto.Id);
+            var context = new StockDealServiceContext();
+            var ticket = await context.SaleTickets.FindAsync(saleTicketDto.Id);
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
             ticket.ModifiedBy = loginContactId;
             ticket.ModifiedDate = DateTime.Now;
 
-            var ticketDb = _context.Update(ticket);
+            var ticketDb = context.Update(ticket);
             ticketDb.CurrentValues.SetValues(saleTicketDto);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: saleTicketDto.Id);
         }
@@ -103,18 +117,19 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = await _context.BuyTickets.FindAsync(buyTicketDto.Id);
+            var context = new StockDealServiceContext();
+            var ticket = await context.BuyTickets.FindAsync(buyTicketDto.Id);
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
+            ticket.StockCodes = string.Join(",", buyTicketDto.StockCode);
             ticket.ModifiedBy = loginContactId;
             ticket.ModifiedDate = DateTime.Now;
 
-            var ticketDb = _context.Update(ticket);
+            var ticketDb = context.Update(ticket);
             ticketDb.CurrentValues.SetValues(buyTicketDto);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: buyTicketDto.Id);
         }
@@ -128,8 +143,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> GetTicketAsync(Guid ticketId)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = await _context.Tickets
+            var context = new StockDealServiceContext();
+            var ticket = await context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => !e.ExpDate.HasValue || e.ExpDate.Value >= DateTime.Now)
                 .Where(e => e.Id == ticketId)
@@ -150,8 +165,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> DeleteTicketAsync(Guid ticketId, Guid loginContactId)
         {
-            var _context = new StockDealServiceContext();
-            var ticket = await _context.Tickets
+            var context = new StockDealServiceContext();
+            var ticket = await context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.CreatedBy == loginContactId)
                 .Where(e => e.Id == ticketId)
@@ -162,18 +177,18 @@ namespace StockDealBusiness.Business
             ticket.DeletedDate = DateTime.Now;
             ticket.DeletedBy = loginContactId;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: ticketId);
         }
 
 
 
-        public async Task<BaseResponse> ListTicketAsync(ListTicketDto listTicketDto, Guid loginContactId)
+        public async Task<BaseResponse> ListTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
-            using var _context = new StockDealServiceContext();
+            var context = new StockDealServiceContext();
 
-            var query = _context.Tickets
+            var query = context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.ExpDate >= DateTime.Now);
 
@@ -226,16 +241,11 @@ namespace StockDealBusiness.Business
 
             if (listTicketDto.StockCode != null && listTicketDto.StockCode.Count > 0)
             {
-                query = query.Where(e => !(e is SaleTicket) || listTicketDto.StockCode.Contains((e as SaleTicket).StockName));
+                query = query.Where(e => !(e is SaleTicket) || listTicketDto.StockCode.Contains((e as SaleTicket).StockCode));
             }
 
 
             List<Ticket> listTicket = await query.AsNoTracking().ToListAsync();
-
-            if (listTicketDto.StockCode != null && listTicketDto.StockCode.Count > 0)
-            {
-                listTicket = listTicket.Where(e => !(e is BuyTicket) || (e as BuyTicket).StockCode.Any(f => listTicketDto.StockCode.Contains(f))).ToList();
-            }
 
 
             PaginateDto paginate = new();

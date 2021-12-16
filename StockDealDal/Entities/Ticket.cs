@@ -23,12 +23,6 @@ namespace StockDealDal.Entities
 
         public string Description { get; set; }
 
-        public decimal? PriceFrom { get; set; }
-
-        public decimal? PriceTo { get; set; }
-
-        public int? Quantity { get; set; }
-
         [MaxLength(255)]
         public string FullName { get; set; }
 

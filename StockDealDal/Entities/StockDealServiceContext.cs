@@ -20,17 +20,6 @@ namespace StockDealDal.Entities
 
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<BuyTicket>().Property(e => e.StockCode).HasConversion(
-                e => JsonConvert.SerializeObject(e),
-                e => JsonConvert.DeserializeObject<List<string>>(e));
-        }
-
-
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -58,5 +47,5 @@ namespace StockDealDal.Entities
 
 
 
-        }
+    }
 }

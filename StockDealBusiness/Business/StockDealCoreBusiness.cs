@@ -19,8 +19,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> DeleteStockDetailAsync(Guid stockDetailId, Guid loginedContactId)
         {
-            var _context = new StockDealServiceContext();
-            var stockDetail = await _context.StockDealDetails
+            var context = new StockDealServiceContext();
+            var stockDetail = await context.StockDealDetails
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.CreatedBy == loginedContactId)
                 .Where(e => e.Id == stockDetailId)
@@ -31,7 +31,7 @@ namespace StockDealBusiness.Business
             stockDetail.DeletedDate = DateTime.Now;
             stockDetail.DeletedBy = loginedContactId;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: stockDetailId);
         }
@@ -45,8 +45,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> GetStockDealAsync(Guid stockDealId)
         {
-            var _context = new StockDealServiceContext();
-            var stockDeal = await _context.StockDeals.Include(e => e.Ticket).FirstOrDefaultAsync(e => e.Id == stockDealId);
+            var context = new StockDealServiceContext();
+            var stockDeal = await context.StockDeals.Include(e => e.Ticket).FirstOrDefaultAsync(e => e.Id == stockDealId);
 
             if (stockDeal == null) return NotFoundResponse();
 
@@ -64,11 +64,11 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateStockDealAsync(CreateStockDealDto input)
         {
-            var _context = new StockDealServiceContext();
+            var context = new StockDealServiceContext();
 
-            var _transaction = await _context.Database.BeginTransactionAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
 
-            var stockDeal = await _context.StockDeals.FirstOrDefaultAsync(e =>
+            var stockDeal = await context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
                 || (e.SenderId == input.ReceiverId && e.ReceiverId == input.SenderId))
                 && e.TicketId == input.TickeId);
@@ -84,8 +84,8 @@ namespace StockDealBusiness.Business
                     SenderName = input.SenderName,
                     ReceiverName = input.ReceiverName
                 };
-                _context.StockDeals.Add(stockDeal);
-                await _context.SaveChangesAsync();
+                context.StockDeals.Add(stockDeal);
+                await context.SaveChangesAsync();
             }
 
             if (input.StockDetail != null)
@@ -93,7 +93,7 @@ namespace StockDealBusiness.Business
                 await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
             }
 
-            await _transaction.CommitAsync();
+            await transaction.CommitAsync();
 
             return SuccessResponse(stockDeal.Id);
         }
@@ -107,8 +107,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, bool isPaging, int currentPage, int perPage)
         {
-            var _context = new StockDealServiceContext();
-            var listStockDeal = _context.StockDeals
+            var context = new StockDealServiceContext();
+            var listStockDeal = context.StockDeals
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
 
@@ -145,15 +145,15 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> ListStockDealDetailAsync(Guid stockDealId, Guid loginedContactId, bool isPaging, int? currentPage = null, int perPage = 20)
         {
-            var _context = new StockDealServiceContext();
-            var stockDeal = _context.StockDeals
+            var context = new StockDealServiceContext();
+            var stockDeal = context.StockDeals
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.Id == stockDealId)
                 .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
 
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
-            var list = _context.StockDealDetails
+            var list = context.StockDealDetails
                 .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.StockDealId == stockDealId)
                 .OrderBy(e => e.CreatedDate);
@@ -187,7 +187,7 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateStockDealDetailAsync(Guid stockDealId, Guid senderId, CreateStockDetailDto input)
         {
-            var _context = new StockDealServiceContext();
+            var context = new StockDealServiceContext();
 
             var stockDetail = new StockDealDetail()
             {
@@ -196,10 +196,10 @@ namespace StockDealBusiness.Business
                 CreatedBy = senderId
             };
 
-            var stockDetailDb = _context.Add(stockDetail);
+            var stockDetailDb = context.Add(stockDetail);
             stockDetailDb.CurrentValues.SetValues(input);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return SuccessResponse(data: stockDetail.Id);
         }
