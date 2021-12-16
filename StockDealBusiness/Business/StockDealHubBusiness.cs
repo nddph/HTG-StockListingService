@@ -17,8 +17,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<List<StockDeal>> ListStockDealAsync(Guid userId)
         {
-            using var _context = new StockDealServiceContext();
-            return await _context.StockDeals.Where(u => u.SenderId == userId || u.ReceiverId == userId).ToListAsync();
+            var context = new StockDealServiceContext();
+            return await context.StockDeals.Where(u => u.SenderId == userId || u.ReceiverId == userId).ToListAsync();
         }
 
 
@@ -30,8 +30,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<StockDealDetail> GetStockDetailAsync(Guid stockDetailId)
         {
-            var _context = new StockDealServiceContext();
-            return await _context.StockDealDetails.FindAsync(stockDetailId);
+            var context = new StockDealServiceContext();
+            return await context.StockDealDetails.FindAsync(stockDetailId);
         }
 
     }
