@@ -9,11 +9,21 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemSettingSharing.Entities;
 
 namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+
+        private async Task<int> GetTicketExpDateAsync()
+        {
+            var syscontext = new SystemSettingContext();
+            var res = await syscontext.SystemSettings.Where(e => e.Key == "Ticket.ExpDate").FirstOrDefaultAsync();
+            if (res == null) return 0;
+            return int.Parse(res.Value);
+        }
+
 
         /// <summary>
         /// tạo tin bán cổ phiếu
@@ -46,7 +56,7 @@ namespace StockDealBusiness.Business
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(180),
+                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
@@ -81,7 +91,7 @@ namespace StockDealBusiness.Business
                 FullName = loginContactName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(180),
+                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
