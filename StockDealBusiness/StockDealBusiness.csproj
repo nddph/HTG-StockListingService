@@ -17,4 +17,10 @@
     <ProjectReference Include="..\StockDealDal\StockDealDal.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="SystemSettingSharing">
+      <HintPath>..\..\CommonUtilities\SystemSettingSharing\SystemSettingSharing.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
