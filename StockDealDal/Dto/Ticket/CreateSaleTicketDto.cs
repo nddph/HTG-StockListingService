@@ -25,6 +25,11 @@ namespace StockDealDal.Dto.Ticket
         [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
         public string StockCode { get; set; }
 
+        public Guid? StockTypeId { get; set; }
+
+        [MaxLength(255)]
+        public string StockTypeName { get; set; }
+
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [Range(0, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int? Quantity { get; set; }

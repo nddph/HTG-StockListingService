@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
@@ -15,6 +14,7 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+
         /// <summary>
         /// tạo tin bán cổ phiếu
         /// </summary>
@@ -28,9 +28,16 @@ namespace StockDealBusiness.Business
             if (stockHolderInfo == null) return BadRequestResponse();
 
             var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
-
             if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"{nameof(saleTicketDto.Quantity)}_ERR_GRE_THAN_{stockLimit}");
-                
+
+            //var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
+            //if (stockInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            //else saleTicketDto.StockCode = stockInfo.StockCode;
+
+            //var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
+            //if (stockTypeInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            //else saleTicketDto.StockTypeName = stockTypeInfo.Name;
+
 
             var context = new StockDealServiceContext();
             var ticket = context.Add(new SaleTicket
@@ -98,6 +105,21 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> UpdateSaleTicketAsync(UpdateSaleTicketDto saleTicketDto, Guid loginContactId)
         {
+            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
+            if (stockHolderInfo == null) return BadRequestResponse();
+
+            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"{nameof(saleTicketDto.Quantity)}_ERR_GRE_THAN_{stockLimit}");
+
+            //var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
+            //if (stockInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            //else saleTicketDto.StockCode = stockInfo.StockCode;
+
+            //var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
+            //if (stockTypeInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            //else saleTicketDto.StockTypeName = stockTypeInfo.Name;
+
+
             var context = new StockDealServiceContext();
             var ticket = await context.SaleTickets.FindAsync(saleTicketDto.Id);
 
@@ -191,6 +213,12 @@ namespace StockDealBusiness.Business
 
 
 
+        /// <summary>
+        /// Danh sách tin mua bán
+        /// </summary>
+        /// <param name="listTicketDto"></param>
+        /// <param name="loginContactId"></param>
+        /// <returns></returns>
         public async Task<BaseResponse> ListTicketsAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
             var context = new StockDealServiceContext();
