@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +26,11 @@ namespace StockDealBusiness.Business
         {
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
+
+            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
+
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"{nameof(saleTicketDto.Quantity)}_ERR_GRE_THAN_{stockLimit}");
+                
 
             var context = new StockDealServiceContext();
             var ticket = context.Add(new SaleTicket
@@ -184,83 +191,43 @@ namespace StockDealBusiness.Business
 
 
 
-        public async Task<BaseResponse> ListTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
+        public async Task<BaseResponse> ListTicketsAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
             var context = new StockDealServiceContext();
 
-            var query = context.Tickets
-                .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => e.ExpDate >= DateTime.Now);
-
-            if (listTicketDto.TicketType.HasValue)
-            {
-                if (listTicketDto.TicketType.Value == (int)TicketType.Sale)
-                {
-                    query = query.Where(e => e is SaleTicket);
-                }
-                else if (listTicketDto.TicketType.Value == (int)TicketType.Buy)
-                {
-                    query = query.Where(e => e is BuyTicket);
-                }
-            }
-
-
-            if (listTicketDto.Status.HasValue)
-            {
-                query = query.Where(e => e.Status.Equals(listTicketDto.Status.Value));
-            }
-
-            if (listTicketDto.IsUser)
-            {
-                query = query.Where(e => e.CreatedBy.Value.Equals(loginContactId));
-            }
-
-
-            if (listTicketDto.PriceFrom.HasValue)
-            {
-                query = query.Where(e => e is SaleTicket && (e as SaleTicket).PriceFrom.HasValue && (e as SaleTicket).PriceFrom >= listTicketDto.PriceFrom);
-            }
-            
-
-            if (listTicketDto.PriceTo.HasValue)
-            {
-                query = query.Where(e => e is SaleTicket && (e as SaleTicket).PriceFrom.HasValue && (e as SaleTicket).PriceFrom <= listTicketDto.PriceTo);
-            }
-            
-
-            if (listTicketDto.QuantityFrom.HasValue)
-            {
-                query = query.Where(e => e is SaleTicket && (e as SaleTicket).Quantity >= listTicketDto.QuantityFrom);
-            }
-            
-
-            if (listTicketDto.QuantityTo.HasValue)
-            {
-                query = query.Where(e => e is SaleTicket && (e as SaleTicket).Quantity <= listTicketDto.QuantityTo);
-            }
-
-            if (listTicketDto.StockCode != null && listTicketDto.StockCode.Count > 0)
-            {
-                query = query.Where(e => !(e is SaleTicket) || listTicketDto.StockCode.Contains((e as SaleTicket).StockCode));
-            }
-
-
-            List<Ticket> listTicket = await query.AsNoTracking().ToListAsync();
+            var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
+                        @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @priceFrom = {4}, @priceTo = {5},
+                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8}, @currentPage = {9}, @pageSize = {10}",
+                        listTicketDto.TicketType,
+                        listTicketDto.StockCode.Count == 0 ? "" : string.Join(",", listTicketDto.StockCode),
+                        listTicketDto.Status,
+                        listTicketDto.IsUser ? loginContactId : Guid.Empty,
+                        listTicketDto.PriceFrom, listTicketDto.PriceTo,
+                        listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
+                        listTicketDto.byNewer ? 0 : 1,
+                        listTicketDto.CurrentPage,
+                        listTicketDto.PerPage
+                        );
 
 
             PaginateDto paginate = new();
             paginate.CurrentPage = listTicketDto.CurrentPage;
             paginate.PerPage = listTicketDto.PerPage;
-            paginate.TotalItems = listTicket.Count;
 
-            if (listTicketDto.byNewer)
+            if (listTicketDto.TicketType == (int)TicketType.Buy)
             {
-                listTicket = listTicket.OrderByDescending(e => e.CreatedDate)
-                    .Skip((listTicketDto.CurrentPage - 1) * listTicketDto.PerPage)
-                    .Take(listTicketDto.PerPage).ToList();
-            }
+                var query = await context.ViewBuyTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
 
-            paginate.Data = listTicket;
+                paginate.TotalItems = query.Count == 0 ? 0 : query.FirstOrDefault().TotalCount;
+                paginate.Data = query;
+            }
+            else
+            {
+                var query = await context.ViewSaleTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
+
+                paginate.TotalItems = query.Count == 0 ? 0 : query.FirstOrDefault().TotalCount;
+                paginate.Data = query;
+            }
 
             return SuccessResponse(data: paginate);
         }

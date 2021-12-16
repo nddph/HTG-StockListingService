@@ -11,6 +11,11 @@ namespace StockDealBusiness.EventBus
 {
     public static class CallEventBus
     {
+        public static int GetStockHolderLimit(Guid stockHolderId, Guid stockId)
+        {
+            return int.MaxValue;
+        }
+
         public static async Task<StockHolderDto> GetStockHolderDetail(Guid stockHolderId, bool isReply = true)
         {
             var res = await EventBusPublisher.CallEventBusAsync(
