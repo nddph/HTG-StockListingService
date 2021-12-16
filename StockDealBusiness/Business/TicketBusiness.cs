@@ -72,7 +72,7 @@ namespace StockDealBusiness.Business
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
                 Phone = stockHolderInfo.Phone,
-                StockCodes = string.Join("|", buyTicketDto.StockCode)
+                StockCodes = string.Join(",", buyTicketDto.StockCode)
             });
 
             ticket.CurrentValues.SetValues(buyTicketDto);
@@ -122,7 +122,7 @@ namespace StockDealBusiness.Business
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
-            ticket.StockCodes = string.Join("|", buyTicketDto.StockCode);
+            ticket.StockCodes = string.Join(",", buyTicketDto.StockCode);
             ticket.ModifiedBy = loginContactId;
             ticket.ModifiedDate = DateTime.Now;
 
