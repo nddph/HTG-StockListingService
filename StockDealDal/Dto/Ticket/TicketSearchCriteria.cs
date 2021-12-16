@@ -18,34 +18,34 @@ namespace StockDealDal.Dto.Ticket
         /// lọc theo loại tin mua/bán
         /// </summary>
         [EnumDataType(typeof(TicketType), ErrorMessage = "ERR_INVALID_VALUE")]
-        public int? TicketType { get; set; }
+        public int TicketType { get; set; } = 1;
 
         /// <summary>
         /// lọc theo status
         /// </summary>
-        public int? Status { get; set; }
+        public int Status { get; set; } = -1;
 
         /// <summary>
         /// lọc theo danh sách mã cổ phiếu
         /// </summary>
-        public List<string> StockCode { get; set; }
+        public List<string> StockCode { get; set; } = new();
 
         /// <summary>
         /// lọc tin được đăng bởi người request
         /// </summary>
         public bool IsUser { get; set; } = false;
 
-        [Range(0, double.MaxValue, ErrorMessage= "ERR_INVALID_VALUE")]
-        public decimal? PriceFrom { get; set; }
+        [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        public decimal PriceFrom { get; set; } = -1;
 
-        [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
-        public decimal? PriceTo { get; set; }
+        [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        public decimal PriceTo { get; set; } = -1;
 
-        [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
-        public int? QuantityFrom { get; set; }
+        [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int QuantityFrom { get; set; } = -1;
 
-        [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
-        public int? QuantityTo { get; set; }
+        [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int QuantityTo { get; set; } = -1;
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int CurrentPage { get; set; } = 1;
@@ -56,7 +56,7 @@ namespace StockDealDal.Dto.Ticket
 
     public enum TicketType
     {
-        Buy = 0,
-        Sale = 1
+        Buy = 1,
+        Sale = 2
     }
 }

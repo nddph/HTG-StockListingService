@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,10 @@ namespace StockDealDal.Entities
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SaleTicket> SaleTickets { get; set; }
         public DbSet<BuyTicket> BuyTickets { get; set; }
+
+
+        public DbSet<ViewBuyTickets> ViewBuyTickets { get; set;}
+        public DbSet<ViewSaleTickets> ViewSaleTickets { get; set;}
 
 
 

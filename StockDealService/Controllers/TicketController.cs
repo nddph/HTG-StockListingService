@@ -167,12 +167,12 @@ namespace StockDealService.Controllers
         /// </summary>
         /// <param name="listTicketDto"></param>
         /// <returns></returns>
-        [HttpPost("v1/ListTicket")]
-        public async Task<ObjectResult> ListTicketAsync(TicketSearchCriteria listTicketDto)
+        [HttpPost("v1/ListTickets")]
+        public async Task<ObjectResult> ListTicketsAsync(TicketSearchCriteria listTicketDto)
         {
             try
             {
-                var result = await _ticketBusiness.ListTicketAsync(listTicketDto, LoginedContactId);
+                var result = await _ticketBusiness.ListTicketsAsync(listTicketDto, LoginedContactId);
 
                 return ReturnData(result);
 

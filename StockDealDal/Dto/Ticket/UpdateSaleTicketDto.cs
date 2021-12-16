@@ -44,6 +44,9 @@ namespace StockDealDal.Dto.Ticket
                     PriceTo = PriceFrom;
                     yield return ValidationResult.Success;
                 }
+            } else
+            {
+                PriceFrom = PriceTo = null;
             }
         }
 
