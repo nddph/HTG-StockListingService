@@ -10,7 +10,6 @@ namespace StockDealDal.Dto.EventBus
     {
         public Guid Id { get; set; }
         public string StockCode { get; set; }
-        public string StockName { get; set; }
         public int? Status { get; set; }
         public bool? IsPrivate { get; set; }
         public Guid? CompanyId { get; set; }
