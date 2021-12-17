@@ -78,6 +78,7 @@ namespace StockDealService.Controllers
             try
             {
                 input.SenderId = LoginedContactId;
+                input.SenderName = LoginedContactFullName;
 
                 var result = await _stockDealBusiness.CreateStockDealAsync(input);
 

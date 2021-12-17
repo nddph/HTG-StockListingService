@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealDal.Entities;
 using System;
@@ -64,7 +65,14 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateStockDealAsync(CreateStockDealDto input)
         {
+            var receiverInfo = await CallEventBus.GetStockHolderDetail(input.ReceiverId.Value);
+            if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
+            else input.ReceiverName = receiverInfo.FullName;
+
             var context = new StockDealServiceContext();
+
+            if (input.TickeId != null && !context.Tickets.Any(e => e.Id == input.TickeId))
+                return BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
 
             var transaction = await context.Database.BeginTransactionAsync();
 
