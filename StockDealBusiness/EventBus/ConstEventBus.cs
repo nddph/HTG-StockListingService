@@ -33,5 +33,6 @@ namespace StockDealBusiness.EventBus
         public static readonly string Publisher_GetStockHolderDetailById = $"{CURRENT_SERVICE}.{SERVICE_MEMBER}.GetStockHolderDetailById.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockDetailById = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockDetail.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockTypeDetailById = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockTypeDetail.{REQUEST_METHOD}";
+        public static readonly string Publisher_GetStockAvailableQty = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockAvailableQty.{REQUEST_METHOD}";
     }
 }

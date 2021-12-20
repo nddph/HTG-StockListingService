@@ -38,7 +38,7 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
             if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
@@ -46,7 +46,7 @@ namespace StockDealBusiness.Business
             else saleTicketDto.StockCode = stockInfo.StockCode;
 
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
-            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeName_ERR_INVALID_VALUE");
+            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
 
@@ -119,15 +119,15 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"{nameof(saleTicketDto.Quantity)}_ERR_GRE_THAN_{stockLimit}");
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
-            if (stockInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
             else saleTicketDto.StockCode = stockInfo.StockCode;
 
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
-            if (stockTypeInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
 
@@ -236,14 +236,18 @@ namespace StockDealBusiness.Business
 
             var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
                         @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @priceFrom = {4}, @priceTo = {5},
-                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8}, @currentPage = {9}, @pageSize = {10}",
+                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8},
+                        @expTicketStatus = {9}, @includeDelTicket = {10},
+                        @currentPage = {11}, @pageSize = {12}",
                         listTicketDto.TicketType,
                         listTicketDto.StockCode.Count == 0 ? "" : string.Join(",", listTicketDto.StockCode),
                         listTicketDto.Status,
                         listTicketDto.IsUser ? loginContactId : Guid.Empty,
                         listTicketDto.PriceFrom, listTicketDto.PriceTo,
                         listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
-                        listTicketDto.byNewer ? 0 : 1,
+                        listTicketDto.byNewer ? 1 : 0,
+                        listTicketDto.ExpTicketStatus,
+                        listTicketDto.IncludeDelTicket ? 1 : 0,
                         listTicketDto.CurrentPage,
                         listTicketDto.PerPage
                         );
