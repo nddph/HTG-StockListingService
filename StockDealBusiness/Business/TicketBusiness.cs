@@ -236,14 +236,18 @@ namespace StockDealBusiness.Business
 
             var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
                         @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @priceFrom = {4}, @priceTo = {5},
-                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8}, @currentPage = {9}, @pageSize = {10}",
+                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8},
+                        @expTicketStatus = {9}, @includeDelTicket = {10},
+                        @currentPage = {11}, @pageSize = {12}",
                         listTicketDto.TicketType,
                         listTicketDto.StockCode.Count == 0 ? "" : string.Join(",", listTicketDto.StockCode),
                         listTicketDto.Status,
                         listTicketDto.IsUser ? loginContactId : Guid.Empty,
                         listTicketDto.PriceFrom, listTicketDto.PriceTo,
                         listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
-                        listTicketDto.byNewer ? 0 : 1,
+                        listTicketDto.byNewer ? 1 : 0,
+                        listTicketDto.ExpTicketStatus,
+                        listTicketDto.IncludeDelTicket ? 1 : 0,
                         listTicketDto.CurrentPage,
                         listTicketDto.PerPage
                         );
