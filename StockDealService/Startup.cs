@@ -100,7 +100,8 @@ namespace StockDealService
 
             services.AddCors(o => o.AddPolicy(_policyName, builder =>
             {
-                builder.AllowAnyOrigin()
+                builder.SetIsOriginAllowed(isOriginAllowed: _ => true)
+                       .AllowCredentials()
                        .AllowAnyMethod()
                        .AllowAnyHeader();
             }));
