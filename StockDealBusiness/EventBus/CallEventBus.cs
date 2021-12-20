@@ -11,9 +11,22 @@ namespace StockDealBusiness.EventBus
 {
     public static class CallEventBus
     {
-        public static int GetStockHolderLimit(Guid stockHolderId, Guid stockId)
+        public static async Task<int> GetStockHolderLimitAsync(Guid stockHolderId, Guid stockId, Guid stockTypeId)
         {
-            return int.MaxValue;
+            var request = new GetStockQuantityRequest
+            {
+                StockHolderId = stockHolderId,
+                StockId = stockId,
+                StockTypeId = stockTypeId
+            };
+
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_GetStockAvailableQty,
+                        JsonConvert.SerializeObject(request), ConstEventBus.EXCHANGE_STOCKTRANS, true);
+
+            var resData = ReturnData(res, true);
+            if (resData.StatusCode != 200) return 0;
+
+            return int.Parse(resData.Data.ToString());
         }
 
 

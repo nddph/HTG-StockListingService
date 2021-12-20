@@ -38,7 +38,7 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
             if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
@@ -46,7 +46,7 @@ namespace StockDealBusiness.Business
             else saleTicketDto.StockCode = stockInfo.StockCode;
 
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
-            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeName_ERR_INVALID_VALUE");
+            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
 
@@ -119,15 +119,15 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = CallEventBus.GetStockHolderLimit(loginContactId, saleTicketDto.StockId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"{nameof(saleTicketDto.Quantity)}_ERR_GRE_THAN_{stockLimit}");
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
-            if (stockInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
             else saleTicketDto.StockCode = stockInfo.StockCode;
 
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
-            if (stockTypeInfo == null) return BadRequestResponse($"{nameof(saleTicketDto.StockId)}_ERR_INVALID_VALUE");
+            if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
 
