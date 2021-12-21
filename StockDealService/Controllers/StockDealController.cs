@@ -129,11 +129,11 @@ namespace StockDealService.Controllers
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDeal")]
-        public async Task<ObjectResult> ListStockDealAsync(bool isPaging = true, int currentPage = 1, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealAsync(int currentPage = 1, int perPage = 20)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, isPaging, currentPage, perPage);
+                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, currentPage, perPage);
 
                 return ReturnData(result);
 

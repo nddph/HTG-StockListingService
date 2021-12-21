@@ -33,5 +33,9 @@ namespace StockDealDal.Entities
 
         public decimal TotalPrice { get; set; }
 
+        public bool SenderRead { get; set; } = false;
+
+        public bool ReceiverRead { get; set; } = false;
+
     }
 }

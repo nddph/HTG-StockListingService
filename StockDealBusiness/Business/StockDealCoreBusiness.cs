@@ -144,30 +144,20 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="loginedContactId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, bool isPaging, int currentPage, int perPage)
+        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, int currentPage, int perPage)
         {
             var context = new StockDealServiceContext();
-            var listStockDeal = context.StockDeals
-                .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => e.SenderId == loginedContactId || e.ReceiverId == loginedContactId);
+            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}",
+                loginedContactId, currentPage, perPage);
 
-            listStockDeal = listStockDeal.OrderByDescending(e => e.CreatedDate);
-
-            var paging = new PaginateDto();
-            if (isPaging)
+            var list = await context.ViewListStockDeals.FromSqlRaw(sql).ToListAsync();
+            var paging = new PaginateDto
             {
-                paging.CurrentPage = currentPage;
-                paging.PerPage = perPage;
-                paging.TotalItems = await listStockDeal.CountAsync();
-                paging.Data = await listStockDeal.Skip((currentPage - 1) * perPage).Take(perPage).ToListAsync();
-            } else
-            {
-                paging.CurrentPage = 1;
-                paging.TotalItems = await listStockDeal.CountAsync();
-                paging.PerPage = paging.TotalItems;
-                paging.Data = await listStockDeal.ToListAsync();
-            }
-
+                CurrentPage = currentPage,
+                PerPage = perPage,
+                TotalItems = list.FirstOrDefault() == null ? 0 : list.FirstOrDefault().TotalCount,
+                Data = list
+            };
             return SuccessResponse(paging);
         }
 
