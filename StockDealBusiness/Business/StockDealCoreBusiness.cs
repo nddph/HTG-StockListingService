@@ -13,6 +13,37 @@ namespace StockDealBusiness.Business
     public class StockDealCoreBusiness : BaseBusiness
     {
         /// <summary>
+        /// đánh dấu tin nhắn đã đọc
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <param name="loginedContactId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> ReadStockDealDetailAsync(Guid stockDealId, Guid loginedContactId)
+        {
+            var context = new StockDealServiceContext();
+            var stockDeal = await context.StockDeals.FindAsync(stockDealId);
+            if (stockDeal == null) return NotFoundResponse();
+
+            string sql = @"UPDATE [dbo].[ST_StockDealDetail]
+                        SET [{0}] = 1
+                        WHERE StockDealId = '{1}' and ({0} is null or {0} <> 1)";
+
+            if (stockDeal.SenderId == loginedContactId)
+            {
+                sql = string.Format(sql, "SenderRead", stockDealId.ToString());
+            } else
+            {
+                sql = string.Format(sql, "ReceiverRead", stockDealId.ToString());
+            }
+
+            await context.Database.ExecuteSqlRawAsync(sql);
+
+            return SuccessResponse();
+        }
+
+
+
+        /// <summary>
         /// Xóa stock detail
         /// </summary>
         /// <param name="stockDetailId"></param>
