@@ -34,5 +34,18 @@ namespace StockDealBusiness.Business
             return await context.StockDealDetails.FindAsync(stockDetailId);
         }
 
+
+
+        /// <summary>
+        /// Lấy chi tiết stockdeal
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <returns></returns>
+        public async Task<StockDeal> GetStockDealAsync(Guid stockDealId)
+        {
+            var context = new StockDealServiceContext();
+            return await context.StockDeals.FindAsync(stockDealId);
+        }
+
     }
 }
