@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using StockDealDal.Dto.StockDeal;
 using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace StockDealDal.Entities
 
         public DbSet<ViewBuyTickets> ViewBuyTickets { get; set;}
         public DbSet<ViewSaleTickets> ViewSaleTickets { get; set;}
+        public DbSet<ViewListStockDeals> ViewListStockDeals { get; set;}
 
 
 
@@ -29,7 +31,6 @@ namespace StockDealDal.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.LogTo(Console.WriteLine);
                 optionsBuilder.UseSqlServer(GetSessionByName("StockDealConn", "ConnectionStrings"));
             }
         }

@@ -15,7 +15,10 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
-
+        /// <summary>
+        /// số ngày tin đăng đc hiển thị từ systemsetting
+        /// </summary>
+        /// <returns></returns>
         private async Task<int> GetTicketExpDateAsync()
         {
             var syscontext = new SystemSettingContext();
@@ -39,7 +42,7 @@ namespace StockDealBusiness.Business
             if (stockHolderInfo == null) return BadRequestResponse();
 
             var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
@@ -120,7 +123,7 @@ namespace StockDealBusiness.Business
             if (stockHolderInfo == null) return BadRequestResponse();
 
             var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_GRE_THAN_{stockLimit}");
+            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
 
             var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");

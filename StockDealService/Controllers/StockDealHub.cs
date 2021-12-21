@@ -6,6 +6,7 @@ using StockDealBusiness.Business;
 using StockDealDal.Dto;
 using StockDealDal.Entities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace StockDealService.Controllers
     [Authorize]
     public class StockDealHub : Hub
     {
+        private readonly static ConcurrentDictionary<Guid, string> _connections = new();
+
         private readonly StockDealHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
         private readonly ILogger _logger;
@@ -65,10 +68,24 @@ namespace StockDealService.Controllers
                 input.SenderName = LoginedContactFullName;
 
                 var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
-                if (stockDetail?.StatusCode == 200)
+                if (stockDetail?.StatusCode != 200) return;
+                
+                var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
+                await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
+
+                var group = await _chatHubBusiness.GetStockDealAsync(groupId);
+                if (userId == group.SenderId)
                 {
-                    var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
-                    await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
+                    if (!_connections.ContainsKey(group.ReceiverId))
+                    {
+                        Console.WriteLine("send notification");
+                    }
+                } else
+                {
+                    if (!_connections.ContainsKey(group.SenderId))
+                    {
+                        Console.WriteLine("send notification");
+                    }
                 }
 
             } catch(Exception e)
@@ -83,17 +100,20 @@ namespace StockDealService.Controllers
         {
             try
             {
+
                 var userId = LoginedContactId;
 
                 var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
 
                 var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId);
 
-                if (response.StatusCode != 200) throw new Exception();
+                if (response.StatusCode != 200) throw new Exception("DealNotFound");
 
                 var room = response.Data as StockDeal;
 
-                if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId))) throw new Exception();
+                if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId))) throw new Exception("UserNotInDeal");
+
+                _connections.TryAdd(userId, Context.ConnectionId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
@@ -113,10 +133,13 @@ namespace StockDealService.Controllers
 
             try
             {
+                var userId = LoginedContactId;
 
                 var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, stockDealId.ToString());
+
+                _connections.TryRemove(userId, out _);
 
                 return base.OnDisconnectedAsync(exception);
             }

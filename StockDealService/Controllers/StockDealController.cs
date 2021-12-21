@@ -26,6 +26,35 @@ namespace StockDealService.Controllers
         }
 
 
+
+        /// <summary>
+        /// Đánh dấu tin nhắn đã đọc
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <returns></returns>
+        [HttpGet("v1/ReadStockDealDetail/{stockDetailId}")]
+        public async Task<ObjectResult> ReadStockDealDetailAsync(Guid stockDetailId)
+        {
+            try
+            {
+                var result = await _stockDealBusiness.ReadStockDealDetailAsync(stockDetailId, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
+        /// xóa deal detail
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <returns></returns>
         [HttpDelete("v1/DeleteStockDetail/{stockDetailId}")]
         public async Task<ObjectResult> DeleteStockDetailAsync(Guid stockDetailId)
         {
@@ -100,11 +129,11 @@ namespace StockDealService.Controllers
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDeal")]
-        public async Task<ObjectResult> ListStockDealAsync(bool isPaging = true, int currentPage = 1, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealAsync(int currentPage = 1, int perPage = 20)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, isPaging, currentPage, perPage);
+                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, currentPage, perPage);
 
                 return ReturnData(result);
 
