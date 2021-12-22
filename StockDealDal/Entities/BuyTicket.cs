@@ -13,6 +13,6 @@ namespace StockDealDal.Entities
         public string StockCodes { get; set; }
 
         [NotMapped]
-        public List<string> StockCode { get => StockCodes.Split(",").ToList(); }
+        public string StockCodeView { get => StockCodes.Replace(",", ", "); }
     }
 }
