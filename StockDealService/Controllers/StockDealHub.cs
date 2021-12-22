@@ -67,12 +67,19 @@ namespace StockDealService.Controllers
 
                 input.SenderName = LoginedContactFullName;
 
+                // tạo tin nhắn
                 var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
                 if (stockDetail?.StatusCode != 200) return;
                 
+
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
+                // gửi tin nhắn
                 await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
 
+                // đánh dấu đã đọc tin
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
+
+                // kiểm tra người nhận offline để đẩy thông báo
                 var group = await _chatHubBusiness.GetStockDealAsync(groupId);
                 if (userId == group.SenderId)
                 {
