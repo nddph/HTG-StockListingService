@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
-using StockDealDal.Dto;
+using StockDealDal.Dto.StockDeal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

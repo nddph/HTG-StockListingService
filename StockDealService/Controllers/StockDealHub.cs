@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StockDealBusiness.Business;
-using StockDealDal.Dto;
+using StockDealDal.Dto.StockDeal;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Concurrent;

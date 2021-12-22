@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StockDealDal.Dto
+namespace StockDealDal.Dto.StockDeal
 {
     public class CreateStockDealDto
     {

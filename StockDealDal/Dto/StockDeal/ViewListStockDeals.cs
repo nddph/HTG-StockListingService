@@ -18,12 +18,12 @@ namespace StockDealDal.Dto.StockDeal
         public Guid ReceiverId { get; set; }
         public string SenderName { get; set; }
         public string ReceiverName { get; set; }
-        public bool IsOnwerLastDealDetail { get; set; }
+        public bool? IsOnwerLastDealDetail { get; set; }
         
         /// <summary>
         /// 1 mua, 2 ban
         /// </summary>
-        public int ReceiverType { get; set; }
+        public int? ReceiverType { get; set; }
         public string Description { get; set; }
         public int? Quantity { get; set; }
         public decimal? UnitPrice { get; set; }
