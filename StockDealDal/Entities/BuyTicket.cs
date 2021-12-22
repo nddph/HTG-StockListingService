@@ -11,5 +11,8 @@ namespace StockDealDal.Entities
     public class BuyTicket : Ticket
     {
         public string StockCodes { get; set; }
+
+        [NotMapped]
+        public List<string> StockCode { get => StockCodes.Split(",").ToList(); }
     }
 }
