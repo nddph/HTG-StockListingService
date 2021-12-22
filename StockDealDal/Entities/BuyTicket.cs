@@ -11,5 +11,8 @@ namespace StockDealDal.Entities
     public class BuyTicket : Ticket
     {
         public string StockCodes { get; set; }
+
+        [NotMapped]
+        public string StockCodeView { get => StockCodes.Replace(",", ", "); }
     }
 }
