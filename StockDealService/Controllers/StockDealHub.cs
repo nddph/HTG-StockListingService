@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StockDealBusiness.Business;
+using StockDealBusiness.EventBus;
+using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
 using StockDealDal.Entities;
 using System;
@@ -17,7 +19,7 @@ namespace StockDealService.Controllers
     [Authorize]
     public class StockDealHub : Hub
     {
-        private readonly static ConcurrentDictionary<Guid, string> _connections = new();
+        private readonly static ConcurrentDictionary<Guid, Guid> _userOnlineDeal = new();
 
         private readonly StockDealHubBusiness _chatHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
@@ -80,20 +82,48 @@ namespace StockDealService.Controllers
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
                 // kiểm tra người nhận offline để đẩy thông báo
+                SendDealNofifyDto sendDealNofify = null;
+
                 var group = await _chatHubBusiness.GetStockDealAsync(groupId);
+
+                var reiverGroupId = Guid.Empty;
+
                 if (userId == group.SenderId)
                 {
-                    if (!_connections.ContainsKey(group.ReceiverId))
+                    _userOnlineDeal.TryGetValue(group.ReceiverId, out reiverGroupId);
+
+                    if (reiverGroupId != groupId)
                     {
-                        Console.WriteLine("send notification");
+                        sendDealNofify = new()
+                        {
+                            SenderId = group.SenderId,
+                            SenderName = group.SenderName,
+                            ReceiverId = group.ReceiverId,
+                            ReceiverName = group.ReceiverName,
+                            StockCodes = group.Ticket?.Code,
+                            StockDealId = group.Id
+                        };
                     }
-                } else
+
+                } else if (userId == group.ReceiverId)
                 {
-                    if (!_connections.ContainsKey(group.SenderId))
+                    _userOnlineDeal.TryGetValue(group.SenderId, out reiverGroupId);
+
+                    if (reiverGroupId != groupId)
                     {
-                        Console.WriteLine("send notification");
+                        sendDealNofify = new()
+                        {
+                            SenderId = group.ReceiverId,
+                            SenderName = group.ReceiverName,
+                            ReceiverId = group.SenderId,
+                            ReceiverName = group.SenderName,
+                            StockCodes = group.Ticket.Code,
+                            StockDealId = group.Id
+                        };
                     }
                 }
+
+                if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
 
             } catch(Exception e)
             {
@@ -120,7 +150,7 @@ namespace StockDealService.Controllers
 
                 if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId))) throw new Exception("UserNotInDeal");
 
-                _connections.TryAdd(userId, Context.ConnectionId);
+                _userOnlineDeal.TryAdd(userId, stockDealId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
@@ -146,7 +176,7 @@ namespace StockDealService.Controllers
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
-                _connections.TryRemove(userId, out _);
+                _userOnlineDeal.TryRemove(userId, out _);
 
                 return base.OnDisconnectedAsync(exception);
             }

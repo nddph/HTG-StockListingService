@@ -11,6 +11,31 @@ namespace StockDealBusiness.EventBus
 {
     public static class CallEventBus
     {
+        /// <summary>
+        /// gửi thông báo thương lượng
+        /// </summary>
+        /// <param name="dealNofifyDto"></param>
+        /// <returns></returns>
+        public static async Task<BaseResponse> SendDealNofify(SendDealNofifyDto dealNofifyDto)
+        {
+
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_SendDealNofify,
+                        JsonConvert.SerializeObject(dealNofifyDto), ConstEventBus.EXCHANGE_NOTIFY, false);
+
+            var resData = ReturnData(res, false);
+
+            return resData;
+        }
+
+
+
+        /// <summary>
+        /// Lấy giới hạn số lượng 1 loại cổ phiếu của 1 user
+        /// </summary>
+        /// <param name="stockHolderId"></param>
+        /// <param name="stockId"></param>
+        /// <param name="stockTypeId"></param>
+        /// <returns></returns>
         public static async Task<int> GetStockHolderLimitAsync(Guid stockHolderId, Guid stockId, Guid stockTypeId)
         {
             var request = new GetStockQuantityRequest
