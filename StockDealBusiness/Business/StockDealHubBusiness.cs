@@ -44,7 +44,7 @@ namespace StockDealBusiness.Business
         public async Task<StockDeal> GetStockDealAsync(Guid stockDealId)
         {
             var context = new StockDealServiceContext();
-            return await context.StockDeals.FindAsync(stockDealId);
+            return await context.StockDeals.Include(e => e.Ticket).Where(e => e.Id == stockDealId).FirstOrDefaultAsync();
         }
 
     }

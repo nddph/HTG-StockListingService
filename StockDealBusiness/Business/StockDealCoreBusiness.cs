@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
+using StockDealDal.Dto.StockDeal;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Generic;

@@ -166,7 +166,7 @@ namespace StockDealService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<StockDealHub>("stockDealHub");
+                endpoints.MapHub<StockDealHub>("stockdeal/stockDealHub");
             });
         }
     }
