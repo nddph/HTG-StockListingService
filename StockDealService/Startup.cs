@@ -98,15 +98,6 @@ namespace StockDealService
             });
 
 
-            services.AddCors(o => o.AddPolicy(_policyName, builder =>
-            {
-                builder.SetIsOriginAllowed(isOriginAllowed: _ => true)
-                       .AllowCredentials()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            }));
-
-
             // Adding Authentication  
             services.AddAuthentication(options =>
             {
@@ -128,6 +119,24 @@ namespace StockDealService
                     ValidIssuer = Configuration["JWT:ValidIssuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/stockdeal/stockDealHub")))
+                        {
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             services.AddSignalR();
@@ -145,11 +154,13 @@ namespace StockDealService
                 app.UseDeveloperExceptionPage();
             }
 
-
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ChatService v1"));
 
-            app.UseCors(_policyName);
+            app.UseCors(e => e.SetIsOriginAllowed(isOriginAllowed: _ => true)
+                       .AllowCredentials()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader());
 
             app.UseRouting();
 
@@ -165,8 +176,8 @@ namespace StockDealService
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
                 endpoints.MapHub<StockDealHub>("stockdeal/stockDealHub");
+                endpoints.MapControllers();
             });
         }
     }
