@@ -72,16 +72,15 @@ namespace StockDealService.Controllers
                 // tạo tin nhắn
                 var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
                 if (stockDetail?.StatusCode != 200) return;
-                
 
-                var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
                 // gửi tin nhắn
+                var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
                 await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
 
                 // đánh dấu đã đọc tin
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
-                // kiểm tra người nhận offline để đẩy thông báo
+                #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
 
                 var group = await _chatHubBusiness.GetStockDealAsync(groupId);
@@ -124,8 +123,10 @@ namespace StockDealService.Controllers
                 }
 
                 if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
+                #endregion
 
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 _logger.LogError(e.ToString());
             }
