@@ -13,13 +13,16 @@ namespace StockDealDal.Dto.StockDeal
 
         public string Description { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Required(ErrorMessage = "ERR_REQUIRED")]
+        [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Quantity { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Required(ErrorMessage = "ERR_REQUIRED")]
+        [Range(1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal TotalPrice { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Required(ErrorMessage = "ERR_REQUIRED")]
+        [Range(1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal UnitPrice { get; set; }
     }
 }
