@@ -21,7 +21,7 @@ namespace StockDealDal.Dto.StockDeal
         public bool? IsOnwerLastDealDetail { get; set; }
         
         /// <summary>
-        /// 1 mua, 2 ban
+        /// 1 deal gửi, 2 deal nhận
         /// </summary>
         public int? ReceiverType { get; set; }
         public string Description { get; set; }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StockDealBusiness.Business;
 using StockDealBusiness.EventBus;
+using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
 using StockDealDal.Entities;
@@ -27,7 +28,14 @@ namespace StockDealService.Controllers
 
 
 
-        protected string LoginedContactFullName
+        private Guid GetStockDealId()
+        {
+            return Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
+        }
+
+
+
+        private string LoginedContactFullName
         {
             get
             {
@@ -44,7 +52,7 @@ namespace StockDealService.Controllers
                 var id = Guid.Empty;
                 if (Context.User.Identity.IsAuthenticated)
                 {
-                    Guid.TryParse(Context.User.Claims.FirstOrDefault(claim => claim.Type == "contactId")?.Value, out id);
+                    _ = Guid.TryParse(Context.User.Claims.FirstOrDefault(claim => claim.Type == "contactId")?.Value, out id);
                 }
                 return id;
             }
@@ -61,37 +69,39 @@ namespace StockDealService.Controllers
 
 
 
-        public async Task SendMessage([Required] Guid groupId, [Required] CreateStockDetailDto input)
+        [HubMethodName("SendMessage")]
+        public async Task<BaseResponse> SendMessage([Required] CreateStockDetailDto input)
         {
             try
             {
+                var groupId = GetStockDealId();
                 var userId = LoginedContactId;
 
                 input.SenderName = LoginedContactFullName;
 
                 // tạo tin nhắn
                 var stockDetail = await _stockDealCoreBusiness.CreateStockDealDetailAsync(groupId, userId, input);
-                if (stockDetail?.StatusCode != 200) return;
+                if (stockDetail?.StatusCode != 200) return stockDetail;
+
+                // đánh dấu người gửi đã đọc tin nhắn
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
                 // gửi tin nhắn
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
                 await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
-
-                // đánh dấu đã đọc tin
-                await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
 
                 var group = await _chatHubBusiness.GetStockDealAsync(groupId);
 
-                var reiverGroupId = Guid.Empty;
+                Guid groupIdReceiverOnline;
 
                 if (userId == group.SenderId)
                 {
-                    _userOnlineDeal.TryGetValue(group.ReceiverId, out reiverGroupId);
+                    _userOnlineDeal.TryGetValue(group.ReceiverId, out groupIdReceiverOnline);
 
-                    if (reiverGroupId != groupId)
+                    if (groupIdReceiverOnline != groupId)
                     {
                         sendDealNofify = new()
                         {
@@ -106,9 +116,9 @@ namespace StockDealService.Controllers
 
                 } else if (userId == group.ReceiverId)
                 {
-                    _userOnlineDeal.TryGetValue(group.SenderId, out reiverGroupId);
+                    _userOnlineDeal.TryGetValue(group.SenderId, out groupIdReceiverOnline);
 
-                    if (reiverGroupId != groupId)
+                    if (groupIdReceiverOnline != groupId)
                     {
                         sendDealNofify = new()
                         {
@@ -125,10 +135,12 @@ namespace StockDealService.Controllers
                 if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
                 #endregion
 
+                return new BaseResponse();
             }
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
+                return new BaseResponse() { StatusCode = 400, Message = e.Message };
             }
         }
 
@@ -141,21 +153,32 @@ namespace StockDealService.Controllers
 
                 var userId = LoginedContactId;
 
-                var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
+                var stockDealId = GetStockDealId();
 
+                // kiểm tra tồn tại stockdeal
                 var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId);
+                if (response.StatusCode != 200)
+                {
+                    _logger.LogError($"not found stockdeal {stockDealId}");
+                    Context.Abort();
+                    return Task.CompletedTask;
+                }
 
-                if (response.StatusCode != 200) throw new Exception("DealNotFound");
-
+                // kiểm tra người dùng có trong stockdeal
                 var room = response.Data as StockDeal;
-
-                if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId))) throw new Exception("UserNotInDeal");
+                if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId)))
+                {
+                    _logger.LogError($"user {userId} not in stockdeal {stockDealId}");
+                    Context.Abort();
+                    return Task.CompletedTask;
+                }
 
                 _userOnlineDeal.TryAdd(userId, stockDealId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
                 return base.OnConnectedAsync();
+
             } catch (Exception e)
             {
                 _logger.LogError(e.ToString());
@@ -173,7 +196,7 @@ namespace StockDealService.Controllers
             {
                 var userId = LoginedContactId;
 
-                var stockDealId = Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
+                var stockDealId = GetStockDealId();
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
