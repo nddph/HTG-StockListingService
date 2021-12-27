@@ -70,11 +70,11 @@ namespace StockDealService.Controllers
 
 
         [HubMethodName("DeleteMessage")]
-        public async Task<BaseResponse> DeleteMessage(Guid stockDealDeailId)
+        public async Task<BaseResponse> DeleteMessage([Required] Guid? stockDealDeailId)
         {
             try
             {
-                var response = await _stockDealCoreBusiness.DeleteStockDetailAsync(stockDealDeailId, LoginedContactId);
+                var response = await _stockDealCoreBusiness.DeleteStockDetailAsync(stockDealDeailId.Value, LoginedContactId);
 
                 if (response.StatusCode != 200) return response;
 
