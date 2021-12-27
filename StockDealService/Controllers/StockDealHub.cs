@@ -69,8 +69,8 @@ namespace StockDealService.Controllers
 
 
 
-        [HubMethodName("DeleteMessage")]
-        public async Task<BaseResponse> DeleteMessage([Required] Guid? stockDealDeailId)
+        [HubMethodName("DeleteStockDealDetail")]
+        public async Task<BaseResponse> DeleteStockDealDetail([Required] Guid? stockDealDeailId)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace StockDealService.Controllers
                 if (response.StatusCode != 200) return response;
 
                 var groupId = GetStockDealId();
-                await Clients.Group(groupId.ToString()).SendAsync("DeleteMessage", stockDealDeailId);
+                await Clients.Group(groupId.ToString()).SendAsync("DeleteStockDealDetail", stockDealDeailId);
 
                 return new BaseResponse();
 
@@ -92,8 +92,8 @@ namespace StockDealService.Controllers
 
 
 
-        [HubMethodName("SendMessage")]
-        public async Task<BaseResponse> SendMessage([Required] CreateStockDetailDto input)
+        [HubMethodName("CreatetockDealDetail")]
+        public async Task<BaseResponse> CreatetockDealDetail([Required] CreateStockDetailDto input)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace StockDealService.Controllers
 
                 // gửi tin nhắn
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
-                await Clients.Group(groupId.ToString()).SendAsync("SendMessage", JsonConvert.SerializeObject(data));
+                await Clients.Group(groupId.ToString()).SendAsync("CreatetockDealDetail", JsonConvert.SerializeObject(data));
 
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
