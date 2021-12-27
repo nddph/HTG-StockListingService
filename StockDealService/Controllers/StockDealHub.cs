@@ -90,6 +90,9 @@ namespace StockDealService.Controllers
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
                 await Clients.Group(groupId.ToString()).SendAsync(groupId.ToString(), JsonConvert.SerializeObject(data));
 
+                // đánh dấu người gửi đã đọc tin nhắn
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
+
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
 
