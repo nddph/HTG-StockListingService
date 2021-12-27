@@ -92,8 +92,8 @@ namespace StockDealService.Controllers
 
 
 
-        [HubMethodName("CreatetockDealDetail")]
-        public async Task<BaseResponse> CreatetockDealDetail([Required] CreateStockDetailDto input)
+        [HubMethodName("CreateStockDealDetail")]
+        public async Task<BaseResponse> CreateStockDealDetail([Required] CreateStockDetailDto input)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace StockDealService.Controllers
 
                 // gửi tin nhắn
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
-                await Clients.Group(groupId.ToString()).SendAsync("CreatetockDealDetail", JsonConvert.SerializeObject(data));
+                await Clients.Group(groupId.ToString()).SendAsync("CreateStockDealDetail", JsonConvert.SerializeObject(data));
 
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
