@@ -97,6 +97,25 @@ namespace StockDealService.Controllers
         {
             try
             {
+                #region validate input
+                var contextValidate = new ValidationContext(input, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+
+                bool isValid = Validator.TryValidateObject(input, contextValidate, validationResults, true);
+
+                if (!isValid)
+                {
+                    var invalid = validationResults.FirstOrDefault();
+                    var key = validationResults.FirstOrDefault().MemberNames.FirstOrDefault();
+                    return new BaseResponse
+                    {
+                        StatusCode = 400,
+                        Message = $"{key.Substring(0, 1).ToLower()}{key.Substring(1)}_{invalid.ErrorMessage}"
+                    };
+                }
+                #endregion
+
+
                 var groupId = GetStockDealId();
                 var userId = LoginedContactId;
 

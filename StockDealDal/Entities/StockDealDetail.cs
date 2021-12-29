@@ -16,6 +16,8 @@ namespace StockDealDal.Entities
         [Required]
         public Guid Id { get; set; }
 
+        public int? Type { get; set; }
+
         public string SenderName { get; set; }
 
         public string Description { get; set; }
