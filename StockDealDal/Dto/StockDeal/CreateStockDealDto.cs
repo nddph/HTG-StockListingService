@@ -18,7 +18,7 @@ namespace StockDealDal.Dto.StockDeal
 
         public string ReceiverName { get; set; }
 
-        public Guid? TickeId { get; set; }
+        public Guid? TicketId { get; set; }
 
         public CreateStockDetailDto StockDetail { get; set; }
 
