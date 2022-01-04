@@ -13,7 +13,7 @@ namespace StockDealDal.Dto.StockDeal
         /// 1: tin nhắn thường
         /// 2: tin nhắn đã tạo thương lượng
         /// </summary>
-        [Range(1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Type { get; set; } = 1;
 
         public string SenderName { get; set; }

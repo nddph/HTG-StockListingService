@@ -188,8 +188,6 @@ namespace StockDealBusiness.Business
         {
             var context = new StockDealServiceContext();
             var ticket = await context.Tickets
-                .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => !e.ExpDate.HasValue || e.ExpDate.Value >= DateTime.Now)
                 .Where(e => e.Id == ticketId)
                 .FirstOrDefaultAsync();
 

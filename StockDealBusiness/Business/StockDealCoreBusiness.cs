@@ -123,7 +123,7 @@ namespace StockDealBusiness.Business
 
             var context = new StockDealServiceContext();
 
-            if (input.TickeId != null && !context.Tickets.Any(e => e.Id == input.TickeId))
+            if (input.TicketId != null && !context.Tickets.Any(e => e.Id == input.TicketId))
                 return BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
 
             var transaction = await context.Database.BeginTransactionAsync();
@@ -131,7 +131,7 @@ namespace StockDealBusiness.Business
             var stockDeal = await context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
                 || (e.SenderId == input.ReceiverId && e.ReceiverId == input.SenderId))
-                && e.TicketId == input.TickeId);
+                && e.TicketId == input.TicketId);
 
             if (stockDeal == null)
             {
@@ -140,7 +140,7 @@ namespace StockDealBusiness.Business
                     Id = Guid.NewGuid(),
                     SenderId = input.SenderId.Value,
                     ReceiverId = input.ReceiverId.Value,
-                    TicketId = input.TickeId,
+                    TicketId = input.TicketId,
                     SenderName = input.SenderName,
                     ReceiverName = input.ReceiverName
                 };
