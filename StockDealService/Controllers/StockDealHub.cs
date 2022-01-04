@@ -198,7 +198,7 @@ namespace StockDealService.Controllers
                 var stockDealId = GetStockDealId();
 
                 // kiểm tra tồn tại stockdeal
-                var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId);
+                var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId, LoginedContactId);
                 if (response.StatusCode != 200)
                 {
                     _logger.LogError($"not found stockdeal {stockDealId}");
@@ -207,7 +207,7 @@ namespace StockDealService.Controllers
                 }
 
                 // kiểm tra người dùng có trong stockdeal
-                var room = response.Data as StockDeal;
+                var room = response.Data as GetStockDealResponseDto;
                 if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId)))
                 {
                     _logger.LogError($"user {userId} not in stockdeal {stockDealId}");
