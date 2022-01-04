@@ -9,7 +9,6 @@ namespace StockDealDal.Dto.StockDeal
 {
     public class CreateStockDealDto
     {
-        [Required(ErrorMessage = "ERR_REQUIRED")]
         public Guid? SenderId { get; set; }
 
         public string SenderName { get; set; }

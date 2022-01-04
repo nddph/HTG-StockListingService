@@ -28,8 +28,9 @@ namespace StockDealDal.Dto.StockDeal
         public int? Quantity { get; set; }
         public decimal? UnitPrice { get; set; }
         public decimal? TotalPrice { get; set; }
-        public int CountUnread { get; set; }
+        public bool? IsDeletedDealDetail { get; set; }
         public DateTime? LastUpdate { get; set; }
+        public int CountUnread { get; set; }
         public int TotalCount { get; set; }
         public int TotalUnread { get; set; }
 

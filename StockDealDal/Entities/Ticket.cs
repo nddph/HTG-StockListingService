@@ -38,5 +38,12 @@ namespace StockDealDal.Entities
 
         public string EmployeeCode { get; set; }
 
+
+        /// <summary>
+        /// 1 mua: 2 bán
+        /// </summary>
+        [NotMapped]
+        public int TicketType { get; set; }
+
     }
 }

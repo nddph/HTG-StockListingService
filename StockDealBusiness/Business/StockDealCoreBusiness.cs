@@ -76,14 +76,34 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="stockDealId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> GetStockDealAsync(Guid stockDealId)
+        public async Task<BaseResponse> GetStockDealAsync(Guid stockDealId, Guid loginedContactId)
         {
             var context = new StockDealServiceContext();
-            var stockDeal = await context.StockDeals.Include(e => e.Ticket).FirstOrDefaultAsync(e => e.Id == stockDealId);
+            var stockDeal = await context.StockDeals
+                .Include(e => e.Ticket)
+                .Where(e => e.Id == stockDealId)
+                .FirstOrDefaultAsync();
 
             if (stockDeal == null) return NotFoundResponse();
 
-            return SuccessResponse(data: stockDeal);
+            return SuccessResponse(data: new GetStockDealResponseDto
+            {
+                Id = stockDeal.Id,
+                ReceiverId = stockDeal.ReceiverId,
+                ReceiverName = stockDeal.ReceiverName,
+                SenderId = stockDeal.SenderId,
+                SenderName = stockDeal.SenderName,
+                Ticket = stockDeal.Ticket,
+                TicketId = stockDeal.TicketId,
+                CreatedDate = stockDeal.CreatedDate,
+                CreatedBy = stockDeal.CreatedBy,
+                ModifiedDate = stockDeal.ModifiedDate,
+                ModifiedBy = stockDeal.ModifiedBy,
+                DeletedDate = stockDeal.DeletedDate,
+                DeletedBy = stockDeal.DeletedBy,
+                ReceiverType = ( (stockDeal.Ticket is SaleTicket && stockDeal.Ticket?.CreatedBy != loginedContactId)
+                                || (stockDeal.Ticket is BuyTicket && stockDeal.Ticket?.CreatedBy == loginedContactId) ) ? 1 : 2
+            });
         }
 
 
@@ -184,7 +204,6 @@ namespace StockDealBusiness.Business
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
             var list = context.StockDealDetails
-                .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.StockDealId == stockDealId)
                 .OrderBy(e => e.CreatedDate);
 

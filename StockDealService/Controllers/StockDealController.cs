@@ -83,7 +83,7 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var result = await _stockDealBusiness.GetStockDealAsync(stockDealId);
+                var result = await _stockDealBusiness.GetStockDealAsync(stockDealId, LoginedContactId);
 
                 return ReturnData(result);
 
