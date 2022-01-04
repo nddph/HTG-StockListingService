@@ -28,5 +28,8 @@ namespace StockDealDal.Entities
         public decimal? PriceTo { get; set; }
 
         public int? Quantity { get; set; }
+
+        [NotMapped]
+        public new int TicketType { get; set; } = 2;
     }
 }
