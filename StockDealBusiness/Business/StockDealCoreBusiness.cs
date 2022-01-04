@@ -204,7 +204,6 @@ namespace StockDealBusiness.Business
             if (await stockDeal.FirstOrDefaultAsync() == null) return NotFoundResponse();
 
             var list = context.StockDealDetails
-                .Where(e => !e.DeletedDate.HasValue)
                 .Where(e => e.StockDealId == stockDealId)
                 .OrderBy(e => e.CreatedDate);
 
