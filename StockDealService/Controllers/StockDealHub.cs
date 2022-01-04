@@ -156,7 +156,8 @@ namespace StockDealService.Controllers
                         };
                     }
 
-                } else if (userId == group.ReceiverId)
+                }
+                else if (userId == group.ReceiverId)
                 {
                     _userOnlineDeal.TryGetValue(group.SenderId, out groupIdReceiverOnline);
 
@@ -177,7 +178,7 @@ namespace StockDealService.Controllers
                 if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
                 #endregion
 
-                return new BaseResponse();
+                return new BaseResponse() { Data = data };
             }
             catch (Exception e)
             {
