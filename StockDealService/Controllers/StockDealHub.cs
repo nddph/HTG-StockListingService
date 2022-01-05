@@ -135,11 +135,6 @@ namespace StockDealService.Controllers
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));
 
-                _logger.LogInformation(JsonConvert.SerializeObject(data, new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                }));
-
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
 
