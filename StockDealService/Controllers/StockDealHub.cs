@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StockDealBusiness.Business;
 using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
-using StockDealDal.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -130,7 +130,15 @@ namespace StockDealService.Controllers
 
                 // gửi tin nhắn
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
-                await Clients.Group(groupId.ToString()).SendAsync("CreateStockDealDetail", JsonConvert.SerializeObject(data));
+                await Clients.Group(groupId.ToString()).SendAsync("CreateStockDealDetail", JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
+
+                _logger.LogInformation(JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
 
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
