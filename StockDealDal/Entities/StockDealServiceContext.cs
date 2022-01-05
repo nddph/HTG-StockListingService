@@ -31,6 +31,7 @@ namespace StockDealDal.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
+                optionsBuilder.LogTo(Console.WriteLine);
                 optionsBuilder.UseSqlServer(GetSessionByName("StockDealConn", "ConnectionStrings"));
             }
         }
