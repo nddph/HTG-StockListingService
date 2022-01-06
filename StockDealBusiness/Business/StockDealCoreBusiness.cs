@@ -13,6 +13,25 @@ namespace StockDealBusiness.Business
 {
     public class StockDealCoreBusiness : BaseBusiness
     {
+        public async Task<BaseResponse> ListStockDealDetailByTimeAsync(Guid stockDealId, DateTime nextPage, int perPage, Guid loginedContactId)
+        {
+            var context = new StockDealServiceContext();
+
+            var list = await context.StockDealDetails
+                .Where(e => e.StockDealId == stockDealId)
+                .Where(e => e.CreatedDate < nextPage)
+                .OrderByDescending(e => e.CreatedDate)
+                .Take(perPage).ToListAsync();
+
+            return SuccessResponse(new
+            {
+                nextPage = list.LastOrDefault()?.CreatedDate,
+                List = list
+            });
+        }
+
+
+
         /// <summary>
         /// đánh dấu tin nhắn đã đọc
         /// </summary>
@@ -177,7 +196,11 @@ namespace StockDealBusiness.Business
                 CurrentPage = currentPage,
                 PerPage = perPage,
                 TotalItems = list.FirstOrDefault() == null ? 0 : list.FirstOrDefault().TotalCount,
-                Data = list
+                Data = new
+                {
+                    TotalUnread = list.FirstOrDefault()?.TotalUnread ?? 0,
+                    List = list
+                }
             };
             return SuccessResponse(paging);
         }

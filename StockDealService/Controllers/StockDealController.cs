@@ -28,6 +28,31 @@ namespace StockDealService.Controllers
 
 
         /// <summary>
+        /// lấy danh sách chi tiết thương lượng theo thời gian
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <param name="nextPage"></param>
+        /// <param name="perPage"></param>
+        /// <returns></returns>
+        [HttpGet("ListStockDealDetailByTime")]
+        public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextPage, int perPage = 20)
+        {
+            try
+            {
+                var result = await _stockDealBusiness.ListStockDealDetailByTimeAsync(stockDetailId.Value, nextPage ?? DateTime.Now, perPage, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
         /// Đánh dấu tin nhắn đã đọc
         /// </summary>
         /// <param name="stockDetailId"></param>
