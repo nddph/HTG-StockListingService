@@ -25,8 +25,6 @@ namespace StockDealBusiness.Business
                 .OrderByDescending(e => e.CreatedDate)
                 .Take(perPage).ToListAsync();
 
-            Console.WriteLine(list.FirstOrDefault()?.CreatedDate < nextPage);
-
             return SuccessResponse(new
             {
                 nextPage = list.LastOrDefault()?.CreatedDate?.AddMilliseconds(-1),
