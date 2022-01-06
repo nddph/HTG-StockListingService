@@ -139,15 +139,13 @@ namespace StockDealService.Controllers
                         {
                             ContractResolver = new CamelCasePropertyNamesContractResolver()
                         }));
-                    return new BaseResponse();
-                }
-
-                await Clients.Group(groupId.ToString()).SendAsync(ConstStockDealHub.CreateStockDealDetail, JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                } else
                 {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                }));
-
-
+                    await Clients.Group(groupId.ToString()).SendAsync(ConstStockDealHub.CreateStockDealDetail, JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    }));
+                }
                 
 
                 #region kiểm tra người nhận offline để đẩy thông báo
@@ -194,7 +192,11 @@ namespace StockDealService.Controllers
                 }
 
                 // nếu người nhận offline thì gửi thông báo, ngược lại thì đánh dấu đã đọc tin nhắn
-                if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
+                if (sendDealNofify != null)
+                {
+                    // không gửi thông báo với loại tin nhắn chờ phản hồi
+                    if (data.Type != (int)TypeStockDealDetail.WaitingForResponse) await CallEventBus.SendDealNofify(sendDealNofify);
+                }
                 else await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, group.SenderId == userId ? group.ReceiverId : group.SenderId);
                 #endregion
 
