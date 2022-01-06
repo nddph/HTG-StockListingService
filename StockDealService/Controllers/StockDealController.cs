@@ -34,7 +34,7 @@ namespace StockDealService.Controllers
         /// <param name="nextPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
-        [HttpGet("ListStockDealDetailByTime")]
+        [HttpGet("v1/ListStockDealDetailByTime")]
         public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextPage, int perPage = 20)
         {
             try
