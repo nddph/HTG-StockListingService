@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StockDealBusiness.Business;
 using StockDealBusiness.EventBus;
+using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
@@ -69,7 +70,7 @@ namespace StockDealService.Controllers
 
 
 
-        [HubMethodName("DeleteStockDealDetail")]
+        [HubMethodName(ConstStockDealHub.DeleteStockDealDetail)]
         public async Task<BaseResponse> DeleteStockDealDetail([Required] Guid? stockDealDeailId)
         {
             try
@@ -79,7 +80,7 @@ namespace StockDealService.Controllers
                 if (response.StatusCode != 200) return response;
 
                 var groupId = GetStockDealId();
-                await Clients.Group(groupId.ToString()).SendAsync("DeleteStockDealDetail", stockDealDeailId);
+                await Clients.Group(groupId.ToString()).SendAsync(ConstStockDealHub.DeleteStockDealDetail, stockDealDeailId);
 
                 return new BaseResponse();
 
@@ -92,7 +93,7 @@ namespace StockDealService.Controllers
 
 
 
-        [HubMethodName("CreateStockDealDetail")]
+        [HubMethodName(ConstStockDealHub.CreateStockDealDetail)]
         public async Task<BaseResponse> CreateStockDealDetail([Required] CreateStockDetailDto input)
         {
             try
@@ -130,10 +131,24 @@ namespace StockDealService.Controllers
 
                 // gửi tin nhắn
                 var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
-                await Clients.Group(groupId.ToString()).SendAsync("CreateStockDealDetail", JsonConvert.SerializeObject(data, new JsonSerializerSettings
+
+                if (data.Type == (int)TypeStockDealDetail.WaitingForResponse)
+                {
+                    await Clients.Caller.SendAsync(ConstStockDealHub.CreateStockDealDetail, 
+                        JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                        {
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }));
+                    return new BaseResponse();
+                }
+
+                await Clients.Group(groupId.ToString()).SendAsync(ConstStockDealHub.CreateStockDealDetail, JsonConvert.SerializeObject(data, new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));
+
+
+                
 
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
@@ -178,7 +193,9 @@ namespace StockDealService.Controllers
                     }
                 }
 
+                // nếu người nhận offline thì gửi thông báo, ngược lại thì đánh dấu đã đọc tin nhắn
                 if (sendDealNofify != null) await CallEventBus.SendDealNofify(sendDealNofify);
+                else await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, group.SenderId == userId ? group.ReceiverId : group.SenderId);
                 #endregion
 
                 return new BaseResponse() { Data = data };

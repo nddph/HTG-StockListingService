@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
+using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.StockDeal;
 using StockDealDal.Entities;
@@ -20,6 +21,7 @@ namespace StockDealBusiness.Business
             var list = await context.StockDealDetails
                 .Where(e => e.StockDealId == stockDealId)
                 .Where(e => e.CreatedDate < nextPage)
+                .Where(e => e.Type != (int)TypeStockDealDetail.WaitingForResponse || loginedContactId == e.CreatedBy)
                 .OrderByDescending(e => e.CreatedDate)
                 .Take(perPage).ToListAsync();
 
