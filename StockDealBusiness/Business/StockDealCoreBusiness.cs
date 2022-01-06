@@ -186,13 +186,49 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="loginedContactId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, int currentPage, int perPage)
+        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, int currentPage, int perPage, bool includeEmptyDeal = false)
         {
             var context = new StockDealServiceContext();
-            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}",
-                loginedContactId, currentPage, perPage);
+            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}",
+                loginedContactId, currentPage, perPage, includeEmptyDeal);
 
             var list = await context.ViewListStockDeals.FromSqlRaw(sql).ToListAsync();
+            var listResult = list.Select(e => new StockDealResponseDto
+            {
+                Id = e.Id,
+                SenderId = e.SenderId,
+                ReceiverId = e.ReceiverId,
+                SenderName = e.SenderName,
+                ReceiverName = e.ReceiverName,
+                ReceiverType = e.ReceiverType,
+                LastUpdate = e.LastUpdate,
+                CountUnread = e.CountUnread,
+                Ticket = new()
+                {
+                    Id = e.TicketId,
+                    Code = e.TicketCode,
+                    TicketType = e.TicketType,
+                    Title = e.TicketTitle,
+                    IsNegotiate = e.TicketIsNegotiate,
+                    PriceFrom = e.TicketPrice,
+                    Quantity = e.TicketQuantity,
+                    StockTypeName = e.TicketStockTypeName,
+                    StockCode = e.TicketStockCode,
+                    StockCodes = e.TicketStockCodes
+                },
+                LastDealDetail = new()
+                {
+                    LastStockDetailId = e.LastStockDetailId,
+                    Description = e.Description,
+                    Quantity = e.Quantity,
+                    TotalPrice = e.TotalPrice,
+                    UnitPrice = e.UnitPrice,
+                    IsDeletedDealDetail = e.IsDeletedDealDetail,
+                    IsOnwerLastDealDetail = e.IsOnwerLastDealDetail,
+                    StockDetailType = e.StockDetailType
+                }
+            });
+
             var paging = new PaginateDto
             {
                 CurrentPage = currentPage,
@@ -201,7 +237,7 @@ namespace StockDealBusiness.Business
                 Data = new
                 {
                     TotalUnread = list.FirstOrDefault()?.TotalUnread ?? 0,
-                    List = list
+                    List = listResult
                 }
             };
             return SuccessResponse(paging);

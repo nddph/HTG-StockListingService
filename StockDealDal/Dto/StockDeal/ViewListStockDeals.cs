@@ -10,14 +10,28 @@ namespace StockDealDal.Dto.StockDeal
     [Keyless]
     public class ViewListStockDeals
     {
+        // deal
         public Guid Id { get; set; }
-        public Guid? TicketId { get; set; }
-        public Guid? LastStockDetailId { get; set; }
-        public string TicketCode { get; set; }
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
         public string SenderName { get; set; }
         public string ReceiverName { get; set; }
+
+        // ticket
+        public Guid? TicketId { get; set; }
+        public string TicketTitle { get; set; }
+        public string TicketCode { get; set; }
+        public string TicketStockCode { get; set; }
+        public string TicketStockTypeName { get; set; }
+        public decimal? TicketPrice { get; set; }
+        public int? TicketQuantity{ get; set; }
+        public bool? TicketIsNegotiate { get; set; }
+        public string TicketStockCodes { get; set; }
+        public int? TicketType { get; set; }
+
+        // deal detail
+        public Guid? LastStockDetailId { get; set; }
+        public int? StockDetailType { get; set; }
         public bool? IsOnwerLastDealDetail { get; set; }
         
         /// <summary>
@@ -31,8 +45,8 @@ namespace StockDealDal.Dto.StockDeal
         public bool? IsDeletedDealDetail { get; set; }
         public DateTime? LastUpdate { get; set; }
         public int CountUnread { get; set; }
-        public int TotalCount { get; set; }
         public int TotalUnread { get; set; }
+        public int TotalCount { get; set; }
 
     }
 }
