@@ -14,13 +14,13 @@ namespace StockDealBusiness.Business
 {
     public class StockDealCoreBusiness : BaseBusiness
     {
-        public async Task<BaseResponse> ListStockDealDetailByTimeAsync(Guid stockDealId, DateTime nextPage, int perPage, Guid loginedContactId)
+        public async Task<BaseResponse> ListStockDealDetailByTimeAsync(Guid stockDealId, DateTime nextQueryTime, int perPage, Guid loginedContactId)
         {
             var context = new StockDealServiceContext();
 
             var list = await context.StockDealDetails
                 .Where(e => e.StockDealId == stockDealId)
-                .Where(e => e.CreatedDate <= nextPage)
+                .Where(e => e.CreatedDate <= nextQueryTime)
                 .Where(e => e.Type != (int)TypeStockDealDetail.WaitingForResponse || loginedContactId == e.CreatedBy)
                 .OrderByDescending(e => e.CreatedDate)
                 .Take(perPage+1).ToListAsync();

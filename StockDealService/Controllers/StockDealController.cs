@@ -31,15 +31,15 @@ namespace StockDealService.Controllers
         /// lấy danh sách chi tiết thương lượng theo thời gian
         /// </summary>
         /// <param name="stockDetailId"></param>
-        /// <param name="nextPage"></param>
+        /// <param name="nextQueryTime"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDealDetailByTime")]
-        public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextPage, [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")] int perPage = 20)
+        public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextQueryTime, [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")] int perPage = 20)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealDetailByTimeAsync(stockDetailId.Value, nextPage ?? DateTime.Now, perPage, LoginedContactId);
+                var result = await _stockDealBusiness.ListStockDealDetailByTimeAsync(stockDetailId.Value, nextQueryTime ?? DateTime.Now, perPage, LoginedContactId);
 
                 return ReturnData(result);
 
