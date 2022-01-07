@@ -31,7 +31,6 @@ namespace StockDealService
         }
 
         public IConfiguration Configuration { get; }
-        private const string _policyName = "Policy";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -127,7 +126,6 @@ namespace StockDealService
                         var accessToken = context.Request.Query["access_token"];
 
                         // If the request is for our hub...
-                        var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             // Read the token out of the query string
