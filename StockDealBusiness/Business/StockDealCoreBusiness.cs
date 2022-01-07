@@ -23,12 +23,20 @@ namespace StockDealBusiness.Business
                 .Where(e => e.CreatedDate <= nextPage)
                 .Where(e => e.Type != (int)TypeStockDealDetail.WaitingForResponse || loginedContactId == e.CreatedBy)
                 .OrderByDescending(e => e.CreatedDate)
-                .Take(perPage).ToListAsync();
+                .Take(perPage+1).ToListAsync();
+
+            var nextPageNew = list.Take(perPage).LastOrDefault()?.CreatedDate?.AddMilliseconds(-1);
+
+            if (list.Count <= perPage)
+            {
+                nextPageNew = null;
+            }
 
             return SuccessResponse(new
             {
-                nextPage = list.LastOrDefault()?.CreatedDate?.AddMilliseconds(-1),
-                List = list
+                IsLastPage = nextPageNew == null,
+                NextPage = nextPageNew,
+                List = list.Take(perPage)
             });
         }
 
