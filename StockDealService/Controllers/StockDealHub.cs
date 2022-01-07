@@ -242,6 +242,9 @@ namespace StockDealService.Controllers
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
+                // đánh dấu đã đọc tin nhắn
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);
+
                 return base.OnConnectedAsync();
 
             } catch (Exception e)

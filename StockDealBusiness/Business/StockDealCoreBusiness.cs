@@ -146,6 +146,8 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateStockDealAsync(CreateStockDealDto input)
         {
+            if (input.SenderId == input.ReceiverId) return BadRequestResponse("receiverId_ERR_DUPLICATE");
+
             var receiverInfo = await CallEventBus.GetStockHolderDetail(input.ReceiverId.Value);
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
             else input.ReceiverName = receiverInfo.FullName;
