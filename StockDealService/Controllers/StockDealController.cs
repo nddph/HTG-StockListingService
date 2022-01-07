@@ -35,7 +35,7 @@ namespace StockDealService.Controllers
         /// <param name="perPage"></param>
         /// <returns></returns>
         [HttpGet("v1/ListStockDealDetailByTime")]
-        public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextPage, int perPage = 20)
+        public async Task<ObjectResult> ListStockDealDetailByTimeAsync([Required] Guid? stockDetailId, DateTime? nextPage, [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")] int perPage = 20)
         {
             try
             {
