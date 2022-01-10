@@ -25,17 +25,17 @@ namespace StockDealBusiness.Business
                 .OrderByDescending(e => e.CreatedDate)
                 .Take(perPage+1).ToListAsync();
 
-            var nextPageNew = list.Take(perPage).LastOrDefault()?.CreatedDate?.AddMilliseconds(-1);
+            var nextQueryTimeNew = list.Take(perPage).LastOrDefault()?.CreatedDate?.AddMilliseconds(-1);
 
             if (list.Count <= perPage)
             {
-                nextPageNew = null;
+                nextQueryTimeNew = null;
             }
 
             return SuccessResponse(new
             {
-                IsLastPage = nextPageNew == null,
-                NextPage = nextPageNew,
+                IsLastPage = nextQueryTimeNew == null,
+                NextQueryTime = nextQueryTimeNew,
                 List = list.Take(perPage)
             });
         }
