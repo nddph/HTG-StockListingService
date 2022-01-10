@@ -135,7 +135,10 @@ namespace StockDealBusiness.Business
 
 
             var context = new StockDealServiceContext();
-            var ticket = await context.SaleTickets.FindAsync(saleTicketDto.Id);
+            var ticket = await context.SaleTickets
+                .Where(e => e.CreatedBy == loginContactId)
+                .Where(e => e.Id == saleTicketDto.Id.Value)
+                .FirstOrDefaultAsync();
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
@@ -161,7 +164,10 @@ namespace StockDealBusiness.Business
         public async Task<BaseResponse> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
             var context = new StockDealServiceContext();
-            var ticket = await context.BuyTickets.FindAsync(buyTicketDto.Id);
+            var ticket = await context.BuyTickets
+                .Where(e => e.CreatedBy == loginContactId)
+                .Where(e => e.Id == buyTicketDto.Id.Value)
+                .FirstOrDefaultAsync();
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
