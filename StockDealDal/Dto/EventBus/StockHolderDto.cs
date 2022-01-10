@@ -9,7 +9,6 @@ namespace StockDealDal.Dto.EventBus
     public class StockHolderDto
     {
         public Guid Id { get; set; }
-        public string Code { get; set; }
         public string EmployeeCode { get; set; }
         public string FullName { get; set; }
         public DateTime? DOB { get; set; }
