@@ -130,7 +130,7 @@ namespace StockDealService.Controllers
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
                 // gửi tin nhắn
-                var data = await _chatHubBusiness.GetStockDetailAsync((Guid)stockDetail.Data);
+                var data = await _chatHubBusiness.GetStockDetailAsync(Guid.Parse(stockDetail.Data.ToString()));
 
                 if (data.Type == (int)TypeStockDealDetail.WaitingForResponse)
                 {
@@ -238,12 +238,18 @@ namespace StockDealService.Controllers
                     return Task.CompletedTask;
                 }
 
-                _userOnlineDeal.TryAdd(userId, stockDealId);
+                if (_userOnlineDeal.TryAdd(userId, stockDealId))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
-                await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
-
-                // đánh dấu đã đọc tin nhắn
-                await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);
+                    // đánh dấu đã đọc tin nhắn
+                    await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);
+                } else
+                {
+                    _logger.LogError($"fail add user to deal");
+                    Context.Abort();
+                    return Task.CompletedTask;
+                }    
 
                 return base.OnConnectedAsync();
 

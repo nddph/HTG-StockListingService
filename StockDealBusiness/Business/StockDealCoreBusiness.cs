@@ -179,11 +179,6 @@ namespace StockDealBusiness.Business
                 await context.SaveChangesAsync();
             }
 
-            if (input.StockDetail != null)
-            {
-                await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
-            }
-
             await transaction.CommitAsync();
 
             return SuccessResponse(stockDeal.Id);
@@ -325,7 +320,7 @@ namespace StockDealBusiness.Business
             {
                 Id = Guid.NewGuid(),
                 StockDealId = stockDealId,
-                CreatedBy = senderId
+                CreatedBy = senderId,
             };
 
             var stockDetailDb = context.Add(stockDetail);
