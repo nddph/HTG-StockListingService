@@ -179,11 +179,6 @@ namespace StockDealBusiness.Business
                 await context.SaveChangesAsync();
             }
 
-            if (input.StockDetail != null)
-            {
-                await CreateStockDealDetailAsync(stockDeal.Id, input.SenderId.Value, input.StockDetail);
-            }
-
             await transaction.CommitAsync();
 
             return SuccessResponse(stockDeal.Id);
@@ -224,7 +219,8 @@ namespace StockDealBusiness.Business
                     Quantity = e.TicketQuantity,
                     StockTypeName = e.TicketStockTypeName,
                     StockCode = e.TicketStockCode,
-                    StockCodes = e.TicketStockCodes
+                    StockCodes = e.TicketStockCodes,
+                    DeletedDate = e.TicketDeletedDate
                 },
                 LastDealDetail = new()
                 {
@@ -309,11 +305,22 @@ namespace StockDealBusiness.Business
         {
             var context = new StockDealServiceContext();
 
+            var stockDeal = await context.StockDeals
+                .Include(e => e.Ticket)
+                .Where(e => e.Id == stockDealId)
+                .Where(e => e.TicketId.HasValue)
+                .FirstOrDefaultAsync();
+
+            if (stockDeal != null && stockDeal.Ticket.DeletedDate.HasValue)
+            {
+                return BadRequestResponse("ticketId_ERR_INACTIVE");
+            }
+
             var stockDetail = new StockDealDetail()
             {
                 Id = Guid.NewGuid(),
                 StockDealId = stockDealId,
-                CreatedBy = senderId
+                CreatedBy = senderId,
             };
 
             var stockDetailDb = context.Add(stockDetail);

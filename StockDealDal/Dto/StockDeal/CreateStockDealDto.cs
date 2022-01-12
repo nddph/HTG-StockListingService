@@ -20,7 +20,5 @@ namespace StockDealDal.Dto.StockDeal
 
         public Guid? TicketId { get; set; }
 
-        public CreateStockDetailDto StockDetail { get; set; }
-
     }
 }

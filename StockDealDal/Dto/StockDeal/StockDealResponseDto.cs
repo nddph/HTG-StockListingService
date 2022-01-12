@@ -67,5 +67,6 @@ namespace StockDealDal.Dto.StockDeal
         // buy ticket
         public string StockCodes { get; set; }
 
+        public DateTime? DeletedDate { get; set; }
     }
 }
