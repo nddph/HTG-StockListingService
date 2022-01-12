@@ -224,7 +224,8 @@ namespace StockDealBusiness.Business
                     Quantity = e.TicketQuantity,
                     StockTypeName = e.TicketStockTypeName,
                     StockCode = e.TicketStockCode,
-                    StockCodes = e.TicketStockCodes
+                    StockCodes = e.TicketStockCodes,
+                    DeletedDate = e.TicketDeletedDate
                 },
                 LastDealDetail = new()
                 {
@@ -308,6 +309,17 @@ namespace StockDealBusiness.Business
         public async Task<BaseResponse> CreateStockDealDetailAsync(Guid stockDealId, Guid senderId, CreateStockDetailDto input)
         {
             var context = new StockDealServiceContext();
+
+            var stockDeal = await context.StockDeals
+                .Include(e => e.Ticket)
+                .Where(e => e.Id == stockDealId)
+                .Where(e => e.TicketId.HasValue)
+                .FirstOrDefaultAsync();
+
+            if (stockDeal != null && stockDeal.Ticket.DeletedDate.HasValue)
+            {
+                return BadRequestResponse("ticketId_ERR_INACTIVE");
+            }
 
             var stockDetail = new StockDealDetail()
             {
