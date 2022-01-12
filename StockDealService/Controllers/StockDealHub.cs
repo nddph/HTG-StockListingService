@@ -238,18 +238,12 @@ namespace StockDealService.Controllers
                     return Task.CompletedTask;
                 }
 
-                if (_userOnlineDeal.TryAdd(userId, stockDealId))
-                {
-                    await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
+                _userOnlineDeal.TryAdd(userId, stockDealId);
 
-                    // đánh dấu đã đọc tin nhắn
-                    await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);
-                } else
-                {
-                    _logger.LogError($"fail add user to deal");
-                    Context.Abort();
-                    return Task.CompletedTask;
-                }    
+                await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
+
+                // đánh dấu đã đọc tin nhắn
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);  
 
                 return base.OnConnectedAsync();
 
