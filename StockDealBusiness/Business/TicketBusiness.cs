@@ -241,15 +241,16 @@ namespace StockDealBusiness.Business
         {
             var context = new StockDealServiceContext();
 
-            var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
-                        @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @priceFrom = {4}, @priceTo = {5},
-                        @quantityFrom = {6}, @quantityTo = {7}, @orderBy = {8},
-                        @expTicketStatus = {9}, @includeDelTicket = {10},
-                        @currentPage = {11}, @pageSize = {12}",
+            var sql = string.Format(@"EXECUTE [GetListTickets_test] @ticketType = {0},
+                        @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @byUserType = '{4}', @priceFrom = {5}, @priceTo = {6},
+                        @quantityFrom = {7}, @quantityTo = {8}, @orderBy = {9},
+                        @expTicketStatus = {10}, @includeDelTicket = {11},
+                        @currentPage = {12}, @pageSize = {13}",
                         listTicketDto.TicketType,
                         listTicketDto.StockCode.Count == 0 ? "" : string.Join(",", listTicketDto.StockCode),
                         listTicketDto.Status,
-                        listTicketDto.IsUser ? loginContactId : Guid.Empty,
+                        loginContactId,
+                        listTicketDto.byUserType,
                         listTicketDto.PriceFrom, listTicketDto.PriceTo,
                         listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
                         listTicketDto.byNewer ? 1 : 0,

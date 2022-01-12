@@ -35,9 +35,12 @@ namespace StockDealDal.Dto.Ticket
         public List<string> StockCode { get; set; } = new();
 
         /// <summary>
-        /// lọc tin được đăng bởi người request
+        /// lọc tin theo người đăng
+        /// 0: tất cả tin
+        /// 1: tin được đăng bởi người request
+        /// 2: tin không được đăng bởi người request
         /// </summary>
-        public bool IsUser { get; set; } = false;
+        public int byUserType { get; set; } = 0;
 
         [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal PriceFrom { get; set; } = -1;
@@ -60,8 +63,8 @@ namespace StockDealDal.Dto.Ticket
         public int ExpTicketStatus { get; set; } = -1;
 
         /// <summary>
-        /// 1: Bao gồm ticket đã xóa
-        /// 0: không bao gồm ticket đã xóa
+        /// true: Bao gồm ticket đã xóa
+        /// false: không bao gồm ticket đã xóa
         /// </summary>
         public bool IncludeDelTicket { get; set; } = false;
 
