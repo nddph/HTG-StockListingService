@@ -30,8 +30,15 @@ namespace StockDealDal.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-            {
+            { 
                 optionsBuilder.UseSqlServer(GetSessionByName("StockDealConn", "ConnectionStrings"));
+
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    optionsBuilder.EnableSensitiveDataLogging();
+                    optionsBuilder.LogTo(Console.WriteLine);
+                    optionsBuilder.EnableDetailedErrors();
+                }
             }
         }
 
