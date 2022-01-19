@@ -185,7 +185,7 @@ namespace StockDealService.Controllers
                             SenderName = group.ReceiverName,
                             ReceiverId = group.SenderId,
                             ReceiverName = group.SenderName,
-                            StockCodes = group.Ticket.Code,
+                            StockCodes = group.Ticket?.Code,
                             StockDealId = group.Id
                         };
                     }
@@ -238,12 +238,15 @@ namespace StockDealService.Controllers
                     return Task.CompletedTask;
                 }
 
+                _logger.LogInformation($"connected {Context.ConnectionId} _ {stockDealId}");
+
                 _userOnlineDeal.TryAdd(userId, stockDealId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
                 // đánh dấu đã đọc tin nhắn
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(stockDealId, LoginedContactId);  
+
 
                 return base.OnConnectedAsync();
 
