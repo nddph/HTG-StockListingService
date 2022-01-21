@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
+using StockDealBusiness.RequestDB;
 using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
@@ -15,6 +16,20 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+        /// <summary>
+        /// thay đổi trạng thái tin mua bán
+        /// </summary>
+        /// <param name="changeStatusTicket"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> ChangeTicketStatusAsync(ChangeStatusTicketDto changeStatusTicket, Guid userId)
+        {
+            await TicketDB.UpdateTicketStatusAsync(changeStatusTicket.IsAll.Value, changeStatusTicket.Status.Value, userId, changeStatusTicket.ListTicket);
+            return SuccessResponse();
+        }
+
+
+
         /// <summary>
         /// số ngày tin đăng đc hiển thị từ systemsetting
         /// </summary>
