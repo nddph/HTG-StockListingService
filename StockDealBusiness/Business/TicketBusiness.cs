@@ -17,6 +17,20 @@ namespace StockDealBusiness.Business
     public class TicketBusiness : BaseBusiness
     {
         /// <summary>
+        /// Xóa nhiều tin mua bán hoặc tất cả bằng storeproduce
+        /// </summary>
+        /// <param name="deleteTicketsDto"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto, Guid userId)
+        {
+            await TicketDB.DeleteTickets(deleteTicketsDto.IsAll.GetValueOrDefault(), userId, deleteTicketsDto.ListTicket);
+            return SuccessResponse();
+        }
+
+
+
+        /// <summary>
         /// thay đổi trạng thái tin mua bán
         /// </summary>
         /// <param name="changeStatusTicket"></param>
@@ -24,7 +38,7 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> ChangeTicketStatusAsync(ChangeStatusTicketDto changeStatusTicket, Guid userId)
         {
-            await TicketDB.UpdateTicketStatusAsync(changeStatusTicket.IsAll.Value, changeStatusTicket.Status.Value, userId, changeStatusTicket.ListTicket);
+            await TicketDB.UpdateTicketStatusAsync(changeStatusTicket.IsAll.GetValueOrDefault(), changeStatusTicket.Status.GetValueOrDefault(), userId, changeStatusTicket.ListTicket);
             return SuccessResponse();
         }
 
