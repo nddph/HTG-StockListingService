@@ -256,23 +256,28 @@ namespace StockDealBusiness.Business
         {
             var context = new StockDealServiceContext();
 
-            var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
-                        @stockCodes = '{1}', @status = {2}, @ownerId = '{3}', @byUserType = '{4}', @priceFrom = {5}, @priceTo = {6},
-                        @quantityFrom = {7}, @quantityTo = {8}, @orderBy = {9},
+            var sql = string.Format(@"EXECUTE [GetListTickets_test] @ticketType = {0},
+                        @stockCodes = N'{1}', @status = {2}, @ownerId = '{3}', @byUserType = {4}, @priceFrom = {5}, @priceTo = {6},
+                        @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @includeDelTicket = {11},
-                        @currentPage = {12}, @pageSize = {13}",
+                        @currentPage = {12}, @pageSize = {13}, @hiddenTicketStatus = {14}, @searchText = N'{15}', @orderByPriceType = {16},
+                        @stockTypeIds = N'{17}'",
                         listTicketDto.TicketType,
-                        listTicketDto.StockCode.Count == 0 ? "" : string.Join(",", listTicketDto.StockCode),
+                        string.Join(",", listTicketDto.StockCodes),
                         listTicketDto.Status,
                         loginContactId,
-                        listTicketDto.byUserType,
+                        listTicketDto.ByUserType,
                         listTicketDto.PriceFrom, listTicketDto.PriceTo,
                         listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
                         listTicketDto.byNewer ? 1 : 0,
                         listTicketDto.ExpTicketStatus,
                         listTicketDto.IncludeDelTicket ? 1 : 0,
                         listTicketDto.CurrentPage,
-                        listTicketDto.PerPage
+                        listTicketDto.PerPage,
+                        listTicketDto.HiddenTicketStatus,
+                        (listTicketDto.searchText ?? "").Trim(),
+                        listTicketDto.OrderByPriceType,
+                        string.Join(",", listTicketDto.StockTypeIds)
                         );
 
 

@@ -10,9 +10,15 @@ namespace StockDealDal.Dto.Ticket
     public class TicketSearchCriteria
     {
         /// <summary>
+        /// tìm kiếm theo tiêu đề, mã cổ phiếu, loại cổ phiếu
+        /// </summary>
+        public string searchText { get; set; }
+
+
+        /// <summary>
         /// sắp sếp theo tin đăng mới nhất hoặc cổ phiếu quan tâm
-        /// 1: theo mới nhất
-        /// 0: theo cổ phiếu quan tâm
+        /// true: theo mới nhất
+        /// false: theo cổ phiếu quan tâm
         /// </summary>
         public bool byNewer { get; set; } = true;
 
@@ -27,12 +33,18 @@ namespace StockDealDal.Dto.Ticket
         /// <summary>
         /// lọc theo status
         /// </summary>
+        [Range(-1, 1, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Status { get; set; } = -1;
 
         /// <summary>
         /// lọc theo danh sách mã cổ phiếu
         /// </summary>
-        public List<string> StockCode { get; set; } = new();
+        public List<string> StockCodes { get; set; } = new();
+
+        /// <summary>
+        /// lọc theo danh sách loại cổ phiếu
+        /// </summary>
+        public List<string> StockTypeIds { get; set; } = new();
 
         /// <summary>
         /// lọc tin theo người đăng
@@ -40,7 +52,7 @@ namespace StockDealDal.Dto.Ticket
         /// 1: tin được đăng bởi người request
         /// 2: tin không được đăng bởi người request
         /// </summary>
-        public int byUserType { get; set; } = 0;
+        public int ByUserType { get; set; } = 0;
 
         [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal PriceFrom { get; set; } = -1;
@@ -67,6 +79,23 @@ namespace StockDealDal.Dto.Ticket
         /// false: không bao gồm ticket đã xóa
         /// </summary>
         public bool IncludeDelTicket { get; set; } = false;
+
+        /// <summary>
+        /// 0: tất cả tin
+        /// 1: tin bị ẩn (tin bị xóa, status = 0, số lượng cổ phiếu khả dụng không đủ)
+        /// 2: tin không bị ẩn
+        /// </summary>
+        [Range(0, 2, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int HiddenTicketStatus { get; set; } = 2;
+
+        /// <summary>
+        /// 0: không lọc, sắp sếp theo thời gian mới nhất
+        /// 1: lọc và sắp sếp theo giá thấp nhất
+        /// 2: lọc và sắp sếp theo giá cao nhất
+        /// 3: lọc và sắp sếp theo thương lượng
+        /// </summary>
+        [Range(0, 3, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int OrderByPriceType { get; set; } = 0;
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int CurrentPage { get; set; } = 1;
