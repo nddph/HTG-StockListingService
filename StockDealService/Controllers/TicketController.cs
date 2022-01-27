@@ -27,7 +27,30 @@ namespace StockDealService.Controllers
 
 
         /// <summary>
-        /// 
+        /// Xóa nhiều tin mua bán cùng lúc
+        /// </summary>
+        /// <param name="deleteTicketsDto"></param>
+        /// <returns></returns>
+        [HttpPost("v1/DeleteTickets")]
+        public async Task<ObjectResult> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto)
+        {
+            try
+            {
+                var result = await _ticketBusiness.DeleteTicketsAsync(deleteTicketsDto, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
+        /// cập nhật trạng thái nhiều ticket cùng lúc
         /// </summary>
         /// <param name="changeStatusTicket"></param>
         /// <returns></returns>
