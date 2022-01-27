@@ -35,5 +35,7 @@ namespace StockDealBusiness.EventBus
         public static readonly string Publisher_GetStockTypeDetailById = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockTypeDetail.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockAvailableQty = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockAvailableQty.{REQUEST_METHOD}";
         public static readonly string Publisher_SendDealNofify = $"{CURRENT_SERVICE}.{SERVICE_NOTIFY}.SendDealNofify.{REQUEST_METHOD}";
+        public static readonly string Publisher_NotificationExpiredTicket = $"{CURRENT_SERVICE}.{SERVICE_NOTIFY}.NotificationExpiredTicket.{REQUEST_METHOD}";
+        public static readonly string Publisher_NotificationSuggestTicket = $"{CURRENT_SERVICE}.{SERVICE_NOTIFY}.NotificationSuggestTicket.{REQUEST_METHOD}";
     }
 }
