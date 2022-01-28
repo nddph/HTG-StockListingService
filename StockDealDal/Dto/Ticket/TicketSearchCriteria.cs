@@ -48,11 +48,11 @@ namespace StockDealDal.Dto.Ticket
 
         /// <summary>
         /// lọc tin theo người đăng
-        /// 0: tất cả tin
+        /// -1: tất cả tin
         /// 1: tin được đăng bởi người request
         /// 2: tin không được đăng bởi người request
         /// </summary>
-        public int ByUserType { get; set; } = 0;
+        public int ByUserType { get; set; } = -1;
 
         [Range(-1, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal PriceFrom { get; set; } = -1;
@@ -75,18 +75,20 @@ namespace StockDealDal.Dto.Ticket
         public int ExpTicketStatus { get; set; } = -1;
 
         /// <summary>
-        /// true: Bao gồm ticket đã xóa
-        /// false: không bao gồm ticket đã xóa
+        /// -1: tất cả tin
+        /// 1: lấy tin chưa xóa
+        /// 2: lấy tin đã xóa
         /// </summary>
-        public bool IncludeDelTicket { get; set; } = false;
+        [Range(-1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int DelTicketStatus { get; set; } = 1;
 
         /// <summary>
-        /// 0: tất cả tin
-        /// 1: tin bị ẩn (tin bị xóa, status = 0, số lượng cổ phiếu khả dụng không đủ)
-        /// 2: tin không bị ẩn
+        /// -1: tất cả tin
+        /// 1: tin có số lượng cổ phiếu khả dụng không đủ để bán
+        /// 2: tin có số lượng cổ phiếu khả dụng đủ để bán
         /// </summary>
-        [Range(0, 2, ErrorMessage = "ERR_INVALID_VALUE")]
-        public int HiddenTicketStatus { get; set; } = 2;
+        [Range(-1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
+        public int quantityStatus { get; set; } = 2;
 
         /// <summary>
         /// 0: không lọc, sắp sếp theo thời gian mới nhất
