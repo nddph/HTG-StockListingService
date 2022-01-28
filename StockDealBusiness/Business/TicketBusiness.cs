@@ -270,7 +270,7 @@ namespace StockDealBusiness.Business
         {
             var context = new StockDealServiceContext();
 
-            var sql = string.Format(@"EXECUTE [GetListTickets_test] @ticketType = {0},
+            var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
                         @stockCodes = N'{1}', @status = {2}, @ownerId = '{3}', @byUserType = {4}, @priceFrom = {5}, @priceTo = {6},
                         @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @delTicketStatus = {11},
