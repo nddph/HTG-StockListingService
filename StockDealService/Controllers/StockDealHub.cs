@@ -9,6 +9,7 @@ using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
+using StockDealDal.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -153,6 +154,12 @@ namespace StockDealService.Controllers
 
                 var group = await _chatHubBusiness.GetStockDealAsync(groupId);
 
+                var stockCodes = "";
+                if (group.Ticket != null) stockCodes = group.Ticket is SaleTicket ? (group.Ticket as SaleTicket).StockCode : (group.Ticket as BuyTicket).StockCodes;
+
+                var ticketType = 0;
+                if (group.Ticket != null) ticketType = group.Ticket is BuyTicket ? 1 : 2;
+
                 Guid groupIdReceiverOnline;
 
                 if (userId == group.SenderId)
@@ -167,8 +174,9 @@ namespace StockDealService.Controllers
                             SenderName = group.SenderName,
                             ReceiverId = group.ReceiverId,
                             ReceiverName = group.ReceiverName,
-                            StockCodes = group.Ticket?.Code,
-                            StockDealId = group.Id
+                            StockCodes = stockCodes,
+                            StockDealId = group.Id,
+                            TicketType = ticketType
                         };
                     }
 
