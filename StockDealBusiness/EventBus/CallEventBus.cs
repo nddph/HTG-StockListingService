@@ -12,17 +12,52 @@ namespace StockDealBusiness.EventBus
     public static class CallEventBus
     {
         /// <summary>
+        /// Gửi thông báo đề xuất tin đăng phù hợp
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="isReply"></param>
+        /// <returns></returns>
+        public static async Task<BaseResponse> NotificationSuggestTicketAsync(Guid userId, bool isReply = false)
+        {
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationSuggestTicket,
+                        JsonConvert.SerializeObject(userId), ConstEventBus.EXCHANGE_NOTIFY, isReply);
+
+            var resData = ReturnData(res, isReply);
+
+            return resData;
+        }
+
+
+
+        /// <summary>
+        /// Gửi thông báo cho user về tin hết hạn
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="isReply"></param>
+        /// <returns></returns>
+        public static async Task<BaseResponse> NotificationExpiredTicketAsync(Guid userId, bool isReply = false)
+        {
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationExpiredTicket,
+                        JsonConvert.SerializeObject(userId), ConstEventBus.EXCHANGE_NOTIFY, isReply);
+
+            var resData = ReturnData(res, isReply);
+
+            return resData;
+        }
+
+
+        /// <summary>
         /// gửi thông báo thương lượng
         /// </summary>
         /// <param name="dealNofifyDto"></param>
         /// <returns></returns>
-        public static async Task<BaseResponse> SendDealNofify(SendDealNofifyDto dealNofifyDto)
+        public static async Task<BaseResponse> SendDealNofify(SendDealNofifyDto dealNofifyDto, bool isReply = false)
         {
 
             var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_SendDealNofify,
-                        JsonConvert.SerializeObject(dealNofifyDto), ConstEventBus.EXCHANGE_NOTIFY, false);
+                        JsonConvert.SerializeObject(dealNofifyDto), ConstEventBus.EXCHANGE_NOTIFY, isReply);
 
-            var resData = ReturnData(res, false);
+            var resData = ReturnData(res, isReply);
 
             return resData;
         }
@@ -36,7 +71,7 @@ namespace StockDealBusiness.EventBus
         /// <param name="stockId"></param>
         /// <param name="stockTypeId"></param>
         /// <returns></returns>
-        public static async Task<int> GetStockHolderLimitAsync(Guid stockHolderId, Guid stockId, Guid stockTypeId)
+        public static async Task<int> GetStockHolderLimitAsync(Guid stockHolderId, Guid stockId, Guid stockTypeId, bool isReply = true)
         {
             var request = new GetStockQuantityRequest
             {
@@ -46,9 +81,9 @@ namespace StockDealBusiness.EventBus
             };
 
             var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_GetStockAvailableQty,
-                        JsonConvert.SerializeObject(request), ConstEventBus.EXCHANGE_STOCKTRANS, true);
+                        JsonConvert.SerializeObject(request), ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
 
-            var resData = ReturnData(res, true);
+            var resData = ReturnData(res, isReply);
             if (resData.StatusCode != 200) return 0;
 
             return int.Parse(resData.Data.ToString());
