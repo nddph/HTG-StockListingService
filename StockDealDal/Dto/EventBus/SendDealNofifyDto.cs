@@ -14,5 +14,6 @@ namespace StockDealDal.Dto.EventBus
         public string ReceiverName { get; set; }
         public Guid StockDealId { get; set; }
         public string StockCodes { get; set; }
+        public int TicketType { get; set; }
     }
 }
