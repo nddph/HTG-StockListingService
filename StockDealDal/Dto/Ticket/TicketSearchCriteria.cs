@@ -12,7 +12,7 @@ namespace StockDealDal.Dto.Ticket
         /// <summary>
         /// tìm kiếm theo tiêu đề, mã cổ phiếu, loại cổ phiếu
         /// </summary>
-        public string searchText { get; set; }
+        public string SearchText { get; set; }
 
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace StockDealDal.Dto.Ticket
         /// true: theo mới nhất
         /// false: theo cổ phiếu quan tâm
         /// </summary>
-        public bool byNewer { get; set; } = true;
+        public bool ByNewer { get; set; } = true;
 
         /// <summary>
         /// lọc theo loại tin mua/bán
@@ -88,7 +88,7 @@ namespace StockDealDal.Dto.Ticket
         /// 2: tin có số lượng cổ phiếu khả dụng đủ để bán
         /// </summary>
         [Range(-1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
-        public int quantityStatus { get; set; } = 2;
+        public int QuantityStatus { get; set; } = 2;
 
         /// <summary>
         /// 0: không lọc, sắp sếp theo thời gian mới nhất
@@ -104,7 +104,8 @@ namespace StockDealDal.Dto.Ticket
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int PerPage { get; set; } = 20;
-        
+
+        public bool IsPaging { get; set; } = true;
     }
 
     public enum TicketType
