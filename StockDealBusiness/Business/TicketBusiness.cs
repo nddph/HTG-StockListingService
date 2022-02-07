@@ -2,6 +2,7 @@
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
 using StockDealDal.Dto;
+using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
@@ -100,6 +101,31 @@ namespace StockDealBusiness.Business
 
             await context.SaveChangesAsync();
 
+            #region gửi thông báo có tin đăng liên quan
+            TicketSearchCriteria ticketSearch = new()
+            {
+                IsPaging = false,
+                ByUserType = 2,
+                ByNewer = true,
+                TicketType = 1,
+                DelTicketStatus = 1,
+                ExpTicketStatus = 1,
+                QuantityStatus = 2,
+                StockCodes = new List<string>() { saleTicketDto.StockCode }
+            };
+            var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
+            if (listUserRes.StatusCode != 200) return listUserRes;
+            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewBuyTickets>;
+
+            SuggestTicketDto suggestTicketDto = new()
+            {
+                UserId = loginContactId,
+                TicketId = ticket.Entity.Id,
+                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
+            };
+            await EventBus.CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+            #endregion
+
             return SuccessResponse(data: ticket.Entity.Id);
         }
 
@@ -135,6 +161,31 @@ namespace StockDealBusiness.Business
             ticket.CurrentValues.SetValues(buyTicketDto);
 
             await context.SaveChangesAsync();
+
+            #region gửi thông báo có tin đăng liên quan
+            TicketSearchCriteria ticketSearch = new()
+            {
+                IsPaging = false,
+                ByUserType = 2,
+                ByNewer = true,
+                TicketType = 2,
+                DelTicketStatus = 1,
+                ExpTicketStatus = 1,
+                QuantityStatus = 2,
+                StockCodes = buyTicketDto.StockCode
+            };
+            var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
+            if (listUserRes.StatusCode != 200) return listUserRes;
+            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewSaleTickets>;
+
+            SuggestTicketDto suggestTicketDto = new()
+            {
+                UserId = loginContactId,
+                TicketId = ticket.Entity.Id,
+                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
+            };
+            await EventBus.CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+            #endregion
 
             return SuccessResponse(data: ticket.Entity.Id);
         }
@@ -283,13 +334,13 @@ namespace StockDealBusiness.Business
                         listTicketDto.ByUserType,
                         listTicketDto.PriceFrom, listTicketDto.PriceTo,
                         listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
-                        listTicketDto.byNewer ? 1 : 0,
+                        listTicketDto.ByNewer ? 1 : 0,
                         listTicketDto.ExpTicketStatus,
                         listTicketDto.DelTicketStatus,
                         listTicketDto.CurrentPage,
                         listTicketDto.PerPage,
-                        listTicketDto.quantityStatus,
-                        (listTicketDto.searchText ?? "").Trim(),
+                        listTicketDto.QuantityStatus,
+                        (listTicketDto.SearchText ?? "").Trim(),
                         listTicketDto.OrderByPriceType,
                         string.Join(",", listTicketDto.StockTypeIds),
                         listTicketDto.IsPaging ? 1 : 0

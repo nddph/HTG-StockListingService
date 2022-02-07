@@ -14,13 +14,13 @@ namespace StockDealBusiness.EventBus
         /// <summary>
         /// Gửi thông báo đề xuất tin đăng phù hợp
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="suggestTicketDto"></param>
         /// <param name="isReply"></param>
         /// <returns></returns>
-        public static async Task<BaseResponse> NotificationSuggestTicketAsync(Guid userId, bool isReply = false)
+        public static async Task<BaseResponse> NotificationSuggestTicketAsync(SuggestTicketDto suggestTicketDto, bool isReply = false)
         {
             var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationSuggestTicket,
-                        JsonConvert.SerializeObject(userId), ConstEventBus.EXCHANGE_NOTIFY, isReply);
+                        JsonConvert.SerializeObject(suggestTicketDto), ConstEventBus.EXCHANGE_NOTIFY, isReply);
 
             var resData = ReturnData(res, isReply);
 
