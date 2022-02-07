@@ -193,7 +193,7 @@ namespace StockDealService.Controllers
                             SenderName = group.ReceiverName,
                             ReceiverId = group.SenderId,
                             ReceiverName = group.SenderName,
-                            StockCodes = group.Ticket?.Code,
+                            StockCodes = stockCodes,
                             StockDealId = group.Id
                         };
                     }
