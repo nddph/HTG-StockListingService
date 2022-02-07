@@ -275,7 +275,7 @@ namespace StockDealBusiness.Business
                         @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @delTicketStatus = {11},
                         @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', @orderByPriceType = {16},
-                        @stockTypeIds = N'{17}'",
+                        @stockTypeIds = N'{17}', @isPaging = {18}",
                         listTicketDto.TicketType,
                         string.Join(",", listTicketDto.StockCodes),
                         listTicketDto.Status,
@@ -291,13 +291,13 @@ namespace StockDealBusiness.Business
                         listTicketDto.quantityStatus,
                         (listTicketDto.searchText ?? "").Trim(),
                         listTicketDto.OrderByPriceType,
-                        string.Join(",", listTicketDto.StockTypeIds)
+                        string.Join(",", listTicketDto.StockTypeIds),
+                        listTicketDto.IsPaging ? 1 : 0
                         );
 
 
             PaginateDto paginate = new();
-            paginate.CurrentPage = listTicketDto.CurrentPage;
-            paginate.PerPage = listTicketDto.PerPage;
+            
 
             if (listTicketDto.TicketType == (int)TicketType.Buy)
             {
@@ -313,6 +313,10 @@ namespace StockDealBusiness.Business
                 paginate.TotalItems = query.Count == 0 ? 0 : query.FirstOrDefault().TotalCount;
                 paginate.Data = query;
             }
+
+            paginate.CurrentPage = listTicketDto.IsPaging ? listTicketDto.CurrentPage : 1;
+            paginate.PerPage = listTicketDto.IsPaging ? listTicketDto.PerPage : paginate.TotalItems;
+
 
             return SuccessResponse(data: paginate);
         }

@@ -104,7 +104,8 @@ namespace StockDealDal.Dto.Ticket
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int PerPage { get; set; } = 20;
-        
+
+        public bool IsPaging { get; set; } = true;
     }
 
     public enum TicketType
