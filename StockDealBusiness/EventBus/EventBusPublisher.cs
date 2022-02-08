@@ -6,7 +6,6 @@ using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,20 +23,36 @@ namespace StockDealBusiness.EventBus
     {
         private readonly ILogger _logger;
 
-        private static IConnection _connection;
-        private static IModel _channel;
+        private static readonly IConnection _connection = InitializeConnection();
+        private static readonly IModel _channel = InitializeChannel();
 
         private string consumerTag;
         private string currentQueue;
         private string currentRouting;
 
-        private static ConcurrentDictionary<string, TaskCompletionSource<string>> pendingMessageQueues = new();
+        private static readonly ConcurrentDictionary<string, TaskCompletionSource<string>> pendingMessageQueues = new();
 
 #if DEBUG
         private const bool _autoDelete = true;
 #else
         private const bool _autoDelete = false;
 #endif
+
+
+        static IConnection InitializeConnection()
+        {
+            var connectionFactory = new ConnectionFactory() { DispatchConsumersAsync = true };
+            ConstEventBus._configuration.GetSection("EventBusConnection").Bind(connectionFactory);
+            return connectionFactory.CreateConnection();
+        }
+
+
+        static IModel InitializeChannel()
+        {
+            return _connection.CreateModel();
+        }
+
+
 
         public EventBusPublisher()
         {
@@ -56,8 +71,7 @@ namespace StockDealBusiness.EventBus
                 var response = Encoding.UTF8.GetString(body);
 
                 var correlationId = props.CorrelationId;
-                TaskCompletionSource<string> pendingMessage = null;
-                pendingMessageQueues.TryGetValue(correlationId, out pendingMessage);
+                pendingMessageQueues.TryGetValue(correlationId, out TaskCompletionSource<string> pendingMessage);
 
                 _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
@@ -92,7 +106,7 @@ namespace StockDealBusiness.EventBus
 
             if (isReply) res = await task.Task;
 
-            pendingMessageQueues.TryRemove(correlationId, out task);
+            pendingMessageQueues.TryRemove(correlationId, out _);
             return res;
         }
 
@@ -137,12 +151,7 @@ namespace StockDealBusiness.EventBus
             var _connectionFactory = new ConnectionFactory() { DispatchConsumersAsync = true };
             ConstEventBus._configuration.GetSection("EventBusConnection").Bind(_connectionFactory);
 
-            pendingMessageQueues = new();
-
             _logger.LogInformation("Publisher StartAsync");
-
-            _connection = _connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
 
             _channel.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
 
