@@ -21,8 +21,8 @@ namespace StockDealBusiness.EventBus
     {
         private readonly ILogger _logger;
 
-        private static IConnection _connection;
-        private static IModel _channel;
+        private static readonly IConnection _connection = InitializeConnection();
+        private static readonly IModel _channel = InitializeChannel();
 
         private string consumerTag = "";
         private string currentQueue;
@@ -33,6 +33,22 @@ namespace StockDealBusiness.EventBus
 #else
         private const bool _autoDelete = false;
 #endif
+
+        static IConnection InitializeConnection()
+        {
+            var connectionFactory = new ConnectionFactory() { DispatchConsumersAsync = true };
+            ConstEventBus._configuration.GetSection("EventBusConnection").Bind(connectionFactory);
+            return connectionFactory.CreateConnection();
+        }
+
+
+
+        static IModel InitializeChannel()
+        {
+            return _connection.CreateModel();
+        }
+
+
 
         public EventBusConsumer()
         {
@@ -113,13 +129,7 @@ namespace StockDealBusiness.EventBus
             currentQueue = $"Q_{ConstEventBus.CURRENT_SERVICE}_{ConstEventBus.REQUEST_METHOD}";
             currentRouting = $"*.{ConstEventBus.CURRENT_SERVICE}.*.{ConstEventBus.REQUEST_METHOD}";
 
-            var connectionFactory = new ConnectionFactory() { DispatchConsumersAsync = true };
-            ConstEventBus._configuration.GetSection("EventBusConnection").Bind(connectionFactory);
-
             _logger.LogInformation("Consumer StartAsync");
-
-            _connection = connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
 
             _channel.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
 
