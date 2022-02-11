@@ -119,7 +119,7 @@ namespace StockDealBusiness.Business
 
             if (stockDeal == null) return NotFoundResponse();
 
-            return SuccessResponse(stockDeal);
+            return SuccessResponse(new StockDealResponseDto(stockDeal));
         }
 
 
@@ -182,42 +182,7 @@ namespace StockDealBusiness.Business
         {
 
             var list = await StockDealDB.ListStockDealAsync(stockDealSearch);
-            var listResult = list.Select(e => new StockDealResponseDto
-            {
-                Id = e.Id,
-                SenderId = e.SenderId,
-                ReceiverId = e.ReceiverId,
-                SenderName = e.SenderName,
-                ReceiverName = e.ReceiverName,
-                ReceiverType = e.ReceiverType,
-                LastUpdate = e.LastUpdate,
-                CountUnread = e.CountUnread,
-                Ticket = new()
-                {
-                    Id = e.TicketId,
-                    Code = e.TicketCode,
-                    TicketType = e.TicketType,
-                    Title = e.TicketTitle,
-                    IsNegotiate = e.TicketIsNegotiate,
-                    PriceFrom = e.TicketPrice,
-                    Quantity = e.TicketQuantity,
-                    StockTypeName = e.TicketStockTypeName,
-                    StockCode = e.TicketStockCode,
-                    StockCodes = e.TicketStockCodes,
-                    DeletedDate = e.TicketDeletedDate
-                },
-                LastDealDetail = new()
-                {
-                    LastStockDetailId = e.LastStockDetailId,
-                    Description = e.Description,
-                    Quantity = e.Quantity,
-                    TotalPrice = e.TotalPrice,
-                    UnitPrice = e.UnitPrice,
-                    IsDeletedDealDetail = e.IsDeletedDealDetail,
-                    IsOnwerLastDealDetail = e.IsOnwerLastDealDetail,
-                    StockDetailType = e.StockDetailType
-                }
-            });
+            var listResult = list.Select(e => new StockDealResponseDto(e));
 
             var paging = new PaginateDto
             {
