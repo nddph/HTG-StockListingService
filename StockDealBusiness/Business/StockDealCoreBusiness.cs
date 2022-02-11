@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
+using StockDealBusiness.RequestDB;
 using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.StockDeal;
@@ -107,32 +108,18 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> GetStockDealAsync(Guid stockDealId, Guid loginedContactId)
         {
-            var context = new StockDealServiceContext();
-            var stockDeal = await context.StockDeals
-                .Include(e => e.Ticket)
-                .Where(e => e.Id == stockDealId)
-                .FirstOrDefaultAsync();
+            var stockDeal = (await StockDealDB.ListStockDealAsync(new()
+            {
+                LoginedContactId = loginedContactId,
+                StockDealId = stockDealId,
+                IncludeEmptyDeal = true,
+                PerPage = 1,
+                CurrentPage = 1
+            })).FirstOrDefault();
 
             if (stockDeal == null) return NotFoundResponse();
 
-            return SuccessResponse(data: new GetStockDealResponseDto
-            {
-                Id = stockDeal.Id,
-                ReceiverId = stockDeal.ReceiverId,
-                ReceiverName = stockDeal.ReceiverName,
-                SenderId = stockDeal.SenderId,
-                SenderName = stockDeal.SenderName,
-                Ticket = stockDeal.Ticket,
-                TicketId = stockDeal.TicketId,
-                CreatedDate = stockDeal.CreatedDate,
-                CreatedBy = stockDeal.CreatedBy,
-                ModifiedDate = stockDeal.ModifiedDate,
-                ModifiedBy = stockDeal.ModifiedBy,
-                DeletedDate = stockDeal.DeletedDate,
-                DeletedBy = stockDeal.DeletedBy,
-                ReceiverType = ( (stockDeal.Ticket is SaleTicket && stockDeal.Ticket?.CreatedBy != loginedContactId)
-                                || (stockDeal.Ticket is BuyTicket && stockDeal.Ticket?.CreatedBy == loginedContactId) ) ? 1 : 2
-            });
+            return SuccessResponse(stockDeal);
         }
 
 
@@ -191,13 +178,10 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="loginedContactId"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> ListStockDealAsync(Guid loginedContactId, int currentPage, int perPage, bool includeEmptyDeal = false)
+        public async Task<BaseResponse> ListStockDealAsync(StockDealSearchCriteria stockDealSearch)
         {
-            var context = new StockDealServiceContext();
-            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}",
-                loginedContactId, currentPage, perPage, includeEmptyDeal);
 
-            var list = await context.ViewListStockDeals.FromSqlRaw(sql).ToListAsync();
+            var list = await StockDealDB.ListStockDealAsync(stockDealSearch);
             var listResult = list.Select(e => new StockDealResponseDto
             {
                 Id = e.Id,
@@ -237,12 +221,12 @@ namespace StockDealBusiness.Business
 
             var paging = new PaginateDto
             {
-                CurrentPage = currentPage,
-                PerPage = perPage,
-                TotalItems = list.FirstOrDefault() == null ? 0 : list.FirstOrDefault().TotalCount,
+                CurrentPage = stockDealSearch.CurrentPage,
+                PerPage = stockDealSearch.PerPage,
+                TotalItems = list.Select(e => e.TotalCount).FirstOrDefault(),
                 Data = new
                 {
-                    TotalUnread = list.FirstOrDefault()?.TotalUnread ?? 0,
+                    TotalUnread = list.Select(e => e.TotalUnread).FirstOrDefault(),
                     List = listResult
                 }
             };
