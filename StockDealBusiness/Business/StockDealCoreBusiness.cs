@@ -148,7 +148,11 @@ namespace StockDealBusiness.Business
         {
             if (input.SenderId == input.ReceiverId) return BadRequestResponse("receiverId_ERR_DUPLICATE");
 
-            var receiverInfo = await CallEventBus.GetStockHolderDetail(input.ReceiverId.Value);
+            var senderInfo = await CallEventBus.GetStockHolderDetail(input.SenderId.GetValueOrDefault());
+            if (senderInfo == null) return BadRequestResponse($"senderId_ERR_INVALID_VALUE");
+            else input.ReceiverName = senderInfo.FullName;
+
+            var receiverInfo = await CallEventBus.GetStockHolderDetail(input.ReceiverId.GetValueOrDefault());
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
             else input.ReceiverName = receiverInfo.FullName;
 
@@ -156,8 +160,6 @@ namespace StockDealBusiness.Business
 
             if (input.TicketId != null && !context.Tickets.Any(e => e.Id == input.TicketId))
                 return BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
-
-            var transaction = await context.Database.BeginTransactionAsync();
 
             var stockDeal = await context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
@@ -178,8 +180,6 @@ namespace StockDealBusiness.Business
                 context.StockDeals.Add(stockDeal);
                 await context.SaveChangesAsync();
             }
-
-            await transaction.CommitAsync();
 
             return SuccessResponse(stockDeal.Id);
         }
@@ -311,10 +311,16 @@ namespace StockDealBusiness.Business
                 .Where(e => e.TicketId.HasValue)
                 .FirstOrDefaultAsync();
 
-            if (stockDeal != null && stockDeal.Ticket.DeletedDate.HasValue)
-            {
-                return BadRequestResponse("ticketId_ERR_INACTIVE");
-            }
+            if (stockDeal == null) return BadRequestResponse("stockDealId_ERR_INVALID_VALUE");
+            if (stockDeal.Ticket.DeletedDate.HasValue) return BadRequestResponse("ticketId_ERR_INACTIVE");
+
+            var senderInfo = await CallEventBus.GetStockHolderDetail(stockDeal.SenderId);
+            if (senderInfo == null) return BadRequestResponse($"senderId_ERR_INVALID_VALUE");
+            else if (stockDeal.SenderName != senderInfo.FullName) stockDeal.SenderName = senderInfo.FullName;
+
+            var receiverInfo = await CallEventBus.GetStockHolderDetail(stockDeal.ReceiverId);
+            if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
+            else if (stockDeal.ReceiverName != receiverInfo.FullName) stockDeal.ReceiverName = receiverInfo.FullName;
 
             var stockDetail = new StockDealDetail()
             {
