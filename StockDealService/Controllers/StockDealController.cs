@@ -153,7 +153,7 @@ namespace StockDealService.Controllers
         /// <param name="currentPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
-        [HttpGet("v1/ListStockDeal")]
+        [HttpPost("v1/ListStockDeal")]
         public async Task<ObjectResult> ListStockDealAsync(StockDealSearchCriteria dealSearchCriteria)
         {
             try
