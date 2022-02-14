@@ -21,7 +21,7 @@ namespace StockDealBusiness.RequestDB
 
             var context = new StockDealServiceContext();
 
-            var sql = string.Format(@"EXECUTE [GetListStockDeals_test] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}, @stockDealId = {4}",
+            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}, @stockDealId = {4}",
                 stockDealSearch.LoginedContactId,
                 stockDealSearch.CurrentPage,
                 stockDealSearch.PerPage,

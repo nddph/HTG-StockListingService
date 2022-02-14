@@ -263,23 +263,8 @@ namespace StockDealBusiness.Business
             if (stockDeal == null) return BadRequestResponse("stockDealId_ERR_INVALID_VALUE");
             if (stockDeal.Ticket.DeletedDate.HasValue) return BadRequestResponse("ticketId_ERR_INACTIVE");
 
-            var senderInfo = await CallEventBus.GetStockHolderDetail(stockDeal.SenderId);
-            if (senderInfo == null) return BadRequestResponse($"senderId_ERR_INVALID_VALUE");
-            else if (stockDeal.SenderName != senderInfo.FullName)
-            {
-                stockDeal.SenderName = senderInfo.FullName;
-                stockDeal.ModifiedBy = senderId;
-                stockDeal.ModifiedDate = DateTime.Now;
-            }
-
             var receiverInfo = await CallEventBus.GetStockHolderDetail(stockDeal.ReceiverId);
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
-            else if (stockDeal.ReceiverName != receiverInfo.FullName)
-            {
-                stockDeal.ReceiverName = receiverInfo.FullName;
-                stockDeal.ModifiedBy = senderId;
-                stockDeal.ModifiedDate = DateTime.Now;
-            }
 
             var stockDetail = new StockDealDetail()
             {

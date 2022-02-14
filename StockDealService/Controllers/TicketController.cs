@@ -106,7 +106,7 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var result = await _ticketBusiness.CreateSaleTicketAsync(saleTicketDto, LoginedContactId, LoginedContactFullName);
+                var result = await _ticketBusiness.CreateSaleTicketAsync(saleTicketDto, LoginedContactId);
 
                 return ReturnData(result);
 
@@ -128,7 +128,7 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var result = await _ticketBusiness.CreateBuyTicketAsync(buyTicketDto, LoginedContactId, LoginedContactFullName);
+                var result = await _ticketBusiness.CreateBuyTicketAsync(buyTicketDto, LoginedContactId);
 
                 return ReturnData(result);
 
