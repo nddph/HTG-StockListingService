@@ -19,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="LogBusinessSharing">
+      <HintPath>..\..\CommonUtilities\LogBusinessSharing\LogBusinessSharing.dll</HintPath>
+    </Reference>
     <Reference Include="SystemSettingSharing">
       <HintPath>..\..\CommonUtilities\SystemSettingSharing\SystemSettingSharing.dll</HintPath>
     </Reference>

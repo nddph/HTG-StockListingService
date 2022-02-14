@@ -26,4 +26,10 @@
     <ProjectReference Include="..\StockDealDal\StockDealDal.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="LogBusinessSharing">
+      <HintPath>..\..\CommonUtilities\LogBusinessSharing\LogBusinessSharing.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

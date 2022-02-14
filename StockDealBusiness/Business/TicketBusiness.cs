@@ -87,7 +87,7 @@ namespace StockDealBusiness.Business
         /// <param name="loginContactId"></param>
         /// <param name="loginContactName"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto, Guid loginContactId, string loginContactName)
+        public async Task<BaseResponse> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto, Guid loginContactId)
         {
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
@@ -108,7 +108,7 @@ namespace StockDealBusiness.Business
             var ticket = context.Add(new SaleTicket
             {
                 Id = Guid.NewGuid(),
-                FullName = loginContactName,
+                FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
                 ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),
@@ -159,7 +159,7 @@ namespace StockDealBusiness.Business
         /// <param name="loginContactId"></param>
         /// <param name="loginContactName"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto, Guid loginContactId, string loginContactName)
+        public async Task<BaseResponse> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
@@ -168,7 +168,7 @@ namespace StockDealBusiness.Business
             var ticket = context.Add(new BuyTicket
             {
                 Id = Guid.NewGuid(),
-                FullName = loginContactName,
+                FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
                 ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),

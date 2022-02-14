@@ -9,8 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SecurityService;
 using StockDealBusiness.EventBus;
 using StockDealDal.Dto;
 using StockDealService.Controllers;
@@ -160,6 +162,11 @@ namespace StockDealService
                        .AllowAnyHeader());
 
             app.UseRouting();
+
+            app.UseMiddleware<MonitorService>(Options.Create(new MonitorServiceOptions
+            {
+
+            }));
 
             app.UseAuthentication();
             app.UseAuthorization();

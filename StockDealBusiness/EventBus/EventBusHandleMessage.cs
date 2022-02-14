@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogBusinessSharing.LogBusiness;
+using LogBusinessSharing.LogCommon;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +16,8 @@ namespace StockDealBusiness.EventBus
 
         public async Task<byte[]> ResponseResult(string method, string message)
         {
+            await LogManagerBusiness.LogDBAsync(LogActionType.Info, nameof(ResponseResult), nameof(EventBusHandleMessage), new { method, message }, null);
+
             var responseBytes = Array.Empty<byte>();
             switch (method)
             {
