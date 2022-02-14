@@ -8,6 +8,45 @@ namespace StockDealDal.Dto.StockDeal
 {
     public class StockDealResponseDto
     {
+
+        public StockDealResponseDto() { }
+        public StockDealResponseDto(ViewListStockDeals viewListStockDeal)
+        {
+            Id = viewListStockDeal.Id;
+            SenderId = viewListStockDeal.SenderId;
+            ReceiverId = viewListStockDeal.ReceiverId;
+            SenderName = viewListStockDeal.SenderName;
+            ReceiverName = viewListStockDeal.ReceiverName;
+            ReceiverType = viewListStockDeal.ReceiverType;
+            LastUpdate = viewListStockDeal.LastUpdate;
+            CountUnread = viewListStockDeal.CountUnread;
+            Ticket = new()
+            {
+                Id = viewListStockDeal.TicketId,
+                Code = viewListStockDeal.TicketCode,
+                TicketType = viewListStockDeal.TicketType,
+                Title = viewListStockDeal.TicketTitle,
+                IsNegotiate = viewListStockDeal.TicketIsNegotiate,
+                PriceFrom = viewListStockDeal.TicketPrice,
+                Quantity = viewListStockDeal.TicketQuantity,
+                StockTypeName = viewListStockDeal.TicketStockTypeName,
+                StockCode = viewListStockDeal.TicketStockCode,
+                StockCodes = viewListStockDeal.TicketStockCodes,
+                DeletedDate = viewListStockDeal.TicketDeletedDate
+            };
+            LastDealDetail = new()
+            {
+                LastStockDetailId = viewListStockDeal.LastStockDetailId,
+                Description = viewListStockDeal.Description,
+                Quantity = viewListStockDeal.Quantity,
+                TotalPrice = viewListStockDeal.TotalPrice,
+                UnitPrice = viewListStockDeal.UnitPrice,
+                IsDeletedDealDetail = viewListStockDeal.IsDeletedDealDetail,
+                IsOnwerLastDealDetail = viewListStockDeal.IsOnwerLastDealDetail,
+                StockDetailType = viewListStockDeal.StockDetailType
+            };
+        }
+
         // deal
         public Guid Id { get; set; }
         public Guid SenderId { get; set; }

@@ -153,12 +153,14 @@ namespace StockDealService.Controllers
         /// <param name="currentPage"></param>
         /// <param name="perPage"></param>
         /// <returns></returns>
-        [HttpGet("v1/ListStockDeal")]
-        public async Task<ObjectResult> ListStockDealAsync(int currentPage = 1, int perPage = 20, bool includeEmptyDeal = false)
+        [HttpPost("v1/ListStockDeal")]
+        public async Task<ObjectResult> ListStockDealAsync(StockDealSearchCriteria dealSearchCriteria)
         {
             try
             {
-                var result = await _stockDealBusiness.ListStockDealAsync(LoginedContactId, currentPage, perPage, includeEmptyDeal);
+                dealSearchCriteria.LoginedContactId = LoginedContactId;
+
+                var result = await _stockDealBusiness.ListStockDealAsync(dealSearchCriteria);
 
                 return ReturnData(result);
 

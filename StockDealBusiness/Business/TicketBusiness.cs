@@ -17,6 +17,27 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+        public async Task<BaseResponse> CountTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
+        {
+            listTicketDto.IsPaging = true;
+            listTicketDto.CurrentPage = 1;
+            listTicketDto.PerPage = 1;
+
+            listTicketDto.TicketType = (int)TicketType.Buy;
+            var listBuyTicket = await TicketDB.ListBuyTicketAsync(listTicketDto, loginContactId);
+
+            listTicketDto.TicketType = (int)TicketType.Sale;
+            var listSaleTicket = await TicketDB.ListSaleTicketAsync(listTicketDto, loginContactId);
+
+            return SuccessResponse(new CountTicketResponseDto 
+            { 
+                CountBuyTicket = listBuyTicket.Select(e => e.TotalCount).FirstOrDefault(),
+                CountSaleTicket = listSaleTicket.Select(e => e.TotalCount).FirstOrDefault()
+            });
+        }
+
+
+
         /// <summary>
         /// Xóa nhiều tin mua bán hoặc tất cả bằng storeproduce
         /// </summary>
@@ -319,49 +340,21 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> ListTicketsAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
-            var context = new StockDealServiceContext();
-
-            var sql = string.Format(@"EXECUTE [GetListTickets] @ticketType = {0},
-                        @stockCodes = N'{1}', @status = {2}, @ownerId = '{3}', @byUserType = {4}, @priceFrom = {5}, @priceTo = {6},
-                        @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
-                        @expTicketStatus = {10}, @delTicketStatus = {11},
-                        @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', @orderByPriceType = {16},
-                        @stockTypeIds = N'{17}', @isPaging = {18}",
-                        listTicketDto.TicketType,
-                        string.Join(",", listTicketDto.StockCodes),
-                        listTicketDto.Status,
-                        loginContactId,
-                        listTicketDto.ByUserType,
-                        listTicketDto.PriceFrom, listTicketDto.PriceTo,
-                        listTicketDto.QuantityFrom, listTicketDto.QuantityTo,
-                        listTicketDto.ByNewer ? 1 : 0,
-                        listTicketDto.ExpTicketStatus,
-                        listTicketDto.DelTicketStatus,
-                        listTicketDto.CurrentPage,
-                        listTicketDto.PerPage,
-                        listTicketDto.QuantityStatus,
-                        (listTicketDto.SearchText ?? "").Trim(),
-                        listTicketDto.OrderByPriceType,
-                        string.Join(",", listTicketDto.StockTypeIds),
-                        listTicketDto.IsPaging ? 1 : 0
-                        );
-
 
             PaginateDto paginate = new();
-            
 
             if (listTicketDto.TicketType == (int)TicketType.Buy)
             {
-                var query = await context.ViewBuyTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
+                var query = await TicketDB.ListBuyTicketAsync(listTicketDto, loginContactId);
 
-                paginate.TotalItems = query.Count == 0 ? 0 : query.FirstOrDefault().TotalCount;
+                paginate.TotalItems = query.Select(e => e.TotalCount).FirstOrDefault();
                 paginate.Data = query;
             }
             else
             {
-                var query = await context.ViewSaleTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
+                var query = await TicketDB.ListSaleTicketAsync(listTicketDto, loginContactId);
 
-                paginate.TotalItems = query.Count == 0 ? 0 : query.FirstOrDefault().TotalCount;
+                paginate.TotalItems = query.Select(e => e.TotalCount).FirstOrDefault();
                 paginate.Data = query;
             }
 

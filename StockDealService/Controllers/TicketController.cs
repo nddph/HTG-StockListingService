@@ -27,6 +27,30 @@ namespace StockDealService.Controllers
 
 
         /// <summary>
+        /// Đếm số lượng tin mua bán
+        /// </summary>
+        /// <param name="listTicketDto"></param>
+        /// <param name="loginContactId"></param>
+        /// <returns></returns>
+        [HttpPost("v1/CountTicket")]
+        public async Task<ObjectResult> CountTicketAsync(TicketSearchCriteria listTicketDto)
+        {
+            try
+            {
+                var result = await _ticketBusiness.CountTicketAsync(listTicketDto, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
         /// Xóa nhiều tin mua bán cùng lúc
         /// </summary>
         /// <param name="deleteTicketsDto"></param>
