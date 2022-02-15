@@ -31,6 +31,8 @@ namespace StockDealDal.Dto.StockDeal
                 Quantity = viewListStockDeal.TicketQuantity,
                 StockTypeName = viewListStockDeal.TicketStockTypeName,
                 StockCode = viewListStockDeal.TicketStockCode,
+                StockId = viewListStockDeal.TicketStockId,
+                StockTypeId = viewListStockDeal.TicketStockTypeId,
                 StockCodes = viewListStockDeal.TicketStockCodes,
                 DeletedDate = viewListStockDeal.TicketDeletedDate
             };
@@ -92,6 +94,8 @@ namespace StockDealDal.Dto.StockDeal
 
 
         // sale ticket
+        public Guid? StockId { get; set; }
+        public Guid? StockTypeId { get; set; }
 
         public string StockCode { get; set; }
 
@@ -107,5 +111,14 @@ namespace StockDealDal.Dto.StockDeal
         public string StockCodes { get; set; }
 
         public DateTime? DeletedDate { get; set; }
+
+        public string StockCodeView
+        {
+            get
+            {
+                if (TicketType == 1) return StockCodes.Replace(",", ", ");
+                return StockCode;
+            }
+        }
     }
 }

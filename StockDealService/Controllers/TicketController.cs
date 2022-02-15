@@ -52,10 +52,12 @@ namespace StockDealService.Controllers
 
         /// <summary>
         /// Xóa nhiều tin mua bán cùng lúc
+        /// API dùng cho Admin
         /// </summary>
         /// <param name="deleteTicketsDto"></param>
         /// <returns></returns>
         [HttpPost("v1/DeleteTickets")]
+        [Authorize(Roles = "APP_TICKET")]
         public async Task<ObjectResult> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto)
         {
             try
@@ -75,10 +77,12 @@ namespace StockDealService.Controllers
 
         /// <summary>
         /// cập nhật trạng thái nhiều ticket cùng lúc
+        /// API cho adminh
         /// </summary>
         /// <param name="changeStatusTicket"></param>
         /// <returns></returns>
         [HttpPost("v1/ChangeTicketStatus")]
+        [Authorize(Roles = "APP_TICKET")]
         public async Task<ObjectResult> ChangeTicketStatusAsync(ChangeStatusTicketDto changeStatusTicket)
         {
             try
