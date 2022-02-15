@@ -26,6 +26,8 @@ namespace StockDealDal.Dto.StockDeal
         public decimal? TicketPrice { get; set; }
         public int? TicketQuantity{ get; set; }
         public bool? TicketIsNegotiate { get; set; }
+        public Guid? TicketStockId { get; set; }
+        public Guid? TicketStockTypeId { get; set; }
         public string TicketStockCodes { get; set; }
         public int? TicketType { get; set; }
         public DateTime? TicketDeletedDate { get; set; }
