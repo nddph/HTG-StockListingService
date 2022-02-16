@@ -70,27 +70,25 @@ namespace SecurityService
                 Param = request.QueryString,
             };
 
-            StringValues header;
 
-            request.Headers.TryGetValue("deviceId", out header);
+            request.Headers.TryGetValue("deviceId", out StringValues header);
 
             if (header.Count == 0)
             {
                 request.Headers.TryGetValue("DeviceId", out header);
             }
 
-            content.DeviceId = header;
+            content.DeviceId = header.Count != 0 ? header : "";
 
             //kiểm tra xem API này có cần log body hay không
             if (request.ContentType == "application/json")
             {
-                using (var bodyReader = new StreamReader(request.Body))
-                {
-                    var body = await bodyReader.ReadToEndAsync();
-                    request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                    //kiểm tra xem API có cần remove password
-                    content.Body = ClearPasswordRequest(body);
-                }
+                using var bodyReader = new StreamReader(request.Body);
+
+                var body = await bodyReader.ReadToEndAsync();
+                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+                //kiểm tra xem API có cần remove password
+                content.Body = ClearPasswordRequest(body);
             }
             await LogManagerBusiness.LogDBAsync(LogActionType.Info,
                                                 request.Path,
@@ -140,23 +138,21 @@ namespace SecurityService
         {
             try
             {
-                StringValues token;
-                if (context.Request.Headers.ContainsKey("Authorization") == false)
-                    return null;
-                context.Request.Headers.TryGetValue("Authorization", out token);
+                if (!context.Request.Headers.ContainsKey("Authorization")) return null;
+
+                context.Request.Headers.TryGetValue("Authorization", out StringValues token);
                 var handler = new JwtSecurityTokenHandler();
                 var strToken = token.ToString().Replace("Bearer ", "");
                 var tokenInfo = handler.ReadJwtToken(strToken);
                 if (tokenInfo != null)
                 {
                     var UserId = tokenInfo.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
-                    if (string.IsNullOrEmpty(UserId))
-                        return null;
+                    if (string.IsNullOrEmpty(UserId)) return null;
                     return Guid.Parse(UserId);
                 }
                 return null;
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }

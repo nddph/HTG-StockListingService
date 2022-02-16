@@ -24,7 +24,7 @@ namespace StockDealService.Controllers
     {
         private readonly static ConcurrentDictionary<Guid, Guid> _userOnlineDeal = new();
 
-        private readonly StockDealHubBusiness _chatHubBusiness;
+        private readonly StockDealHubBusiness _stockDealHubBusiness;
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
         private readonly ILogger _logger;
 
@@ -64,7 +64,7 @@ namespace StockDealService.Controllers
 
         public StockDealHub(ILogger<StockDealHub> logger)
         {
-            _chatHubBusiness = new();
+            _stockDealHubBusiness = new();
             _stockDealCoreBusiness = new();
             _logger = logger;
         }
@@ -131,7 +131,7 @@ namespace StockDealService.Controllers
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, userId);
 
                 // gửi tin nhắn
-                var data = await _chatHubBusiness.GetStockDetailAsync(Guid.Parse(stockDetail.Data.ToString()));
+                var data = await _stockDealHubBusiness.GetStockDetailAsync(Guid.Parse(stockDetail.Data.ToString()));
 
                 if (data.Type == (int)TypeStockDealDetail.WaitingForResponse)
                 {
@@ -152,7 +152,7 @@ namespace StockDealService.Controllers
                 #region kiểm tra người nhận offline để đẩy thông báo
                 SendDealNofifyDto sendDealNofify = null;
 
-                var group = await _chatHubBusiness.GetStockDealAsync(groupId);
+                var group = await _stockDealHubBusiness.GetStockDealAsync(groupId);
 
                 var stockCodes = "";
                 if (group.Ticket != null) stockCodes = group.Ticket is SaleTicket ? (group.Ticket as SaleTicket).StockCode : (group.Ticket as BuyTicket).StockCodes;
@@ -229,8 +229,8 @@ namespace StockDealService.Controllers
                 var stockDealId = GetStockDealId();
 
                 // kiểm tra tồn tại stockdeal
-                var response = await _stockDealCoreBusiness.GetStockDealAsync(stockDealId, LoginedContactId);
-                if (response.StatusCode != 200)
+                var room = await _stockDealHubBusiness.GetStockDealAsync(stockDealId);
+                if (room == null)
                 {
                     _logger.LogError($"not found stockdeal {stockDealId}");
                     Context.Abort();
@@ -238,7 +238,6 @@ namespace StockDealService.Controllers
                 }
 
                 // kiểm tra người dùng có trong stockdeal
-                var room = response.Data as GetStockDealResponseDto;
                 if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId)))
                 {
                     _logger.LogError($"user {userId} not in stockdeal {stockDealId}");
