@@ -9,6 +9,7 @@ using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
+using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Concurrent;
@@ -147,66 +148,9 @@ namespace StockDealService.Controllers
                         ContractResolver = new CamelCasePropertyNamesContractResolver()
                     }));
                 }
-                
 
-                #region kiểm tra người nhận offline để đẩy thông báo
-                SendDealNofifyDto sendDealNofify = null;
-
-                var group = await _stockDealHubBusiness.GetStockDealAsync(groupId);
-
-                var stockCodes = "";
-                if (group.Ticket != null) stockCodes = group.Ticket is SaleTicket ? (group.Ticket as SaleTicket).StockCode : (group.Ticket as BuyTicket).StockCodes;
-
-                var ticketType = 0;
-                if (group.Ticket != null) ticketType = group.Ticket is BuyTicket ? 1 : 2;
-
-                Guid groupIdReceiverOnline;
-
-                if (userId == group.SenderId)
-                {
-                    _userOnlineDeal.TryGetValue(group.ReceiverId, out groupIdReceiverOnline);
-
-                    if (groupIdReceiverOnline != groupId)
-                    {
-                        sendDealNofify = new()
-                        {
-                            SenderId = group.SenderId,
-                            SenderName = group.SenderName,
-                            ReceiverId = group.ReceiverId,
-                            ReceiverName = group.ReceiverName,
-                            StockCodes = stockCodes,
-                            StockDealId = group.Id,
-                            TicketType = ticketType
-                        };
-                    }
-
-                }
-                else if (userId == group.ReceiverId)
-                {
-                    _userOnlineDeal.TryGetValue(group.SenderId, out groupIdReceiverOnline);
-
-                    if (groupIdReceiverOnline != groupId)
-                    {
-                        sendDealNofify = new()
-                        {
-                            SenderId = group.ReceiverId,
-                            SenderName = group.ReceiverName,
-                            ReceiverId = group.SenderId,
-                            ReceiverName = group.SenderName,
-                            StockCodes = stockCodes,
-                            StockDealId = group.Id
-                        };
-                    }
-                }
-
-                // nếu người nhận offline thì gửi thông báo, ngược lại thì đánh dấu đã đọc tin nhắn
-                if (sendDealNofify != null)
-                {
-                    // không gửi thông báo với loại tin nhắn chờ phản hồi
-                    if (data.Type != (int)TypeStockDealDetail.WaitingForResponse) await CallEventBus.SendDealNofify(sendDealNofify);
-                }
-                else await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, group.SenderId == userId ? group.ReceiverId : group.SenderId);
-                #endregion
+                // Gửi thông báo hoặc đánh dấu người nhận đã đọc tin nhắn
+                await SendDealNotificationAsync(LoginedContactId, groupId, data);
 
                 return new BaseResponse() { Data = data };
             }
@@ -215,6 +159,69 @@ namespace StockDealService.Controllers
                 _logger.LogError(e.ToString());
                 return new BaseResponse() { StatusCode = 400, Message = e.Message };
             }
+        }
+
+
+
+
+        /// <summary>
+        /// Gửi thông báo thương lượng
+        /// </summary>
+        /// <param name="loginContactId"></param>
+        /// <param name="groupId"></param>
+        /// <param name="stockDealDetail"></param>
+        /// <returns></returns>
+        private async Task<BaseResponse> SendDealNotificationAsync(Guid loginContactId, Guid groupId, StockDealDetail stockDealDetail)
+        {
+            var stockDealRes = await _stockDealCoreBusiness.GetStockDealAsync(groupId, loginContactId);
+            if (stockDealRes.StatusCode != 200) return stockDealRes;
+
+            var stockDeal = stockDealRes.Data as StockDealResponseDto;
+
+            Guid senderId = stockDeal.SenderId;
+            Guid receiverId = stockDeal.ReceiverId;
+            string senderName = stockDeal.SenderName;
+            string receiverName = stockDeal.ReceiverName;
+
+            if (loginContactId != stockDeal.SenderId)
+            {
+                senderId = stockDeal.ReceiverId;
+                receiverId = stockDeal.SenderId;
+                senderName = stockDeal.ReceiverName;
+                receiverName = stockDeal.SenderName;
+            }
+
+            _userOnlineDeal.TryGetValue(receiverId, out Guid groupIdReceiverOnline);
+
+            // nếu người nhận online thì đánh dấu người nhận đã đọc tin nhắn, ngược lại thì gửi thông báo
+            if (groupIdReceiverOnline == groupId)
+            {
+                await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, receiverId);
+                return new BaseResponse();
+            }
+
+            // gửi thông báo
+            // chỉ gửi thông báo deal, ko gửi thông báo thương lượng và chờ phản hồi
+
+            var stockCodes = "";
+            if (stockDeal.Ticket != null) stockCodes = stockDeal.Ticket.TicketType == (int)TicketType.Buy ? stockDeal.Ticket.StockCodes : stockDeal.Ticket.StockCode;
+
+            var sendDealNofifyDto = new SendDealNofifyDto()
+            {
+                SenderId = senderId,
+                SenderName = senderName,
+                ReceiverId = receiverId,
+                ReceiverName = receiverName,
+                StockCodes = stockCodes,
+                StockDealId = groupId
+            };
+
+            if (stockDealDetail.Type == (int?)TypeStockDealDetail.DealDetail)
+            {
+                await CallEventBus.SendDealNofify(sendDealNofifyDto, false);
+            }
+
+            return new BaseResponse();
         }
 
 
