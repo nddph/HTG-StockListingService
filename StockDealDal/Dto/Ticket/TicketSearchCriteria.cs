@@ -90,6 +90,14 @@ namespace StockDealDal.Dto.Ticket
         [Range(-1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
         public int QuantityStatus { get; set; } = 2;
 
+
+        /// <summary>
+        /// lấy tin có số lượng cổ phiếu khả dụng không đủ để bán
+        /// lấy tin hết hạn
+        /// lấy tin có status = 0 (tắt)
+        /// </summary>
+        public bool? IsHidden { get; set; } = false;
+
         /// <summary>
         /// 0: không lọc, sắp sếp theo thời gian mới nhất
         /// 1: lọc và sắp sếp theo giá thấp nhất

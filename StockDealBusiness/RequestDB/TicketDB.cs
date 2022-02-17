@@ -18,7 +18,7 @@ namespace StockDealBusiness.RequestDB
                         @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @delTicketStatus = {11},
                         @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', @orderByPriceType = {16},
-                        @stockTypeIds = N'{17}', @isPaging = {18}",
+                        @stockTypeIds = N'{17}', @isPaging = {18}, @isHidden = {19}",
                         listTicketDto.TicketType,
                         string.Join(",", listTicketDto.StockCodes),
                         listTicketDto.Status,
@@ -35,7 +35,8 @@ namespace StockDealBusiness.RequestDB
                         (listTicketDto.SearchText ?? "").Trim(),
                         listTicketDto.OrderByPriceType,
                         string.Join(",", listTicketDto.StockTypeIds),
-                        listTicketDto.IsPaging ? 1 : 0
+                        listTicketDto.IsPaging ? 1 : 0,
+                        listTicketDto.IsHidden.GetValueOrDefault(false)
                         );
         }
 
