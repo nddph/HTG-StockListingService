@@ -30,6 +30,9 @@ namespace StockDealBusiness.EventBus
         public static readonly string CURRENT_EXCHANGE = _configuration["EventBusConfig:CurrentExchange"];
 
 
+        public const string Method_CountUnreadDeal = "CountUnreadDeal";
+
+
         public static readonly string Publisher_GetStockHolderDetailById = $"{CURRENT_SERVICE}.{SERVICE_MEMBER}.GetStockHolderDetailById.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockDetailById = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockDetail.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockTypeDetailById = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockTypeDetail.{REQUEST_METHOD}";
