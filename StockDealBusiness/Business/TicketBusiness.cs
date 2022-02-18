@@ -23,7 +23,7 @@ namespace StockDealBusiness.Business
             var ticketSearchCriteria = new TicketSearchCriteria()
             {
                 TicketId = ticketId,
-                DelTicketStatus = 1,
+                DelTicketStatus = -1,
                 IsPaging = true,
                 CurrentPage = 1,
                 PerPage = 1,
