@@ -48,5 +48,7 @@ namespace StockDealDal.Dto.Ticket
         public int TotalCount { get; set; }
 
         public string StockCodeView { get; set; }
+        public int TicketType { get; set; }
+
     }
 }

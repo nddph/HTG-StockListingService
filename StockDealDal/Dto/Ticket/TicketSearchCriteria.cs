@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StockDealCommon;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,6 +10,12 @@ namespace StockDealDal.Dto.Ticket
 {
     public class TicketSearchCriteria
     {
+        /// <summary>
+        /// Lấy ticket theo Id
+        /// </summary>
+        public Guid? TicketId { get; set; }
+
+
         /// <summary>
         /// tìm kiếm theo tiêu đề, mã cổ phiếu, loại cổ phiếu
         /// </summary>
@@ -114,11 +121,5 @@ namespace StockDealDal.Dto.Ticket
         public int PerPage { get; set; } = 20;
 
         public bool IsPaging { get; set; } = true;
-    }
-
-    public enum TicketType
-    {
-        Buy = 1,
-        Sale = 2
     }
 }

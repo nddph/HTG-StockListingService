@@ -201,7 +201,7 @@ namespace StockDealService.Controllers
         {
             try
             {
-                var result = await _ticketBusiness.GetTicketAsync(ticketId.Value);
+                var result = await _ticketBusiness.GetTicketAsync(ticketId.Value, LoginedContactId);
 
                 return ReturnData(result);
 
