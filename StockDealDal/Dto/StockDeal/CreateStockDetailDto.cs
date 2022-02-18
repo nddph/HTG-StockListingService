@@ -23,13 +23,13 @@ namespace StockDealDal.Dto.StockDeal
 
         public string Description { get; set; }
 
-        [Range(0, (long)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range(0, (long)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Quantity { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal TotalPrice { get; set; }
 
-        [Range((double)0, (double)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range((double)0, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal UnitPrice { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
