@@ -14,7 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SecurityService
+namespace StockDealService
 {
     public class MonitorServiceOptions
     {
@@ -29,6 +29,8 @@ namespace SecurityService
     public class LogContent
     {
         public string DeviceId { get; set; }
+
+        public string OSVersion { get; set; }
 
         public object Body { get; set; }
 
@@ -48,8 +50,6 @@ namespace SecurityService
         {
             _next = next;
             _options = options.Value;
-
-
         }
 
         public async Task Invoke(HttpContext context)
@@ -71,24 +71,19 @@ namespace SecurityService
             };
 
 
-            request.Headers.TryGetValue("deviceId", out StringValues header);
-
-            if (header.Count == 0)
-            {
-                request.Headers.TryGetValue("DeviceId", out header);
-            }
-
-            content.DeviceId = header.Count != 0 ? header : "";
+            content.DeviceId = GetDeviceId(request);
+            content.OSVersion = GetOSVersion(request);
 
             //kiểm tra xem API này có cần log body hay không
             if (request.ContentType == "application/json")
             {
-                using var bodyReader = new StreamReader(request.Body);
-
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                //kiểm tra xem API có cần remove password
-                content.Body = ClearPasswordRequest(body);
+                using (var bodyReader = new StreamReader(request.Body))
+                {
+                    var body = await bodyReader.ReadToEndAsync();
+                    request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+                    //kiểm tra xem API có cần remove password
+                    content.Body = ClearPasswordRequest(body);
+                }
             }
             await LogManagerBusiness.LogDBAsync(LogActionType.Info,
                                                 request.Path,
@@ -97,9 +92,42 @@ namespace SecurityService
                                                 userId);
         }
 
+        private string GetDeviceId(HttpRequest request)
+        {
+            StringValues header;
+
+            request.Headers.TryGetValue("deviceId", out header);
+
+            if (header.Count == 0)
+            {
+                request.Headers.TryGetValue("DeviceId", out header);
+            }
+
+            return header.Count == 0 ? "" : header;
+        }
+
+        private string GetOSVersion(HttpRequest request)
+        {
+            StringValues header;
+
+            request.Headers.TryGetValue("osVersion", out header);
+
+            if (header.Count == 0)
+            {
+                request.Headers.TryGetValue("OSVersion", out header);
+            }
+
+            return header.Count == 0 ? "" : header;
+        }
+
         private string ClearPasswordRequest(string json)
         {
             JObject jObject = JObject.Parse(json);
+
+            if (jObject == null)
+            {
+                return json;
+            }
 
             if (jObject.ContainsKey("Password"))
             {
@@ -138,21 +166,23 @@ namespace SecurityService
         {
             try
             {
-                if (!context.Request.Headers.ContainsKey("Authorization")) return null;
-
-                context.Request.Headers.TryGetValue("Authorization", out StringValues token);
+                StringValues token;
+                if (context.Request.Headers.ContainsKey("Authorization") == false)
+                    return null;
+                context.Request.Headers.TryGetValue("Authorization", out token);
                 var handler = new JwtSecurityTokenHandler();
                 var strToken = token.ToString().Replace("Bearer ", "");
                 var tokenInfo = handler.ReadJwtToken(strToken);
                 if (tokenInfo != null)
                 {
                     var UserId = tokenInfo.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
-                    if (string.IsNullOrEmpty(UserId)) return null;
+                    if (string.IsNullOrEmpty(UserId))
+                        return null;
                     return Guid.Parse(UserId);
                 }
                 return null;
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }
@@ -190,5 +220,4 @@ namespace SecurityService
         }
 
     }
-
 }
