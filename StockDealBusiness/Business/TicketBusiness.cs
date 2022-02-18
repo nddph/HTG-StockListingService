@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
+using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.Ticket;
@@ -17,6 +18,38 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+        private async Task<object> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
+        {
+            var ticketSearchCriteria = new TicketSearchCriteria()
+            {
+                TicketId = ticketId,
+                DelTicketStatus = 1,
+                IsPaging = true,
+                CurrentPage = 1,
+                PerPage = 1,
+                ByNewer = true,
+                ByUserType = -1,
+                TicketType = (int)ticketType,
+                ExpTicketStatus = -1,
+                IsHidden = false,
+                OrderByPriceType = 0,
+                Status = -1,
+                QuantityStatus = -1
+            };
+
+            if (ticketType == TicketType.Buy) return (await TicketDB.ListBuyTicketAsync(ticketSearchCriteria, loginContactId)).FirstOrDefault();
+            return (await TicketDB.ListSaleTicketAsync(ticketSearchCriteria, loginContactId)).FirstOrDefault();
+
+        }
+
+
+
+        /// <summary>
+        /// đếm số lượng ticket
+        /// </summary>
+        /// <param name="listTicketDto"></param>
+        /// <param name="loginContactId"></param>
+        /// <returns></returns>
         public async Task<BaseResponse> CountTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
             listTicketDto.IsPaging = true;
@@ -144,7 +177,7 @@ namespace StockDealBusiness.Business
                 TicketId = ticket.Entity.Id,
                 ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
             };
-            await EventBus.CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+            await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             #endregion
 
             return SuccessResponse(data: ticket.Entity.Id);
@@ -205,7 +238,7 @@ namespace StockDealBusiness.Business
                 TicketId = ticket.Entity.Id,
                 ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
             };
-            await EventBus.CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+            await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             #endregion
 
             return SuccessResponse(data: ticket.Entity.Id);
@@ -291,12 +324,12 @@ namespace StockDealBusiness.Business
         /// </summary>
         /// <param name="buyTicketDto"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> GetTicketAsync(Guid ticketId)
+        public async Task<BaseResponse> GetTicketAsync(Guid ticketId, Guid loginContactId)
         {
-            var context = new StockDealServiceContext();
-            var ticket = await context.Tickets
-                .Where(e => e.Id == ticketId)
-                .FirstOrDefaultAsync();
+
+            var ticket = await GetTicketAsync(ticketId, TicketType.Buy, loginContactId);
+
+            if (ticket == null) ticket = await GetTicketAsync(ticketId, TicketType.Sale, loginContactId);
 
             if (ticket == null) return NotFoundResponse();
 

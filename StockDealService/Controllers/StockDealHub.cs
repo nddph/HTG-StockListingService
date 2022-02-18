@@ -9,7 +9,6 @@ using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
-using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Concurrent;
