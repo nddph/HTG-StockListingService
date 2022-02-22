@@ -253,7 +253,7 @@ namespace StockDealService.Controllers
 
                 _logger.LogInformation($"connected {Context.ConnectionId} _ {stockDealId}");
 
-                _userOnlineDeal.TryAdd(userId, stockDealId);
+                _userOnlineDeal.AddOrUpdate(userId, stockDealId, (oldkey, oldvalue) => stockDealId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
@@ -268,7 +268,7 @@ namespace StockDealService.Controllers
                 _logger.LogError(e.ToString());
                 throw;
             }
-            
+
         }
 
 
