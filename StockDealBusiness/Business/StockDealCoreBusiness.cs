@@ -55,19 +55,7 @@ namespace StockDealBusiness.Business
             var stockDeal = await context.StockDeals.FindAsync(stockDealId);
             if (stockDeal == null) return NotFoundResponse();
 
-            string sql = @"UPDATE [dbo].[ST_StockDealDetail]
-                        SET [{0}] = 1
-                        WHERE StockDealId = '{1}' and ({0} is null or {0} <> 1)";
-
-            if (stockDeal.SenderId == loginedContactId)
-            {
-                sql = string.Format(sql, "SenderRead", stockDealId.ToString());
-            } else
-            {
-                sql = string.Format(sql, "ReceiverRead", stockDealId.ToString());
-            }
-
-            await context.Database.ExecuteSqlRawAsync(sql);
+            await StockDealDB.ReadStockDealDetailAsync(stockDealId, stockDeal.SenderId == loginedContactId);
 
             return SuccessResponse();
         }

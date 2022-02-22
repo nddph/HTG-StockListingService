@@ -12,6 +12,30 @@ namespace StockDealBusiness.RequestDB
     public class StockDealDB
     {
         /// <summary>
+        /// đánh dấu tin nhắn đã đọc cho người gửi deal hoặc người nhận deal
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <param name="isUpdateForSender">true: đánh dấu tin nhắn đã đọc cho người gửi deal, ngược lại đánh dấu tin nhắn đã đọc cho người nhận deal</param>
+        /// <returns></returns>
+        public static async Task ReadStockDealDetailAsync(Guid stockDealId, bool isUpdateForSender)
+        {
+            var context = new StockDealServiceContext();
+
+            string sql = @"UPDATE [dbo].[ST_StockDealDetail]
+                        SET [{0}] = 1
+                        WHERE [StockDealId] = '{1}' and ([{0}] is null or [{0}] <> 1)";
+
+            var userRead = isUpdateForSender ? "SenderRead" : "ReceiverRead";
+
+            sql = string.Format(sql, userRead, stockDealId);
+
+            await context.Database.ExecuteSqlRawAsync(sql);
+
+        }
+
+
+
+        /// <summary>
         /// lấy danh sách stockdeal
         /// </summary>
         /// <param name="stockDealSearch"></param>
