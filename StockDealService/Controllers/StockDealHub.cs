@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StockDealBusiness.Business;
@@ -32,7 +33,11 @@ namespace StockDealService.Controllers
 
         private Guid GetStockDealId()
         {
-            return Guid.Parse(Context.GetHttpContext().Request.Query["stockDealId"]);
+            Context.GetHttpContext().Request.Query.TryGetValue("stockDealId", out StringValues stockDealIds);
+
+            _ = Guid.TryParse(stockDealIds.FirstOrDefault(), out Guid stockDealId);
+
+            return stockDealId;
         }
 
 
@@ -234,11 +239,18 @@ namespace StockDealService.Controllers
 
                 var stockDealId = GetStockDealId();
 
+                if (userId == Guid.Empty || stockDealId == Guid.Empty)
+                {
+                    _logger.LogError($"ConnectionId: {Context.ConnectionId} | user: {userId} or stockDealId: {stockDealId} is empty");
+                    Context.Abort();
+                    return Task.CompletedTask;
+                }
+
                 // kiểm tra tồn tại stockdeal
                 var room = await _stockDealHubBusiness.GetStockDealAsync(stockDealId);
                 if (room == null)
                 {
-                    _logger.LogError($"not found stockdeal {stockDealId}");
+                    _logger.LogError($"ConnectionId: {Context.ConnectionId} | not found stockDealId: {stockDealId} for user: {userId}");
                     Context.Abort();
                     return Task.CompletedTask;
                 }
@@ -246,14 +258,14 @@ namespace StockDealService.Controllers
                 // kiểm tra người dùng có trong stockdeal
                 if (!(room.SenderId.Equals(userId) || room.ReceiverId.Equals(userId)))
                 {
-                    _logger.LogError($"user {userId} not in stockdeal {stockDealId}");
+                    _logger.LogError($"ConnectionId: {Context.ConnectionId} | user: {userId} not in stockDealId: {stockDealId}");
                     Context.Abort();
                     return Task.CompletedTask;
                 }
 
-                _logger.LogInformation($"connected {Context.ConnectionId} _ {stockDealId}");
+                _logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} connected stockDealId: {stockDealId}");
 
-                _userOnlineDeal.TryAdd(userId, stockDealId);
+                _userOnlineDeal.AddOrUpdate(userId, stockDealId, (oldkey, oldvalue) => stockDealId);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
@@ -268,7 +280,7 @@ namespace StockDealService.Controllers
                 _logger.LogError(e.ToString());
                 throw;
             }
-            
+
         }
 
 
@@ -285,6 +297,8 @@ namespace StockDealService.Controllers
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, stockDealId.ToString());
 
                 _userOnlineDeal.TryRemove(userId, out _);
+
+                _logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} disconnected stockDealId: {stockDealId}");
 
                 return base.OnDisconnectedAsync(exception);
             }

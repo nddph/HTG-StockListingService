@@ -32,6 +32,8 @@ namespace StockDealService
 
         public string OSVersion { get; set; }
 
+        public string AppVersion { get; set; }
+
         public object Body { get; set; }
 
         public object Param { get; set; }
@@ -68,11 +70,10 @@ namespace StockDealService
             var content = new LogContent()
             {
                 Param = request.QueryString,
+                DeviceId = GetDeviceId(request),
+                OSVersion = GetOSVersion(request),
+                AppVersion = GetAppVersion(request)
             };
-
-
-            content.DeviceId = GetDeviceId(request);
-            content.OSVersion = GetOSVersion(request);
 
             //kiểm tra xem API này có cần log body hay không
             if (request.ContentType == "application/json")
@@ -115,6 +116,20 @@ namespace StockDealService
             if (header.Count == 0)
             {
                 request.Headers.TryGetValue("OSVersion", out header);
+            }
+
+            return header.Count == 0 ? "" : header;
+        }
+
+        private string GetAppVersion(HttpRequest request)
+        {
+            StringValues header;
+
+            request.Headers.TryGetValue("appVersion", out header);
+
+            if (header.Count == 0)
+            {
+                request.Headers.TryGetValue("AppVersion", out header);
             }
 
             return header.Count == 0 ? "" : header;
