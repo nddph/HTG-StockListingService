@@ -14,7 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SecurityService
+namespace StockDealService
 {
     public class MonitorServiceOptions
     {
