@@ -39,6 +39,9 @@ namespace StockDealDal.Dto.Ticket
 
         /// <summary>
         /// lọc theo status
+        /// -1: tất cả
+        /// 0: bị ẩn do quá số lượng bán
+        /// 1: bật
         /// </summary>
         [Range(-1, 1, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Status { get; set; } = -1;

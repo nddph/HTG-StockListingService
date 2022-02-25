@@ -86,20 +86,6 @@ namespace StockDealBusiness.Business
 
 
         /// <summary>
-        /// thay đổi trạng thái tin mua bán
-        /// </summary>
-        /// <param name="changeStatusTicket"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public async Task<BaseResponse> ChangeTicketStatusAsync(ChangeStatusTicketDto changeStatusTicket, Guid userId)
-        {
-            await TicketDB.UpdateTicketStatusAsync(changeStatusTicket.IsAll.GetValueOrDefault(), changeStatusTicket.Status.GetValueOrDefault(), userId, changeStatusTicket.ListTicket);
-            return SuccessResponse();
-        }
-
-
-
-        /// <summary>
         /// số ngày tin đăng đc hiển thị từ systemsetting
         /// </summary>
         /// <returns></returns>

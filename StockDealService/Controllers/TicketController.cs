@@ -76,31 +76,6 @@ namespace StockDealService.Controllers
 
 
         /// <summary>
-        /// cập nhật trạng thái nhiều ticket cùng lúc
-        /// API cho adminh
-        /// </summary>
-        /// <param name="changeStatusTicket"></param>
-        /// <returns></returns>
-        [HttpPost("v1/ChangeTicketStatus")]
-        [Authorize(Roles = "APP_TICKET")]
-        public async Task<ObjectResult> ChangeTicketStatusAsync(ChangeStatusTicketDto changeStatusTicket)
-        {
-            try
-            {
-                var result = await _ticketBusiness.ChangeTicketStatusAsync(changeStatusTicket, LoginedContactId);
-
-                return ReturnData(result);
-
-            }
-            catch (Exception e)
-            {
-                return CatchErrorResponse(e, _logger);
-            }
-        }
-
-
-
-        /// <summary>
         /// Tạo tin bán cổ phiếu
         /// </summary>
         /// <param name="saleTicketDto"></param>
