@@ -12,10 +12,10 @@ namespace StockDealDal.Dto.Ticket
         [MaxLength(50, ErrorMessage = "ERR_MAX_LENGTH_50")]
         public string Title { get; set; }
 
-        [Range((double)1, (double)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceFrom { get; set; }
 
-        [Range((double)1, (double)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceTo { get; set; }
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
@@ -33,7 +33,7 @@ namespace StockDealDal.Dto.Ticket
         public string StockTypeName { get; set; }
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
-        [Range(1, (long)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range(1, (long)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public int? Quantity { get; set; }
 
         public bool IsNegotiate { get; set; } = false;

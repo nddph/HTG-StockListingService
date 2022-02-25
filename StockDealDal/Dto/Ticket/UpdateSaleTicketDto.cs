@@ -14,11 +14,11 @@ namespace StockDealDal.Dto.Ticket
         public string Title { get; set; }
 
 
-        [Range((double)1, (double)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceFrom { get; set; }
 
 
-        [Range((double)1, (double)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceTo { get; set; }
 
 
@@ -39,7 +39,7 @@ namespace StockDealDal.Dto.Ticket
 
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
-        [Range(1, (long)999999999, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range(1, (long)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public int? Quantity { get; set; }
 
 
