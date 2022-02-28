@@ -130,7 +130,7 @@ namespace StockDealBusiness.Business
                 FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),
+                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()).Date,
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
@@ -147,11 +147,12 @@ namespace StockDealBusiness.Business
                 IsPaging = false,
                 ByUserType = 2,
                 ByNewer = true,
-                TicketType = 1,
+                TicketType = (int)TicketType.Buy,
                 DelTicketStatus = 1,
                 ExpTicketStatus = 1,
                 QuantityStatus = 2,
-                StockCodes = new List<string>() { saleTicketDto.StockCode }
+                StockCodes = new List<string>() { saleTicketDto.StockCode },
+                Status = 1
             };
             var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
             if (listUserRes.StatusCode != 200) return listUserRes;
@@ -161,7 +162,13 @@ namespace StockDealBusiness.Business
             {
                 UserId = loginContactId,
                 TicketId = ticket.Entity.Id,
-                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
+                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
+                TicketType = (int)TicketType.Sale,
+                StockCodes = ticket.Entity.StockCode,
+                Quantity = ticket.Entity.Quantity,
+                Price = ticket.Entity.PriceFrom,
+                IsNegotiate = ticket.Entity.IsNegotiate,
+                Title = ticket.Entity.Title
             };
             await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             #endregion
@@ -190,7 +197,7 @@ namespace StockDealBusiness.Business
                 FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()),
+                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()).Date,
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
@@ -208,11 +215,12 @@ namespace StockDealBusiness.Business
                 IsPaging = false,
                 ByUserType = 2,
                 ByNewer = true,
-                TicketType = 2,
+                TicketType = (int)TicketType.Sale,
                 DelTicketStatus = 1,
                 ExpTicketStatus = 1,
                 QuantityStatus = 2,
-                StockCodes = buyTicketDto.StockCode
+                StockCodes = buyTicketDto.StockCode,
+                Status = 1
             };
             var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
             if (listUserRes.StatusCode != 200) return listUserRes;
@@ -222,7 +230,10 @@ namespace StockDealBusiness.Business
             {
                 UserId = loginContactId,
                 TicketId = ticket.Entity.Id,
-                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList()
+                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
+                TicketType = (int)TicketType.Buy,
+                StockCodes = ticket.Entity.StockCodes,
+                Title = ticket.Entity.Title
             };
             await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             #endregion

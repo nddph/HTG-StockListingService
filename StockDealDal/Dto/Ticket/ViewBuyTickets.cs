@@ -49,6 +49,7 @@ namespace StockDealDal.Dto.Ticket
 
         public string StockCodeView { get; set; }
         public int TicketType { get; set; }
+        public bool? IsExpTicket { get; set; }
 
     }
 }
