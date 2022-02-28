@@ -45,8 +45,7 @@ namespace StockDealDal.Dto.Ticket
                 if (!PriceFrom.HasValue)
                 {
                     yield return new ValidationResult("ERR_REQUIRED", new[] { nameof(PriceFrom) });
-                }
-                else
+                } else
                 {
                     PriceTo = PriceFrom;
                     yield return ValidationResult.Success;
@@ -54,6 +53,11 @@ namespace StockDealDal.Dto.Ticket
             } else
             {
                 PriceFrom = PriceTo = null;
+            }
+
+            if (Quantity % 100 != 0)
+            {
+                yield return new ValidationResult("ERR_MOD_100", new[] { nameof(Quantity) });
             }
         }
     }
