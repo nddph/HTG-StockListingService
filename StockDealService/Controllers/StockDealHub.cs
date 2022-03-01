@@ -197,11 +197,11 @@ namespace StockDealService.Controllers
 
             _userOnlineDeal.TryGetValue(receiverId, out Guid groupIdReceiverOnline);
 
-            // nếu người nhận online thì đánh dấu người nhận đã đọc tin nhắn
+            // nếu người nhận online thì đánh dấu người nhận đã đọc tin nhắn, ngược lại thì gửi thông báo
             if (groupIdReceiverOnline == groupId)
             {
                 await _stockDealCoreBusiness.ReadStockDealDetailAsync(groupId, receiverId);
-                // return new BaseResponse();
+                return new BaseResponse();
             }
 
             // gửi thông báo
