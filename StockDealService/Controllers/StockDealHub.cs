@@ -263,7 +263,7 @@ namespace StockDealService.Controllers
                     return Task.CompletedTask;
                 }
 
-                _logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} connected stockDealId: {stockDealId}");
+                //_logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} connected stockDealId: {stockDealId}");
 
                 _userOnlineDeal.AddOrUpdate(userId, stockDealId, (oldkey, oldvalue) => stockDealId);
 
@@ -298,7 +298,7 @@ namespace StockDealService.Controllers
 
                 _userOnlineDeal.TryRemove(userId, out _);
 
-                _logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} disconnected stockDealId: {stockDealId}");
+                //_logger.LogInformation($"ConnectionId: {Context.ConnectionId} | user: {userId} disconnected stockDealId: {stockDealId}");
 
                 return base.OnDisconnectedAsync(exception);
             }

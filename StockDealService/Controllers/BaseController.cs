@@ -64,8 +64,7 @@ namespace StockDealService.Controllers
         protected ObjectResult CatchErrorResponse(Exception e, ILogger logger)
         {
             var _logger = logger;
-            _logger.LogError(e.Message);
-            _logger.LogError(e.StackTrace);
+            _logger.LogError(e.ToString());
 
             return StatusCode(StatusCodes.Status500InternalServerError, createModel(null, e.Message, 500));
         }
