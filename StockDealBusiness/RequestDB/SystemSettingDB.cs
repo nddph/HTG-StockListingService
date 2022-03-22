@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SystemSettingSharing.Entities;
+using SystemSettingSharing.SystemSettingBusiness;
 
 namespace StockDealBusiness.RequestDB
 {
@@ -25,8 +26,10 @@ namespace StockDealBusiness.RequestDB
         /// <returns></returns>
         public static async Task<int> GetTicketExpDateAsync()
         {
-            var systemSettingDB = new SystemSettingDB();
-            var res = await systemSettingDB.GetValueBuyKeyAsync("Ticket.ExpDate");
+            SystemSettingBusiness systemSettingBusiness = new();
+
+            var res = await systemSettingBusiness.GetSystemSettingItem("Ticket.ExpDate", 0);
+
             if (res == null) return 0;
             if (int.TryParse(res.Value, out int expDate)) return expDate;
             return 0;
@@ -42,8 +45,10 @@ namespace StockDealBusiness.RequestDB
         /// <returns></returns>
         public static async Task<bool> AllowCreateBuyTicketAsync()
         {
-            var systemSettingDB = new SystemSettingDB();
-            var res = await systemSettingDB.GetValueBuyKeyAsync("AllowCreateBuyTicket");
+            SystemSettingBusiness systemSettingBusiness = new();
+
+            var res = await systemSettingBusiness.GetSystemSettingItem("AllowCreateBuyTicket", 0);
+
             if (res == null) return false;
             if (int.TryParse(res.Value, out int isAllow)) return isAllow == 1;
             return false;
