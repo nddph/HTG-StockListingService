@@ -86,20 +86,6 @@ namespace StockDealBusiness.Business
 
 
         /// <summary>
-        /// số ngày tin đăng đc hiển thị từ systemsetting
-        /// </summary>
-        /// <returns></returns>
-        private async Task<int> GetTicketExpDateAsync()
-        {
-            var syscontext = new SystemSettingContext();
-            var res = await syscontext.SystemSettings.Where(e => e.Key == "Ticket.ExpDate").FirstOrDefaultAsync();
-            if (res == null) return 0;
-            return int.Parse(res.Value);
-        }
-
-
-
-        /// <summary>
         /// tạo tin bán cổ phiếu
         /// </summary>
         /// <param name="saleTicketDto"></param>
@@ -130,7 +116,7 @@ namespace StockDealBusiness.Business
                 FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()).Date,
+                ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
@@ -190,6 +176,13 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
+            // cho phép người dùng không phải nhân viên đăng bài
+            if (await SystemSettingDB.AllowCreateBuyTicketAsync() == false)
+            {
+                // nếu không phải nhân viên thì không cho đăng
+                if (stockHolderInfo.Status == 0) return BadRequestResponse("user_ERR_ONLY_STAFF_CREATE_BUY_TICKET");
+            }
+
             var context = new StockDealServiceContext();
             var ticket = context.Add(new BuyTicket
             {
@@ -197,7 +190,7 @@ namespace StockDealBusiness.Business
                 FullName = stockHolderInfo.FullName,
                 CreatedBy = loginContactId,
                 Status = 1,
-                ExpDate = DateTime.Now.AddDays(await GetTicketExpDateAsync()).Date,
+                ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
                 Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
                 Email = stockHolderInfo.WorkingEmail,
                 EmployeeCode = stockHolderInfo.EmployeeCode,
