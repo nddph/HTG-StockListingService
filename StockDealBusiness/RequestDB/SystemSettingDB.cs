@@ -1,24 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SystemSettingSharing.Entities;
 using SystemSettingSharing.SystemSettingBusiness;
 
 namespace StockDealBusiness.RequestDB
 {
     public class SystemSettingDB
     {
-        private async Task<SysSetting> GetValueBuyKeyAsync(string key)
-        {
-            var syscontext = new SystemSettingContext();
-            var res = await syscontext.SystemSettings.Where(e => e.Key == key).FirstOrDefaultAsync();
-            return res;
-        }
-
-
 
         /// <summary>
         /// số ngày tin đăng đc hiển thị từ systemsetting
