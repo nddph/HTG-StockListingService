@@ -19,6 +19,7 @@ namespace StockDealDal.Entities
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SaleTicket> SaleTickets { get; set; }
         public DbSet<BuyTicket> BuyTickets { get; set; }
+        public DbSet<BuyTicketDetail> BuyTicketDetails { get; set; }
 
 
         public DbSet<ViewBuyTickets> ViewBuyTickets { get; set;}

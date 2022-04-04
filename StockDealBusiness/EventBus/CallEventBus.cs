@@ -146,7 +146,23 @@ namespace StockDealBusiness.EventBus
             return JsonConvert.DeserializeObject<StockTypeDto>(resData.Data.ToString());
         }
 
-        
+
+
+        /// <summary>
+        /// Lấy danh sách các mã CP trong hệ thống
+        /// </summary>
+        /// <param name="isReply"></param>
+        /// <returns></returns>
+        public static async Task<List<StockDto>> GetStockList(bool isReply = true)
+        {
+            var res = await EventBusPublisher.CallEventBusAsync(
+                ConstEventBus.Publisher_GetStockList, "",
+                ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
+            var resData = ReturnData(res, isReply);
+            if (resData.StatusCode != 200) return null;
+
+            return JsonConvert.DeserializeObject<List<StockDto>>(resData.Data.ToString());
+        }
 
 
         public static BaseResponse ReturnData(string res, bool isReply = true)

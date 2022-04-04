@@ -50,10 +50,11 @@ namespace StockDealService
                         var errorKey = string.Join('.', invalid.Key.Split('.').AsEnumerable().Select(e => e.Length > 0 ? (e.Substring(0, 1).ToLower() + e[1..]) : ""));
                         var errorValue = invalid.Value.Errors.FirstOrDefault()?.ErrorMessage;
 
-                        var response = new ErrorMessage
+                        var response = new BaseResponse
                         {
-                            error = $"{errorKey}_{errorValue}",
-                            error_description = $"{errorKey}_{errorValue}"
+                            StatusCode = 400,
+                            Message = $"{errorKey}_{errorValue}",
+                            Data = string.Empty
                         };
 
                         var result = new BadRequestObjectResult(response);

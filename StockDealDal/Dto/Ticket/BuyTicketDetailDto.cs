@@ -7,26 +7,27 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Dto.Ticket
 {
-    public class CreateBuyTicketDto : CreateTicketDto, IValidatableObject
+    public class BuyTicketDetailDto : IValidatableObject
     {
-        //public CreateBuyTicketDto()
-        //{
-        //    BuyTicketDetailDtos = new List<BuyTicketDetailDto>();
-        //}
-
-        [Required(ErrorMessage = "ERR_REQUIRED")]
-        [MaxLength(50, ErrorMessage = "ERR_MAX_LENGTH_50")]
-        public string Title { get; set; }
-
-        [Required(ErrorMessage = "ERR_REQUIRED")]
-        [MinLength(1, ErrorMessage = "ERR_REQUIRED")]
-        public List<string> StockCode { get; set; }
-
         [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceFrom { get; set; }
 
         [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public decimal? PriceTo { get; set; }
+
+        [Required(ErrorMessage = "ERR_REQUIRED")]
+        public Guid? StockId { get; set; }
+
+        [Required(ErrorMessage = "ERR_REQUIRED")]
+        [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
+        public string StockCode { get; set; }
+
+        //[Required(ErrorMessage = "ERR_REQUIRED")]
+        public Guid? StockTypeId { get; set; }
+
+        //[Required(ErrorMessage = "ERR_REQUIRED")]
+        [MaxLength(255, ErrorMessage = "ERR_MAX_LENGTH_255")]
+        public string StockTypeName { get; set; }
 
         [Required(ErrorMessage = "ERR_REQUIRED")]
         [Range(1, (long)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
@@ -41,19 +42,20 @@ namespace StockDealDal.Dto.Ticket
                 if (!PriceFrom.HasValue)
                 {
                     yield return new ValidationResult("ERR_REQUIRED", new[] { nameof(PriceFrom) });
-                }
-                else
+                } else
                 {
                     PriceTo = PriceFrom;
                     yield return ValidationResult.Success;
                 }
-            }
-            else
+            } else
             {
                 PriceFrom = PriceTo = null;
             }
-        }
 
-        //public List<BuyTicketDetailDto> BuyTicketDetailDtos { get; set; }
+            if (Quantity % 100 != 0)
+            {
+                yield return new ValidationResult("ERR_MOD_100", new[] { nameof(Quantity) });
+            }
+        }
     }
 }

@@ -108,6 +108,12 @@ namespace StockDealBusiness.Business
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
+            //kiểm tra số lượng CP có hợp lệ hay không
+            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+            if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+            {
+                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+            }
 
             var context = new StockDealServiceContext();
             var ticket = context.Add(new SaleTicket
@@ -183,6 +189,13 @@ namespace StockDealBusiness.Business
                 if (stockHolderInfo.Status == 0) return BadRequestResponse("user_ERR_ONLY_STAFF_CREATE_BUY_TICKET");
             }
 
+            //kiểm tra số lượng CP có hợp lệ hay không
+            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+            if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+            {
+                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+            }
+
             var context = new StockDealServiceContext();
             var ticket = context.Add(new BuyTicket
             {
@@ -199,6 +212,30 @@ namespace StockDealBusiness.Business
             });
 
             ticket.CurrentValues.SetValues(buyTicketDto);
+
+            //danh sách các mã CP đang có trong hệ thống
+            var stocks = await CallEventBus.GetStockList(true);
+
+            foreach(var item in buyTicketDto.StockCode)
+            {
+                var stock = stocks.Count > 0 ? stocks.FirstOrDefault(x => x.StockCode == item) : null;
+                if(stock == null)
+                {
+                    return BadRequestResponse("stockCode_ERR_INVALID_VALUE", item);
+                }
+                var buyTicketDetail = new BuyTicketDetail()
+                {
+                    Id = Guid.NewGuid(),
+                    BuyTicketId = ticket.Entity.Id,
+                    StockId = stock.Id,
+                    StockCode = stock.StockCode,
+                    PriceFrom = buyTicketDto.PriceFrom,
+                    PriceTo = buyTicketDto.PriceTo,
+                    IsNegotiate = buyTicketDto.IsNegotiate,
+                    Quantity = buyTicketDto.Quantity
+                };
+                context.Add(buyTicketDetail);
+            }
 
             await context.SaveChangesAsync();
 
@@ -257,6 +294,12 @@ namespace StockDealBusiness.Business
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
+            //kiểm tra số lượng CP có hợp lệ hay không
+            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+            if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+            {
+                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+            }
 
             var context = new StockDealServiceContext();
             var ticket = await context.SaleTickets
@@ -287,10 +330,18 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
+            //kiểm tra số lượng CP có hợp lệ hay không
+            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+            if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+            {
+                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+            }
+
             var context = new StockDealServiceContext();
             var ticket = await context.BuyTickets
                 .Where(e => e.CreatedBy == loginContactId)
                 .Where(e => e.Id == buyTicketDto.Id.Value)
+                .Include(x => x.BuyTicketDetails)
                 .FirstOrDefaultAsync();
 
             if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
@@ -299,12 +350,60 @@ namespace StockDealBusiness.Business
             ticket.ModifiedBy = loginContactId;
             ticket.ModifiedDate = DateTime.Now;
 
+            //cập nhật danh sách mã CP
+
+            //danh sách các mã CP đang có trong hệ thống
+            var stocks = await CallEventBus.GetStockList(true);
+
+            //các mã CP được xóa đi
+            var stockCodeDeleted = ticket.BuyTicketDetails.Where(x => !buyTicketDto.StockCode.Contains(x.StockCode)).ToList();
+            context.RemoveRange(stockCodeDeleted);
+
+            //các mã CP được cập nhật hoặc thêm mới
+            var stockCodeUpdate = ticket.BuyTicketDetails.Where(x => buyTicketDto.StockCode.Contains(x.StockCode)).ToList();
+
+            foreach (var item in buyTicketDto.StockCode)
+            {
+                var stock = stocks.Count > 0 ? stocks.FirstOrDefault(x => x.StockCode == item) : null;
+                if (stock == null)
+                {
+                    return BadRequestResponse("stockCode_ERR_INVALID_VALUE", item);
+                }
+
+                var detailDB = stockCodeUpdate.Count > 0 ? stockCodeUpdate.FirstOrDefault(x => x.StockCode == item) : null;
+
+                if(detailDB == null)
+                {
+                    var buyTicketDetail = new BuyTicketDetail()
+                    {
+                        Id = Guid.NewGuid(),
+                        BuyTicketId = ticket.Id,
+                        StockId = stock.Id,
+                        StockCode = stock.StockCode,
+                        PriceFrom = buyTicketDto.PriceFrom,
+                        PriceTo = buyTicketDto.PriceTo,
+                        IsNegotiate = buyTicketDto.IsNegotiate,
+                        Quantity = buyTicketDto.Quantity
+                    };
+                    context.Add(buyTicketDetail);
+                }
+                else
+                {
+                    detailDB.PriceFrom = buyTicketDto.PriceFrom;
+                    detailDB.PriceTo = buyTicketDto.PriceTo;
+                    detailDB.Quantity = buyTicketDto.Quantity;
+                    detailDB.IsNegotiate = buyTicketDto.IsNegotiate;
+
+                    context.Update(detailDB);
+                }
+            }
+
             var ticketDb = context.Update(ticket);
             ticketDb.CurrentValues.SetValues(buyTicketDto);
 
             await context.SaveChangesAsync();
 
-            return SuccessResponse(data: buyTicketDto.Id);
+            return SuccessResponse(buyTicketDto.Id);
         }
 
 
@@ -387,6 +486,7 @@ namespace StockDealBusiness.Business
 
             return SuccessResponse(data: paginate);
         }
+
 
     }
 }
