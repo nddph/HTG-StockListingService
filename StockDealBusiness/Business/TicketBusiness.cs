@@ -231,7 +231,6 @@ namespace StockDealBusiness.Business
                     StockCode = stock.StockCode,
                     PriceFrom = buyTicketDto.PriceFrom,
                     PriceTo = buyTicketDto.PriceTo,
-                    IsNegotiate = buyTicketDto.IsNegotiate,
                     Quantity = buyTicketDto.Quantity
                 };
                 context.Add(buyTicketDetail);
@@ -382,7 +381,6 @@ namespace StockDealBusiness.Business
                         StockCode = stock.StockCode,
                         PriceFrom = buyTicketDto.PriceFrom,
                         PriceTo = buyTicketDto.PriceTo,
-                        IsNegotiate = buyTicketDto.IsNegotiate,
                         Quantity = buyTicketDto.Quantity
                     };
                     context.Add(buyTicketDetail);
@@ -392,7 +390,6 @@ namespace StockDealBusiness.Business
                     detailDB.PriceFrom = buyTicketDto.PriceFrom;
                     detailDB.PriceTo = buyTicketDto.PriceTo;
                     detailDB.Quantity = buyTicketDto.Quantity;
-                    detailDB.IsNegotiate = buyTicketDto.IsNegotiate;
 
                     context.Update(detailDB);
                 }

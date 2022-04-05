@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Dto.Ticket
 {
-    public class UpdateBuyTicketDto : UpdateTicketDto, IValidatableObject
+    public class UpdateBuyTicketDto : UpdateTicketDto
     {
         //public UpdateBuyTicketDto()
         //{
@@ -26,33 +26,18 @@ namespace StockDealDal.Dto.Ticket
         public decimal? PriceFrom { get; set; }
 
         [Range((double)1, (double)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
-        public decimal? PriceTo { get; set; }
+        public decimal? PriceTo
+        {
+            get
+            {
+                return PriceFrom;
+            }
+        }
 
-        [Required(ErrorMessage = "ERR_REQUIRED")]
+        //[Required(ErrorMessage = "ERR_REQUIRED")]
         [Range(1, (long)99999999, ErrorMessage = "ERR_INVALID_VALUE")]
         public int? Quantity { get; set; }
 
-        public bool IsNegotiate { get; set; } = false;
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (!IsNegotiate)
-            {
-                if (!PriceFrom.HasValue)
-                {
-                    yield return new ValidationResult("ERR_REQUIRED", new[] { nameof(PriceFrom) });
-                }
-                else
-                {
-                    PriceTo = PriceFrom;
-                    yield return ValidationResult.Success;
-                }
-            }
-            else
-            {
-                PriceFrom = PriceTo = null;
-            }
-        }
         //public List<BuyTicketDetailDto> BuyTicketDetailDtos { get; set; }
     }
 }
