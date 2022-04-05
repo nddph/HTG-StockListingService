@@ -79,7 +79,7 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto, Guid userId)
         {
-            await TicketDB.DeleteTickets(deleteTicketsDto.IsAll.GetValueOrDefault(), userId, deleteTicketsDto.ListTicket);
+            await TicketDB.DeleteTickets(userId, deleteTicketsDto.ListTicket);
             return SuccessResponse();
         }
 
@@ -438,12 +438,14 @@ namespace StockDealBusiness.Business
             var context = new StockDealServiceContext();
             var ticket = await context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
+                .Where(e => e.Status == 1)
                 .Where(e => e.CreatedBy == loginContactId)
                 .Where(e => e.Id == ticketId)
                 .FirstOrDefaultAsync();
 
             if (ticket == null) return NotFoundResponse();
 
+            ticket.Status = 0;
             ticket.DeletedDate = DateTime.Now;
             ticket.DeletedBy = loginContactId;
 
