@@ -34,6 +34,15 @@ namespace StockDealDal.Dto.Ticket
 
         public string EmployeeCode { get; set; }
 
+        public bool? IsNegotiate { get; set; } = false;
+
+        public decimal? PriceFrom { get; set; }
+
+        public decimal? PriceTo { get; set; }
+
+        public int? Quantity { get; set; }
+
+
 
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? ModifiedDate { get; set; }

@@ -233,7 +233,5 @@ namespace StockDealService.Controllers
         }
 
 
-
-        
     }
 }
