@@ -109,10 +109,13 @@ namespace StockDealBusiness.Business
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
             //kiểm tra số lượng CP có hợp lệ hay không
-            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-            if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+            if(!saleTicketDto.IsNegotiate)
             {
-                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+                {
+                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                }
             }
 
             var context = new StockDealServiceContext();
@@ -190,10 +193,13 @@ namespace StockDealBusiness.Business
             }
 
             //kiểm tra số lượng CP có hợp lệ hay không
-            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-            if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+            if(buyTicketDto.Quantity != null)
             {
-                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+                {
+                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                }
             }
 
             var context = new StockDealServiceContext();
@@ -295,10 +301,13 @@ namespace StockDealBusiness.Business
             else saleTicketDto.StockTypeName = stockTypeInfo.Name;
 
             //kiểm tra số lượng CP có hợp lệ hay không
-            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-            if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+            if (!saleTicketDto.IsNegotiate)
             {
-                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+                {
+                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                }
             }
 
             var context = new StockDealServiceContext();
@@ -331,10 +340,13 @@ namespace StockDealBusiness.Business
         public async Task<BaseResponse> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
             //kiểm tra số lượng CP có hợp lệ hay không
-            var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-            if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+            if (buyTicketDto.Quantity != null)
             {
-                return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+                {
+                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                }
             }
 
             var context = new StockDealServiceContext();
