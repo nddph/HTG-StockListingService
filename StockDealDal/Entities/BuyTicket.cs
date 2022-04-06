@@ -10,6 +10,11 @@ namespace StockDealDal.Entities
     [Table("ST_BuyTicket")]
     public class BuyTicket : Ticket
     {
+        public BuyTicket()
+        {
+            BuyTicketDetails = new List<BuyTicketDetail>();
+        }
+
         public string StockCodes { get; set; }
 
         [NotMapped]
@@ -17,5 +22,7 @@ namespace StockDealDal.Entities
 
         [NotMapped]
         public new int TicketType { get; set; } = 1;
+
+        public List<BuyTicketDetail> BuyTicketDetails { get; set; }
     }
 }

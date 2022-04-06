@@ -43,5 +43,23 @@ namespace StockDealBusiness.RequestDB
             if (int.TryParse(res.DisplayValue, out int isAllow)) return isAllow == 1;
             return false;
         }
+
+        /// <summary>
+        /// lấy bội số cho phép khi giao dịch
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<int?> GetTransactionMultiple()
+        {
+            SystemSettingBusiness systemSettingBusiness = new();
+
+            var systemSetting = await systemSettingBusiness.GetSystemSettingItem("TransactionMultiple", 1);
+
+            if (systemSetting != null && !string.IsNullOrWhiteSpace(systemSetting.DisplayValue))
+            {
+                return Int32.Parse(systemSetting.DisplayValue);
+            }
+
+            return null;
+        }
     }
 }

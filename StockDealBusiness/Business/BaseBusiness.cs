@@ -23,12 +23,13 @@ namespace StockDealBusiness.Business
 
 
 
-        protected BaseResponse BadRequestResponse(string message = "")
+        protected BaseResponse BadRequestResponse(string message = "", object data = null)
         {
             return new BaseResponse()
             {
                 StatusCode = 400,
                 Message = message,
+                Data = data
             };
         }
 

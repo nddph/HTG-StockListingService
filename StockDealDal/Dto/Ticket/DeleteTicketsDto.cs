@@ -10,8 +10,5 @@ namespace StockDealDal.Dto.Ticket
     public class DeleteTicketsDto
     {
         public List<Guid> ListTicket { get; set; } = new();
-
-        [Required(ErrorMessage = "ERR_REQUIRED")]
-        public bool? IsAll { get; set; }
     }
 }
