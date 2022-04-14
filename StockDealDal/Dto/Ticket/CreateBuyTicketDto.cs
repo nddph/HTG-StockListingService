@@ -37,7 +37,7 @@ namespace StockDealDal.Dto.Ticket
         {
             if (!IsNegotiate)
             {
-                if (PriceFrom.HasValue)
+                if (!PriceFrom.HasValue)
                 {
                     yield return new ValidationResult("ERR_REQUIRED", new[] { nameof(PriceFrom) });
                 }
