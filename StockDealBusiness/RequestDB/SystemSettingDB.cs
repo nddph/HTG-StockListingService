@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NewsCommon.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace StockDealBusiness.RequestDB
         {
             SystemSettingBusiness systemSettingBusiness = new();
 
-            var res = await systemSettingBusiness.GetSystemSettingItem("Ticket.ExpDate", 0);
+            var res = await systemSettingBusiness.GetSystemSettingItem(Constants.TicketExpDate, 0);
 
             if (res == null) return 0;
             if (int.TryParse(res.DisplayValue, out int expDate)) return expDate;
@@ -37,7 +38,7 @@ namespace StockDealBusiness.RequestDB
         {
             SystemSettingBusiness systemSettingBusiness = new();
 
-            var res = await systemSettingBusiness.GetSystemSettingItem("AllowCreateBuyTicket", 0);
+            var res = await systemSettingBusiness.GetSystemSettingItem(Constants.AllowCreateBuyTicket, 0);
 
             if (res == null) return false;
             if (int.TryParse(res.DisplayValue, out int isAllow)) return isAllow == 1;
@@ -52,7 +53,7 @@ namespace StockDealBusiness.RequestDB
         {
             SystemSettingBusiness systemSettingBusiness = new();
 
-            var systemSetting = await systemSettingBusiness.GetSystemSettingItem("TransactionMultiple", 1);
+            var systemSetting = await systemSettingBusiness.GetSystemSettingItem(Constants.TransactionMultiple, 1);
 
             if (systemSetting != null && !string.IsNullOrWhiteSpace(systemSetting.DisplayValue))
             {
@@ -61,5 +62,24 @@ namespace StockDealBusiness.RequestDB
 
             return null;
         }
+
+        /// <summary>
+        /// số tin rao vặt tối đa được đăng mỗi ngày của 1 người
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<int?> GetMinTicketDaily()
+        {
+            SystemSettingBusiness systemSettingBusiness = new();
+
+            var systemSetting = await systemSettingBusiness.GetSystemSettingItem(Constants.MinTicketDaily, 1);
+
+            if (systemSetting != null && !string.IsNullOrWhiteSpace(systemSetting.DisplayValue))
+            {
+                return Int32.Parse(systemSetting.DisplayValue);
+            }
+
+            return null;
+        }
+
     }
 }
