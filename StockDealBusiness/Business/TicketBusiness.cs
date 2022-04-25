@@ -94,6 +94,17 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto, Guid loginContactId)
         {
+            var context = new StockDealServiceContext();
+
+            //kiểm tra xem quá số lượng cho phép đăng tin 1 ngày hay không
+            var today = DateTime.Now.Date;
+            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.DeletedDate == null).CountAsync();
+            var minTicketDaily = await SystemSettingDB.GetMinTicketDaily();
+            if (minTicketDaily != null && totalTicketDaily == minTicketDaily && minTicketDaily > 0)
+            {
+                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY");
+            }
+
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
@@ -118,7 +129,6 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var context = new StockDealServiceContext();
             var ticket = context.Add(new SaleTicket
             {
                 Id = Guid.NewGuid(),
@@ -182,6 +192,17 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto, Guid loginContactId)
         {
+            var context = new StockDealServiceContext();
+
+            //kiểm tra xem quá số lượng cho phép đăng tin 1 ngày hay không
+            var today = DateTime.Now.Date;
+            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.DeletedDate == null).CountAsync();
+            var minTicketDaily = await SystemSettingDB.GetMinTicketDaily();
+            if (minTicketDaily != null && totalTicketDaily == minTicketDaily && minTicketDaily > 0)
+            {
+                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY");
+            }
+
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
@@ -202,7 +223,6 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var context = new StockDealServiceContext();
             var ticket = context.Add(new BuyTicket
             {
                 Id = Guid.NewGuid(),
