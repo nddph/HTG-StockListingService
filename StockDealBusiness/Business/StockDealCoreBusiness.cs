@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿       using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
 using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.StockDeal;
+using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
 using System.Collections.Generic;
@@ -107,10 +109,26 @@ namespace StockDealBusiness.Business
 
             if (stockDeal == null) return NotFoundResponse();
 
-            return SuccessResponse(new StockDealResponseDto(stockDeal));
+            //lấy thông tin chi tiết của tin đăng
+            if (stockDeal.TicketId.HasValue)
+            {
+                var ticketBusiness = new TicketBusiness();
+                var ticket = await ticketBusiness.GetTicketAsync(stockDeal.TicketId.Value, TicketType.Buy, loginedContactId);
+                if (ticket != null)
+                {
+                    stockDeal.BuyTicket = JsonConvert.DeserializeObject<ViewBuyTickets>(JsonConvert.SerializeObject(ticket));
+                }
+                else
+                {
+                    ticket = await ticketBusiness.GetTicketAsync(stockDeal.TicketId.Value, TicketType.Sale, loginedContactId);
+                    if (ticket != null)
+                    {
+                        stockDeal.SaleTicket = JsonConvert.DeserializeObject<ViewSaleTickets>(JsonConvert.SerializeObject(ticket));
+                    }
+                }
+            }
+            return SuccessResponse(new StockDealResponseDto(stockDeal, true));
         }
-
-
 
         /// <summary>
         /// tạo stock deal

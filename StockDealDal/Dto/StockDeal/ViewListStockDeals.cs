@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +52,12 @@ namespace StockDealDal.Dto.StockDeal
         public int CountUnread { get; set; }
         public int TotalUnread { get; set; }
         public int TotalCount { get; set; }
+
+        [NotMapped]
+        public ViewBuyTickets BuyTicket { get; set; }
+
+        [NotMapped]
+        public ViewSaleTickets SaleTicket { get; set; }
 
     }
 }
