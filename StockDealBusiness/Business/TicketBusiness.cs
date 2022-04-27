@@ -18,7 +18,7 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
-        private async Task<object> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
+        public async Task<object> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
         {
             var ticketSearchCriteria = new TicketSearchCriteria()
             {

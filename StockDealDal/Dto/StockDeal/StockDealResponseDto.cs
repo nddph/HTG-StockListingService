@@ -10,7 +10,7 @@ namespace StockDealDal.Dto.StockDeal
     {
 
         public StockDealResponseDto() { }
-        public StockDealResponseDto(ViewListStockDeals viewListStockDeal)
+        public StockDealResponseDto(ViewListStockDeals viewListStockDeal, bool isDetail = false)
         {
             Id = viewListStockDeal.Id;
             SenderId = viewListStockDeal.SenderId;
@@ -47,6 +47,13 @@ namespace StockDealDal.Dto.StockDeal
                 IsOnwerLastDealDetail = viewListStockDeal.IsOnwerLastDealDetail,
                 StockDetailType = viewListStockDeal.StockDetailType
             };
+
+            if (isDetail)
+            {
+                Ticket.QuantityStatus = viewListStockDeal.SaleTicket == null ? null : viewListStockDeal.SaleTicket.QuantityStatus;
+                Ticket.IsExpTicket = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsExpTicket : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsExpTicket : null;
+                Ticket.Status = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Status : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Status : null;
+            }
         }
 
         // deal
@@ -92,6 +99,10 @@ namespace StockDealDal.Dto.StockDeal
 
         public int? TicketType { get; set; }
 
+        public bool? IsExpTicket { get; set; }
+
+        public int? Status { get; set; }
+
 
         // sale ticket
         public Guid? StockId { get; set; }
@@ -107,6 +118,8 @@ namespace StockDealDal.Dto.StockDeal
 
         public int? Quantity { get; set; }
 
+        public int? QuantityStatus { get; set; }
+
         // buy ticket
         public string StockCodes { get; set; }
 
@@ -120,5 +133,6 @@ namespace StockDealDal.Dto.StockDeal
                 return StockCode;
             }
         }
+
     }
 }
