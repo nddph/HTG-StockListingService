@@ -97,6 +97,27 @@ namespace StockDealService.Controllers
         }
 
 
+        /// <summary>
+        /// xóa deal
+        /// </summary>
+        /// <param name="stockDetailId"></param>
+        /// <returns></returns>
+        [HttpDelete("v1/DeleteStockDetal/{stockDealId}")]
+        public async Task<ObjectResult> DeleteStockDealAsync(Guid stockDealId)
+        {
+            try
+            {
+                var result = await _stockDealBusiness.DeleteStockDealAsync(stockDealId, LoginedContactId);
+
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
 
         /// <summary>
         /// Lấy chi tiết stock deal

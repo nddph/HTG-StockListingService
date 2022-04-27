@@ -1,4 +1,4 @@
-﻿       using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
@@ -89,6 +89,39 @@ namespace StockDealBusiness.Business
             return SuccessResponse(data: stockDetailId);
         }
 
+
+        /// <summary>
+        /// Xóa stock deal
+        /// </summary>
+        /// <param name="stockDealId"></param>
+        /// <param name="loginedContactId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> DeleteStockDealAsync(Guid stockDealId, Guid loginedContactId)
+        {
+            var context = new StockDealServiceContext();
+
+            var stockDeal = await context.StockDeals
+                .Where(e => !e.DeletedDate.HasValue)
+                .Where(e => e.CreatedBy == loginedContactId)
+                .Where(e => e.Id == stockDealId)
+                .Include(e => e.StockDealDetails)
+                .FirstOrDefaultAsync();
+
+            if (stockDeal == null) return NotFoundResponse();
+
+            stockDeal.DeletedDate = DateTime.Now;
+            stockDeal.DeletedBy = loginedContactId;
+
+            stockDeal.StockDealDetails.ForEach(item =>
+            {
+                item.DeletedDate = DateTime.Now;
+                item.DeletedBy = loginedContactId;
+            });
+
+            await context.SaveChangesAsync();
+
+            return SuccessResponse(data: stockDealId);
+        }
 
 
         /// <summary>

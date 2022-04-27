@@ -11,6 +11,11 @@ namespace StockDealDal.Entities
     [Table("ST_StockDeal")]
     public class StockDeal : BaseEntity
     {
+        public StockDeal()
+        {
+            StockDealDetails = new List<StockDealDetail>();
+        }
+
         [Key]
         [Required]
         public Guid Id { get; set; }
@@ -30,7 +35,7 @@ namespace StockDealDal.Entities
 
         public string ReceiverName { get; set; }
 
-        public ICollection<StockDealDetail> StockDealDetails { get; set; }
+        public List<StockDealDetail> StockDealDetails { get; set; }
 
     }
 }

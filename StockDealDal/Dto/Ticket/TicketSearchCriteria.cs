@@ -1,4 +1,5 @@
 ﻿using StockDealCommon;
+using StockDealCommon.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -108,14 +109,14 @@ namespace StockDealDal.Dto.Ticket
         /// </summary>
         public bool? IsHidden { get; set; } = false;
 
-        /// <summary>
-        /// 0: không lọc, sắp sếp theo thời gian mới nhất
-        /// 1: lọc và sắp sếp theo giá thấp nhất
-        /// 2: lọc và sắp sếp theo giá cao nhất
-        /// 3: lọc và sắp sếp theo thương lượng
-        /// </summary>
-        [Range(0, 3, ErrorMessage = "ERR_INVALID_VALUE")]
-        public int OrderByPriceType { get; set; } = 0;
+        ///// <summary>
+        ///// 0: không lọc, sắp sếp theo thời gian mới nhất
+        ///// 1: lọc và sắp sếp theo giá thấp nhất
+        ///// 2: lọc và sắp sếp theo giá cao nhất
+        ///// 3: lọc và sắp sếp theo thương lượng
+        ///// </summary>
+        //[Range(0, 3, ErrorMessage = "ERR_INVALID_VALUE")]
+        //public int OrderByPriceType { get; set; } = 0;
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
         public int CurrentPage { get; set; } = 1;
@@ -124,5 +125,12 @@ namespace StockDealDal.Dto.Ticket
         public int PerPage { get; set; } = 20;
 
         public bool IsPaging { get; set; } = true;
+
+        [EnumDataType(typeof(TicketColumn), ErrorMessage = "sortIndex_ERR_INVALID_VALUE")]
+        public int? SortIndex { get; set; } = 1;
+
+        [EnumDataType(typeof(SortDirection), ErrorMessage = "sortDirection_ERR_INVALID_VALUE")]
+        public int? SortDirection { get; set; } = 1;
+
     }
 }
