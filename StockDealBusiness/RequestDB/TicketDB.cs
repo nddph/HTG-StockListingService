@@ -18,8 +18,8 @@ namespace StockDealBusiness.RequestDB
                         @stockCodes = N'{1}', @status = {2}, @ownerId = '{3}', @byUserType = {4}, @priceFrom = {5}, @priceTo = {6},
                         @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @delTicketStatus = {11},
-                        @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', @orderByPriceType = {16},
-                        @stockTypeIds = N'{17}', @isPaging = {18}, @isHidden = {19}, @ticketId = {20}",
+                        @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', 
+                        @stockTypeIds = N'{16}', @isPaging = {17}, @isHidden = {18}, @ticketId = {19}, @sortIndex = {20}, @sortDirection = {21}",
                         listTicketDto.TicketType,
                         string.Join(",", listTicketDto.StockCodes),
                         listTicketDto.Status,
@@ -34,11 +34,12 @@ namespace StockDealBusiness.RequestDB
                         listTicketDto.PerPage,
                         listTicketDto.QuantityStatus,
                         (listTicketDto.SearchText ?? "").Trim(),
-                        listTicketDto.OrderByPriceType,
                         string.Join(",", listTicketDto.StockTypeIds),
                         listTicketDto.IsPaging ? 1 : 0,
                         listTicketDto.IsHidden.GetValueOrDefault(false),
-                        listTicketDto.TicketId.HasValue ? $"'{listTicketDto.TicketId.GetValueOrDefault()}'" : "null"
+                        listTicketDto.TicketId.HasValue ? $"'{listTicketDto.TicketId.GetValueOrDefault()}'" : "null",
+                        listTicketDto.SortIndex,
+                        listTicketDto.SortDirection
                         );
         }
 

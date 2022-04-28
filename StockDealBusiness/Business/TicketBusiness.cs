@@ -32,7 +32,6 @@ namespace StockDealBusiness.Business
                 TicketType = (int)ticketType,
                 ExpTicketStatus = -1,
                 IsHidden = false,
-                OrderByPriceType = 0,
                 Status = -1,
                 QuantityStatus = -1
             };
