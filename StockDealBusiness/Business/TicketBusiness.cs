@@ -473,7 +473,7 @@ namespace StockDealBusiness.Business
             var context = new StockDealServiceContext();
             var ticket = await context.Tickets
                 .Where(e => !e.DeletedDate.HasValue)
-                .Where(e => e.Status == 1)
+                //.Where(e => e.Status == 1)
                 .Where(e => e.CreatedBy == loginContactId)
                 .Where(e => e.Id == ticketId)
                 .FirstOrDefaultAsync();
