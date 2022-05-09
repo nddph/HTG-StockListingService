@@ -53,6 +53,9 @@ namespace StockDealDal.Dto.StockDeal
                 Ticket.QuantityStatus = viewListStockDeal.SaleTicket == null ? null : viewListStockDeal.SaleTicket.QuantityStatus;
                 Ticket.IsExpTicket = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsExpTicket : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsExpTicket : null;
                 Ticket.Status = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Status : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Status : null;
+                Ticket.IsNegotiate = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsNegotiate : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsNegotiate : null;
+                Ticket.PriceFrom = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.PriceFrom : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.PriceFrom : null;
+                Ticket.Quantity = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Quantity : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Quantity : null;
             }
         }
 
@@ -106,6 +109,7 @@ namespace StockDealDal.Dto.StockDeal
 
         // sale ticket
         public Guid? StockId { get; set; }
+
         public Guid? StockTypeId { get; set; }
 
         public string StockCode { get; set; }
