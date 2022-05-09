@@ -27,6 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="CommonSharing">
+      <HintPath>..\..\CommonUtilities\CommonSharing\CommonSharing.dll</HintPath>
+    </Reference>
     <Reference Include="LogBusinessSharing">
       <HintPath>..\..\CommonUtilities\LogBusinessSharing\LogBusinessSharing.dll</HintPath>
     </Reference>
