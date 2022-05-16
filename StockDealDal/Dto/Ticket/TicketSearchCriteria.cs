@@ -43,8 +43,9 @@ namespace StockDealDal.Dto.Ticket
         /// -1: tất cả
         /// 0: bị ẩn do quá số lượng bán
         /// 1: bật
+        /// 2: do admin ẩn
         /// </summary>
-        [Range(-1, 1, ErrorMessage = "ERR_INVALID_VALUE")]
+        [Range(-1, 2, ErrorMessage = "ERR_INVALID_VALUE")]
         public int Status { get; set; } = -1;
 
         /// <summary>
@@ -105,9 +106,30 @@ namespace StockDealDal.Dto.Ticket
         /// <summary>
         /// lấy tin có số lượng cổ phiếu khả dụng không đủ để bán
         /// lấy tin hết hạn
-        /// lấy tin có status = 0 (tắt)
+        /// lấy tin có status != 1 (tắt)
         /// </summary>
         public bool? IsHidden { get; set; } = false;
+
+
+        /// <summary>
+        /// tên người đăng bài
+        /// </summary>
+        public string StockHolderName { get; set; }
+
+
+        /// <summary>
+        /// thời gian đăng bài
+        /// </summary>
+        public DateTime? CreatedDateFrom { get; set; } = null;
+        public DateTime? CreatedDateTo { get; set; } = null;
+
+
+        /// <summary>
+        /// thời gian chỉnh sửa bài
+        /// </summary>
+        public DateTime? ModifiedDateFrom { get; set; } = null;
+        public DateTime? ModifiedDateTo { get; set; } = null;
+
 
         ///// <summary>
         ///// 0: không lọc, sắp sếp theo thời gian mới nhất

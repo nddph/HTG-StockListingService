@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
+using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,14 @@ namespace StockDealService.Controllers
             _ticketBusiness = new();
         }
 
+        [HttpGet]
+        public BaseResponse Health()
+        {
+            return new BaseResponse()
+            {
+                Message = "Healthy"
+            };
+        }
 
 
         /// <summary>
@@ -58,14 +67,13 @@ namespace StockDealService.Controllers
         /// <returns></returns>
         [HttpPost("v1/DeleteTickets")]
         [Authorize(Roles = "APP_TICKET")]
-        public async Task<ObjectResult> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto)
+        public async Task<ObjectResult> DeleteTicketsAsync(UpdateTicketsStatusDto deleteTicketsDto)
         {
             try
             {
-                var result = await _ticketBusiness.DeleteTicketsAsync(deleteTicketsDto, LoginedContactId);
-
+                deleteTicketsDto.IsDelete = true;
+                var result = await _ticketBusiness.UpdateTicketStatusAsync(deleteTicketsDto, LoginedContactId);
                 return ReturnData(result);
-
             }
             catch (Exception e)
             {
@@ -223,6 +231,82 @@ namespace StockDealService.Controllers
             {
                 var result = await _ticketBusiness.ListTicketsAsync(listTicketDto, LoginedContactId);
 
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+
+        /// <summary>
+        /// Cập nhật trạng thái cho nhiều tin mua bán cùng lúc
+        /// API dùng cho Admin
+        /// </summary>
+        /// <param name="updateTicketsDto"></param>
+        /// <returns></returns>
+        [HttpPost("v1/UpdateTicketStatus")]
+        public async Task<ObjectResult> UpdateTicketStatusAsync(UpdateTicketsStatusDto updateTicketsDto)
+        {
+            try
+            {
+                updateTicketsDto.IsDelete = false;
+                var result = await _ticketBusiness.UpdateTicketStatusAsync(updateTicketsDto, LoginedContactId);
+                return ReturnData(result);
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+
+        /// <summary>
+        /// lấy danh sách tin đăng cho phía admin
+        /// </summary>
+        /// <param name="listTicketDto"></param>
+        /// <returns></returns>
+        [HttpPost("v1/ListTicketsWeb")]
+        public async Task<ObjectResult> ListTicketsWebAsync(TicketSearchCriteria listTicketDto)
+        {
+            try
+            {
+                //set các giá trị lọc cho phía web
+                listTicketDto.ByNewer = true;
+                listTicketDto.ByUserType = -1;
+                listTicketDto.Status = 1;
+                listTicketDto.DelTicketStatus = 1;
+                listTicketDto.ExpTicketStatus = 1;
+                listTicketDto.QuantityStatus = 2;
+                listTicketDto.IsHidden = false;
+                var result = await _ticketBusiness.ListTicketsAsync(listTicketDto, LoginedContactId);
+                return ReturnData(result);
+
+            }
+            catch (Exception e)
+            {
+                return CatchErrorResponse(e, _logger);
+            }
+        }
+
+        /// <summary>
+        /// lấy chi tiết tin tức cho phía web
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpGet("v1/GetTicketWeb")]
+        public async Task<ObjectResult> GetTicketWebAsync(Guid ticketId)
+        {
+            try
+            {
+                if (ticketId == Guid.Empty)
+                {
+                    return BadRequestResponse(createModel(null, "ticketId_ERR_REQUIRED", 400));
+                }
+                var result = await _ticketBusiness.GetTicketAsync(ticketId, LoginedContactId);
                 return ReturnData(result);
 
             }
