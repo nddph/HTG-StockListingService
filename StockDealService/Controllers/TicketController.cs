@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
+using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,14 @@ namespace StockDealService.Controllers
             _ticketBusiness = new();
         }
 
+        [HttpGet]
+        public BaseResponse Health()
+        {
+            return new BaseResponse()
+            {
+                Message = "Healthy"
+            };
+        }
 
 
         /// <summary>
