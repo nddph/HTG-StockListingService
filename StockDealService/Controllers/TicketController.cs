@@ -248,6 +248,7 @@ namespace StockDealService.Controllers
         /// </summary>
         /// <param name="updateTicketsDto"></param>
         /// <returns></returns>
+        [Authorize(Roles = "TICKET_CHANGESTATUS")]
         [HttpPost("v1/UpdateTicketStatus")]
         public async Task<ObjectResult> UpdateTicketStatusAsync(UpdateTicketsStatusDto updateTicketsDto)
         {
@@ -269,6 +270,7 @@ namespace StockDealService.Controllers
         /// </summary>
         /// <param name="listTicketDto"></param>
         /// <returns></returns>
+        [Authorize(Roles = "TICKET_VIEWLIST")]
         [HttpPost("v1/ListTicketsWeb")]
         public async Task<ObjectResult> ListTicketsWebAsync(TicketSearchCriteria listTicketDto)
         {
@@ -297,6 +299,7 @@ namespace StockDealService.Controllers
         /// </summary>
         /// <param name="ticketId"></param>
         /// <returns></returns>
+        [Authorize(Roles = "TICKET_VIEWLIST")]
         [HttpGet("v1/GetTicketWeb")]
         public async Task<ObjectResult> GetTicketWebAsync(Guid ticketId)
         {
