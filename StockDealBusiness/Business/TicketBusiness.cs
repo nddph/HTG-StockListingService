@@ -557,17 +557,8 @@ namespace StockDealBusiness.Business
 
             if (tickets.Count != updateTicketsDto.ticketIds.Count)
             {
-                //lấy id không tìm thấy được thông tin ra
-                foreach (var ticketId in updateTicketsDto.ticketIds)
-                {
-                    var ticket = tickets.Any(x => x.Id == ticketId);
-
-                    //lấy thông tin lịch hẹn đang tồn tại
-                    if (!ticket)
-                    {
-                        return BadRequestResponse("ticketId_ERR_DATA_NOT_FOUND", ticketId);
-                    }
-                }
+                var idNotFound = updateTicketsDto.ticketIds.Where(x => !tickets.Select(x => x.Id).Contains(x)).ToList();
+                return BadRequestResponse("ticketId_ERR_DATA_NOT_FOUND", idNotFound);
             }
 
             if (updateTicketsDto.IsDelete)
@@ -581,12 +572,19 @@ namespace StockDealBusiness.Business
                     updateTicketsDto.Reason = "";
                 };
 
-                tickets.ForEach(x => {
-                    x.ModifiedDate = DateTime.Now;
-                    x.ModifiedBy = userId;
-                    x.Status = updateTicketsDto.Status;
-                    x.Reason = updateTicketsDto.Reason;
-                });
+                //lấy id không tìm thấy được thông tin ra
+                foreach (var ticket in tickets)
+                {
+                    //muốn hiển thị tin tức đã bị ẩn mà không phải do phía admin ẩn
+                    if (updateTicketsDto.Status == 1 && ticket.Status != 2)
+                    {
+                        return BadRequestResponse("ticketId_ERR_STATUS_NOT_CHANGE", ticket.Id);
+                    }
+                    ticket.ModifiedDate = DateTime.Now;
+                    ticket.ModifiedBy = userId;
+                    ticket.Status = updateTicketsDto.Status;
+                    ticket.Reason = updateTicketsDto.Reason;
+                }
             }
 
             await context.SaveChangesAsync();
