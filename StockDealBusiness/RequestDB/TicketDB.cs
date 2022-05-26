@@ -19,7 +19,8 @@ namespace StockDealBusiness.RequestDB
                         @quantityFrom = {7}, @quantityTo = {8}, @byNewer = {9},
                         @expTicketStatus = {10}, @delTicketStatus = {11},
                         @currentPage = {12}, @pageSize = {13}, @quantityStatus = {14}, @searchText = N'{15}', 
-                        @stockTypeIds = N'{16}', @isPaging = {17}, @isHidden = {18}, @ticketId = {19}, @sortIndex = {20}, @sortDirection = {21}",
+                        @stockTypeIds = N'{16}', @isPaging = {17}, @isHidden = {18}, @ticketId = {19}, @sortIndex = {20}, @sortDirection = {21},
+                        @stockHolderName = N'{22}', @createdDateFrom = {23}, @createdDateTo = {24}, @modifiedDateFrom = {25}, @modifiedDateTo = {26}",
                         listTicketDto.TicketType,
                         string.Join(",", listTicketDto.StockCodes),
                         listTicketDto.Status,
@@ -39,7 +40,12 @@ namespace StockDealBusiness.RequestDB
                         listTicketDto.IsHidden.GetValueOrDefault(false),
                         listTicketDto.TicketId.HasValue ? $"'{listTicketDto.TicketId.GetValueOrDefault()}'" : "null",
                         listTicketDto.SortIndex,
-                        listTicketDto.SortDirection
+                        listTicketDto.SortDirection,
+                        (listTicketDto.StockHolderName ?? "").Trim(),
+                        Helper.FormatRequestDate(listTicketDto.CreatedDateFrom.GetValueOrDefault()),
+                        Helper.FormatRequestDate(listTicketDto.CreatedDateTo.GetValueOrDefault()),
+                        Helper.FormatRequestDate(listTicketDto.ModifiedDateFrom.GetValueOrDefault()),
+                        Helper.FormatRequestDate(listTicketDto.ModifiedDateTo.GetValueOrDefault())
                         );
         }
 

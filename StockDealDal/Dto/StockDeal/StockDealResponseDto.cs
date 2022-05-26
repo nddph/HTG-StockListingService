@@ -56,6 +56,7 @@ namespace StockDealDal.Dto.StockDeal
                 Ticket.IsNegotiate = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsNegotiate : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsNegotiate : null;
                 Ticket.PriceFrom = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.PriceFrom : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.PriceFrom : null;
                 Ticket.Quantity = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Quantity : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Quantity : null;
+                Ticket.Reason = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Reason : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Reason : "";
             }
         }
 
@@ -106,6 +107,8 @@ namespace StockDealDal.Dto.StockDeal
 
         public int? Status { get; set; }
 
+        public string Reason { get; set; }
+
 
         // sale ticket
         public Guid? StockId { get; set; }
@@ -128,6 +131,7 @@ namespace StockDealDal.Dto.StockDeal
         public string StockCodes { get; set; }
 
         public DateTime? DeletedDate { get; set; }
+        
 
         public string StockCodeView
         {

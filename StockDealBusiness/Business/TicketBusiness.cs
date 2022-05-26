@@ -69,21 +69,6 @@ namespace StockDealBusiness.Business
         }
 
 
-
-        /// <summary>
-        /// Xóa nhiều tin mua bán hoặc tất cả bằng storeproduce
-        /// </summary>
-        /// <param name="deleteTicketsDto"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public async Task<BaseResponse> DeleteTicketsAsync(DeleteTicketsDto deleteTicketsDto, Guid userId)
-        {
-            await TicketDB.DeleteTickets(userId, deleteTicketsDto.ListTicket);
-            return SuccessResponse();
-        }
-
-
-
         /// <summary>
         /// tạo tin bán cổ phiếu
         /// </summary>
@@ -499,6 +484,29 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> ListTicketsAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
+            if (listTicketDto.CreatedDateFrom != null || listTicketDto.CreatedDateTo != null)
+            {
+                if (listTicketDto.CreatedDateFrom == null && listTicketDto.CreatedDateTo != null)
+                {
+                    return BadRequestResponse("createdDateFrom_ERR_REQUIRED");
+                }
+                if (listTicketDto.CreatedDateFrom != null && listTicketDto.CreatedDateTo == null)
+                {
+                    return BadRequestResponse("createdDateTo_ERR_REQUIRED");
+                }
+            }
+
+            if (listTicketDto.ModifiedDateFrom != null || listTicketDto.ModifiedDateTo != null)
+            {
+                if (listTicketDto.ModifiedDateFrom == null && listTicketDto.ModifiedDateTo != null)
+                {
+                    return BadRequestResponse("modifiedDateFrom_ERR_REQUIRED");
+                }
+                if (listTicketDto.ModifiedDateFrom != null && listTicketDto.ModifiedDateTo == null)
+                {
+                    return BadRequestResponse("modifiedDateTo_ERR_REQUIRED");
+                }
+            }
 
             PaginateDto paginate = new();
 
@@ -524,6 +532,65 @@ namespace StockDealBusiness.Business
             return SuccessResponse(data: paginate);
         }
 
+
+        /// <summary>
+        /// Xóa nhiều tin mua bán hoặc tất cả bằng storeproduce
+        /// </summary>
+        /// <param name="deleteTicketsDto"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<BaseResponse> UpdateTicketStatusAsync(UpdateTicketsStatusDto updateTicketsDto, Guid userId)
+        {
+            if (!updateTicketsDto.IsDelete && updateTicketsDto.Status != (int)TicketStatus.Show && updateTicketsDto.Status != (int)TicketStatus.HideAdmin)
+            {
+                return BadRequestResponse("status_ERR_INVALID_VALUE");
+            }
+
+            if (!updateTicketsDto.IsDelete && updateTicketsDto.Status == (int)TicketStatus.HideAdmin && string.IsNullOrWhiteSpace(updateTicketsDto.Reason))
+            {
+                return BadRequestResponse("reason_ERR_REQUIRED");
+            }
+
+            var context = new StockDealServiceContext();
+
+            var tickets = await context.Tickets.Where(x => updateTicketsDto.ticketIds.Contains(x.Id) && x.DeletedDate == null).ToListAsync();
+
+            if (tickets.Count != updateTicketsDto.ticketIds.Count)
+            {
+                var idNotFound = updateTicketsDto.ticketIds.Where(x => !tickets.Select(x => x.Id).Contains(x)).ToList();
+                return BadRequestResponse("ticketId_ERR_DATA_NOT_FOUND", idNotFound);
+            }
+
+            if (updateTicketsDto.IsDelete)
+            {
+                await TicketDB.DeleteTickets(userId, updateTicketsDto.ticketIds);
+            }
+            else
+            {
+                if (updateTicketsDto.Status == (int)TicketStatus.Show)
+                {
+                    updateTicketsDto.Reason = "";
+                };
+
+                //lấy id không tìm thấy được thông tin ra
+                foreach (var ticket in tickets)
+                {
+                    //muốn hiển thị tin tức đã bị ẩn mà không phải do phía admin ẩn
+                    if (updateTicketsDto.Status == 1 && ticket.Status != 2)
+                    {
+                        return BadRequestResponse("ticketId_ERR_STATUS_NOT_CHANGE", ticket.Id);
+                    }
+                    ticket.ModifiedDate = DateTime.Now;
+                    ticket.ModifiedBy = userId;
+                    ticket.Status = updateTicketsDto.Status;
+                    ticket.Reason = updateTicketsDto.Reason;
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            return SuccessResponse();
+        }
 
     }
 }

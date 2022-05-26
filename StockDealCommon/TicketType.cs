@@ -11,4 +11,11 @@ namespace StockDealCommon
         Buy = 1,
         Sale = 2
     }
+
+    public enum TicketStatus
+    {
+        HideQuantity = 0,
+        Show = 1,
+        HideAdmin = 2
+    }
 }
