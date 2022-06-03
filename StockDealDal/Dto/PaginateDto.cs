@@ -20,6 +20,13 @@ namespace StockDealDal.Dto
         public int CurrentPage { get; set; } = 1;
         public int PerPage { get; set; } = 20;
         public object Data { get; set; }
+        public object Items
+        {
+            get
+            {
+                return Data;
+            }
+        }
 
     }
 }
