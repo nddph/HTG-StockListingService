@@ -47,6 +47,28 @@ namespace StockDealBusiness.EventBus
 
 
         /// <summary>
+        /// Gửi thông báo cho user về tin bị admin ẩn
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="isReply"></param>
+        /// <returns></returns>
+        public static async Task<BaseResponse> NotificationAdminHiddenTicketAsync(Guid userId, List<Guid> ticketId, bool isReply = false)
+        {
+            var body = new AdminHiddenTicketDto
+            {
+                UserId = userId,
+                TicketId = ticketId
+            };
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationAdminHiddenTicket,
+                        JsonConvert.SerializeObject(body), ConstEventBus.EXCHANGE_NOTIFY, isReply);
+
+            var resData = ReturnData(res, isReply);
+
+            return resData;
+        }
+
+
+        /// <summary>
         /// gửi thông báo thương lượng
         /// </summary>
         /// <param name="dealNofifyDto"></param>
