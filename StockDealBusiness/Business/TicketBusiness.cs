@@ -589,6 +589,13 @@ namespace StockDealBusiness.Business
 
             await context.SaveChangesAsync();
 
+            #region gửi thông báo có tin đăng liên quan
+            if (!updateTicketsDto.IsDelete)
+            {
+                await CallEventBus.NotificationAdminHiddenTicketAsync(userId, updateTicketsDto.ticketIds, false);
+            }
+            #endregion
+
             return SuccessResponse();
         }
 
