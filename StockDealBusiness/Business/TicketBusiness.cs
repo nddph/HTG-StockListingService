@@ -552,6 +552,7 @@ namespace StockDealBusiness.Business
             }
 
             var context = new StockDealServiceContext();
+            var adminHiddenTickets = new List<AdminHiddenTicketDto>();
 
             var tickets = await context.Tickets.Where(x => updateTicketsDto.ticketIds.Contains(x.Id) && x.DeletedDate == null).ToListAsync();
 
@@ -584,6 +585,24 @@ namespace StockDealBusiness.Business
                     ticket.ModifiedBy = userId;
                     ticket.Status = updateTicketsDto.Status;
                     ticket.Reason = updateTicketsDto.Reason;
+
+                    var adminHiddenTicket = adminHiddenTickets.FirstOrDefault(x => x.UserId == ticket.CreatedBy);
+                    if (adminHiddenTicket != null)
+                    {
+                        adminHiddenTicket.TicketId.Add(ticket.Id);
+                    }
+                    else
+                    {
+                        if (ticket.CreatedBy.HasValue)
+                        {
+                            adminHiddenTicket = new AdminHiddenTicketDto()
+                            {
+                                UserId = ticket.CreatedBy.Value
+                            };
+                            adminHiddenTicket.TicketId.Add(ticket.Id);
+                            adminHiddenTickets.Add(adminHiddenTicket);
+                        }
+                    }
                 }
             }
 
@@ -592,7 +611,7 @@ namespace StockDealBusiness.Business
             #region gửi thông báo có tin đăng liên quan
             if (!updateTicketsDto.IsDelete)
             {
-                await CallEventBus.NotificationAdminHiddenTicketAsync(userId, updateTicketsDto.ticketIds, false);
+                await CallEventBus.NotificationAdminHiddenTicketAsync(adminHiddenTickets, false);
             }
             #endregion
 
