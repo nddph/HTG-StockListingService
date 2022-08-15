@@ -29,8 +29,6 @@ namespace StockDealService.Controllers
         private readonly StockDealCoreBusiness _stockDealCoreBusiness;
         private readonly ILogger _logger;
 
-
-
         private Guid GetStockDealId()
         {
             Context.GetHttpContext().Request.Query.TryGetValue("stockDealId", out StringValues stockDealIds);
@@ -40,8 +38,6 @@ namespace StockDealService.Controllers
             return stockDealId;
         }
 
-
-
         private string LoginedContactFullName
         {
             get
@@ -49,8 +45,6 @@ namespace StockDealService.Controllers
                 return Context.User?.Claims?.FirstOrDefault(claim => claim.Type == "fullName")?.Value;
             }
         }
-
-
 
         private Guid LoginedContactId
         {
@@ -65,16 +59,12 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
         public StockDealHub(ILogger<StockDealHub> logger)
         {
             _stockDealHubBusiness = new();
             _stockDealCoreBusiness = new();
             _logger = logger;
         }
-
-
 
         [HubMethodName(ConstStockDealHub.DeleteStockDealDetail)]
         public async Task<BaseResponse> DeleteStockDealDetail([Required] Guid? stockDealDeailId)
@@ -96,8 +86,6 @@ namespace StockDealService.Controllers
                 return new BaseResponse() { StatusCode = 400, Message = e.Message };
             }
         }
-
-
 
         [HubMethodName(ConstStockDealHub.CreateStockDealDetail)]
         public async Task<BaseResponse> CreateStockDealDetail([Required] CreateStockDetailDto input)
@@ -165,9 +153,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
-
         /// <summary>
         /// Gửi thông báo thương lượng
         /// </summary>
@@ -228,8 +213,6 @@ namespace StockDealService.Controllers
             return new BaseResponse();
         }
 
-
-
         public override async Task<Task> OnConnectedAsync()
         {
             try
@@ -282,8 +265,6 @@ namespace StockDealService.Controllers
             }
 
         }
-
-
 
         public override async Task<Task> OnDisconnectedAsync(Exception exception)
         {

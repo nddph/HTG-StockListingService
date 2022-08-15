@@ -26,6 +26,7 @@ namespace StockDealService.Controllers
         }
 
         [HttpGet]
+        [Route("v1/healthy")]
         public BaseResponse Health()
         {
             return new BaseResponse()
@@ -33,7 +34,6 @@ namespace StockDealService.Controllers
                 Message = "Healthy"
             };
         }
-
 
         /// <summary>
         /// Đếm số lượng tin mua bán
@@ -57,8 +57,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
         /// <summary>
         /// Xóa nhiều tin mua bán cùng lúc
         /// API dùng cho Admin
@@ -66,7 +64,6 @@ namespace StockDealService.Controllers
         /// <param name="deleteTicketsDto"></param>
         /// <returns></returns>
         [HttpPost("v1/DeleteTickets")]
-        [Authorize(Roles = "APP_TICKET")]
         public async Task<ObjectResult> DeleteTicketsAsync(UpdateTicketsStatusDto deleteTicketsDto)
         {
             try
@@ -80,8 +77,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Tạo tin bán cổ phiếu
@@ -102,8 +97,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Tạo tin mua cổ phiếu
@@ -126,8 +119,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
         /// <summary>
         /// cập nhật tin bán
         /// </summary>
@@ -148,8 +139,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Cập nhật tin mua
@@ -172,8 +161,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
         /// <summary>
         /// lấy chi tiết tin tức
         /// </summary>
@@ -194,8 +181,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// xóa tin
@@ -218,7 +203,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
         /// <summary>
         /// lấy danh sách tin đăng
         /// </summary>
@@ -239,8 +223,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Cập nhật trạng thái cho nhiều tin mua bán cùng lúc
@@ -263,7 +245,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
 
         /// <summary>
         /// lấy danh sách tin đăng cho phía admin
@@ -318,7 +299,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
 
     }
 }

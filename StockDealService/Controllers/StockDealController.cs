@@ -25,8 +25,6 @@ namespace StockDealService.Controllers
             _stockDealBusiness = new();
         }
 
-
-
         /// <summary>
         /// lấy danh sách chi tiết thương lượng theo thời gian
         /// </summary>
@@ -50,8 +48,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-
         /// <summary>
         /// Đánh dấu tin nhắn đã đọc
         /// </summary>
@@ -72,8 +68,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// xóa deal detail
@@ -96,7 +90,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
         /// <summary>
         /// xóa deal
         /// </summary>
@@ -118,7 +111,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
         /// <summary>
         /// Lấy chi tiết stock deal
         /// </summary>
@@ -138,8 +130,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Tạo StockDeal
@@ -164,8 +154,6 @@ namespace StockDealService.Controllers
                 return CatchErrorResponse(e, _logger);
             }
         }
-
-
 
         /// <summary>
         /// Danh sách stock deal cho user
@@ -192,8 +180,6 @@ namespace StockDealService.Controllers
             }
         }
 
-
-        
         /// <summary>
         /// Danh sách stock deal detail
         /// </summary>
