@@ -52,6 +52,7 @@ namespace StockDealDal.Dto.StockDeal
         public int CountUnread { get; set; }
         public int TotalUnread { get; set; }
         public int TotalCount { get; set; }
+        public int Type { get; set; }
 
         [NotMapped]
         public ViewBuyTickets BuyTicket { get; set; }

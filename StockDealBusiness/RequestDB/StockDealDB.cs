@@ -45,12 +45,13 @@ namespace StockDealBusiness.RequestDB
 
             var context = new StockDealServiceContext();
 
-            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}, @stockDealId = {4}",
+            var sql = string.Format(@"EXECUTE [GetListStockDeals] @userId = '{0}', @currentPage = {1}, @pageSize = {2}, @includeEmptyDeal = {3}, @stockDealId = {4}, @type = {5}",
                 stockDealSearch.LoginedContactId,
                 stockDealSearch.CurrentPage,
                 stockDealSearch.PerPage,
                 stockDealSearch.IncludeEmptyDeal,
-                stockDealSearch.StockDealId.HasValue ? $"'{stockDealSearch.StockDealId}'" : "null"
+                stockDealSearch.StockDealId.HasValue ? $"'{stockDealSearch.StockDealId}'" : "null",
+                stockDealSearch.Type
                 );
 
             return await context.ViewListStockDeals.FromSqlRaw(sql).ToListAsync();

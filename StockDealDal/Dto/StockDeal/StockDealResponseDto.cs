@@ -20,6 +20,7 @@ namespace StockDealDal.Dto.StockDeal
             ReceiverType = viewListStockDeal.ReceiverType;
             LastUpdate = viewListStockDeal.LastUpdate;
             CountUnread = viewListStockDeal.CountUnread;
+            Type = viewListStockDeal.Type;
             Ticket = new()
             {
                 Id = viewListStockDeal.TicketId,
@@ -70,6 +71,7 @@ namespace StockDealDal.Dto.StockDeal
 
         public DateTime? LastUpdate { get; set; }
         public int CountUnread { get; set; }
+        public int Type { get; set; }
 
         public TicketStockDealResponseDto Ticket { get; set; }
         public DealDetailStockDealResponseDto LastDealDetail { get; set; }
