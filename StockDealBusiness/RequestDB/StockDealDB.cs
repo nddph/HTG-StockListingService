@@ -51,7 +51,7 @@ namespace StockDealBusiness.RequestDB
                 stockDealSearch.PerPage,
                 stockDealSearch.IncludeEmptyDeal,
                 stockDealSearch.StockDealId.HasValue ? $"'{stockDealSearch.StockDealId}'" : "null",
-                stockDealSearch.Type
+                stockDealSearch.Type ?? 0
                 );
 
             return await context.ViewListStockDeals.FromSqlRaw(sql).ToListAsync();

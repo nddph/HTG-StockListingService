@@ -26,6 +26,6 @@ namespace StockDealDal.Dto.StockDeal
         /// 1: người bán
         /// 2: người mua
         /// </summary>
-        public int? Type { get; set; }
+        public int? Type { get; set; } = 0;
     }
 }
