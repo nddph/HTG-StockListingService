@@ -61,6 +61,11 @@ namespace StockDealDal.Dto.Ticket
 
         public int TotalCount { get; set; }
 
+        /// <summary>
+        /// -1: tất cả
+        /// 1: không đủ để bán
+        /// 2: đủ để bán
+        /// </summary>
         public int QuantityStatus { get; set; }
 
         public int TicketType { get; set; }

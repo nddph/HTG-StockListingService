@@ -82,11 +82,11 @@ namespace StockDealBusiness.Business
 
             //kiểm tra xem quá số lượng cho phép đăng tin 1 ngày hay không
             var today = DateTime.Now.Date;
-            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.DeletedDate == null).CountAsync();
+            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.CreatedBy == loginContactId && x.DeletedDate == null).CountAsync();
             var minTicketDaily = await SystemSettingDB.GetMinTicketDaily();
-            if (minTicketDaily != null && totalTicketDaily == minTicketDaily && minTicketDaily > 0)
+            if (minTicketDaily != null && totalTicketDaily >= minTicketDaily && minTicketDaily > 0)
             {
-                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY");
+                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY", minTicketDaily);
             }
 
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
@@ -180,11 +180,11 @@ namespace StockDealBusiness.Business
 
             //kiểm tra xem quá số lượng cho phép đăng tin 1 ngày hay không
             var today = DateTime.Now.Date;
-            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.DeletedDate == null).CountAsync();
+            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.CreatedBy == loginContactId && x.DeletedDate == null).CountAsync();
             var minTicketDaily = await SystemSettingDB.GetMinTicketDaily();
-            if (minTicketDaily != null && totalTicketDaily == minTicketDaily && minTicketDaily > 0)
+            if (minTicketDaily != null && totalTicketDaily >= minTicketDaily && minTicketDaily > 0)
             {
-                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY");
+                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY", minTicketDaily);
             }
 
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
@@ -435,12 +435,45 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> GetTicketAsync(Guid ticketId, Guid loginContactId)
         {
+            var ticketType = TicketType.Buy;
+            ViewBuyTickets ticketBuy = null;
+            ViewSaleTickets ticketSale = null;
 
             var ticket = await GetTicketAsync(ticketId, TicketType.Buy, loginContactId);
 
-            if (ticket == null) ticket = await GetTicketAsync(ticketId, TicketType.Sale, loginContactId);
+            if (ticket == null)
+            {
+                ticket = await GetTicketAsync(ticketId, TicketType.Sale, loginContactId);
+                ticketType = TicketType.Sale;
+            }
 
             if (ticket == null) return NotFoundResponse();
+
+            //ktra nếu ticket đã bị ẩn thì chỉ có người đăng tin mới đc phép xem
+            if (ticketType == TicketType.Buy)
+            {
+                ticketBuy = (ViewBuyTickets)ticket;
+                if (loginContactId == Guid.Empty || loginContactId != ticketBuy.CreatedBy)
+                {
+                    if (ticketBuy.Status != 1 || ticketBuy.DeletedDate != null || 
+                          (ticketBuy.IsExpTicket.HasValue && ticketBuy.IsExpTicket.Value))
+                    {
+                        return BadRequestResponse("ticket_ERR_HIDDEN");
+                    }     
+                }
+            }
+            else
+            {
+                ticketSale = (ViewSaleTickets)ticket;
+                if (loginContactId == Guid.Empty || loginContactId != ticketBuy.CreatedBy)
+                {
+                    if (ticketSale.Status != 1 || ticketSale.DeletedDate != null ||
+                          (ticketSale.IsExpTicket.HasValue && ticketSale.IsExpTicket.Value))
+                    {
+                        return BadRequestResponse("ticket_ERR_HIDDEN");
+                    }
+                }
+            }
 
             return SuccessResponse(data: ticket);
         }
