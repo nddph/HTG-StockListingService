@@ -465,7 +465,7 @@ namespace StockDealBusiness.Business
             else
             {
                 ticketSale = (ViewSaleTickets)ticket;
-                if (loginContactId == Guid.Empty || loginContactId != ticketBuy.CreatedBy)
+                if (loginContactId == Guid.Empty || loginContactId != ticketSale.CreatedBy)
                 {
                     if (ticketSale.Status != 1 || ticketSale.DeletedDate != null ||
                           (ticketSale.IsExpTicket.HasValue && ticketSale.IsExpTicket.Value))
