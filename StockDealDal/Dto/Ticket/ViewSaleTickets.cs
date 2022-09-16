@@ -1,6 +1,8 @@
-﻿using System;
+﻿using StockDealDal.Dto.StockDeal;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,6 +77,9 @@ namespace StockDealDal.Dto.Ticket
         public bool? IsExpTicket { get; set; }
 
         public string Reason { get; set; }
+
+        [NotMapped]
+        public List<StockDealResponseDto> StockDeals { get; set; } = new List<StockDealResponseDto>();
 
     }
 }

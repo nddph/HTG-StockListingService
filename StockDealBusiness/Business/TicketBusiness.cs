@@ -4,6 +4,7 @@ using StockDealBusiness.RequestDB;
 using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
+using StockDealDal.Dto.StockDeal;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
@@ -475,7 +476,26 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            return SuccessResponse(data: ticket);
+            //lấy thông tin các deal theo tin tức này
+            var stockDealSearch = new StockDealSearchCriteria()
+            {
+                TicketId = ticketId,
+                LoginedContactId = loginContactId,
+                CurrentPage = 1,
+                PerPage = 1000
+            };
+            var list = await StockDealDB.ListStockDealAsync(stockDealSearch);
+            var listResult = list.Select(e => new StockDealResponseDto(e)).ToList();
+            if (ticketType == TicketType.Buy)
+            {
+                ticketBuy.StockDeals = listResult;
+                return SuccessResponse(ticketBuy);
+            }
+            else
+            {
+                ticketSale.StockDeals = listResult;
+                return SuccessResponse(ticketSale);
+            }
         }
 
 

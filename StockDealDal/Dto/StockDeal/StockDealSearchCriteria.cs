@@ -11,6 +11,8 @@ namespace StockDealDal.Dto.StockDeal
     {
         public Guid? StockDealId { get; set; }
 
+        public Guid? TicketId { get; set; }
+
         public Guid? LoginedContactId { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "ERR_INVALID_VALUE")]
