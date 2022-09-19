@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
+using StockDealDal.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -164,6 +165,25 @@ namespace StockDealBusiness.EventBus
         }
 
 
+        /// <summary>
+        /// lấy thông tin hạn mức giao dịch
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<List<DTOStockPolicyResponse>> GetStockPolicyList(Guid stockId, Guid stockTypeId, bool isReply = true)
+        {
+            var request = new DTOSearchStockPolicy()
+            {
+                StockId = stockId,
+                StockTypeId = stockTypeId,
+                GetOldEffectDate = 0
+            };
+            string bodyString = JsonConvert.SerializeObject(request);
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_GetStockPolicyList, bodyString, ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
+            var resData = ReturnData(res, isReply);
+            if (resData.StatusCode != 200) return null;
+
+            return JsonConvert.DeserializeObject<List<DTOStockPolicyResponse>>(resData.Data.ToString());
+        }
 
         /// <summary>
         /// Lấy danh sách các mã CP trong hệ thống

@@ -54,7 +54,7 @@ namespace StockDealDal.Dto.Ticket
         public List<string> StockCodes { get; set; } = new();
 
         /// <summary>
-        /// lọc theo danh sách loại cổ phiếu
+        /// lọc theo danh sách id loại cổ phiếu
         /// </summary>
         public List<string> StockTypeIds { get; set; } = new();
 

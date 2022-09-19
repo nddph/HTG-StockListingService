@@ -8,6 +8,7 @@ using StockDealDal.Dto.StockDeal;
 using StockDealDal.Dto.Ticket;
 using StockDealDal.Entities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
-        public async Task<object> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
+        public async Task<ViewTickets> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
         {
             var ticketSearchCriteria = new TicketSearchCriteria()
             {
@@ -37,12 +38,8 @@ namespace StockDealBusiness.Business
                 QuantityStatus = -1
             };
 
-            if (ticketType == TicketType.Buy) return (await TicketDB.ListBuyTicketAsync(ticketSearchCriteria, loginContactId)).FirstOrDefault();
-            return (await TicketDB.ListSaleTicketAsync(ticketSearchCriteria, loginContactId)).FirstOrDefault();
-
+            return (await TicketDB.ListTicketAsync(ticketSearchCriteria, loginContactId)).FirstOrDefault();
         }
-
-
 
         /// <summary>
         /// đếm số lượng ticket
@@ -57,10 +54,10 @@ namespace StockDealBusiness.Business
             listTicketDto.PerPage = 1;
 
             listTicketDto.TicketType = (int)TicketType.Buy;
-            var listBuyTicket = await TicketDB.ListBuyTicketAsync(listTicketDto, loginContactId);
+            var listBuyTicket = await TicketDB.ListTicketAsync(listTicketDto, loginContactId);
 
             listTicketDto.TicketType = (int)TicketType.Sale;
-            var listSaleTicket = await TicketDB.ListSaleTicketAsync(listTicketDto, loginContactId);
+            var listSaleTicket = await TicketDB.ListTicketAsync(listTicketDto, loginContactId);
 
             return SuccessResponse(new CountTicketResponseDto 
             { 
@@ -69,15 +66,14 @@ namespace StockDealBusiness.Business
             });
         }
 
-
         /// <summary>
-        /// tạo tin bán cổ phiếu
+        /// tạo tin mua bán cổ phiếu
         /// </summary>
-        /// <param name="saleTicketDto"></param>
+        /// <param name="ticketDto"></param>
         /// <param name="loginContactId"></param>
-        /// <param name="loginContactName"></param>
+        /// <param name="ticketType"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto, Guid loginContactId)
+        public async Task<BaseResponse> CreateTicketAsync(CreateTicketDto ticketDto, Guid loginContactId, TicketType ticketType)
         {
             var context = new StockDealServiceContext();
 
@@ -93,341 +89,233 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            if (ticketType == TicketType.Buy)
+            {
+                // cho phép người dùng không phải nhân viên đăng bài
+                if (await SystemSettingDB.AllowCreateBuyTicketAsync() == false)
+                {
+                    // nếu không phải nhân viên thì không cho đăng
+                    if (stockHolderInfo.Status == 0) return BadRequestResponse("user_ERR_ONLY_STAFF_CREATE_BUY_TICKET");
+                }
+            }
 
-            var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+            if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+
+            var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
-            else saleTicketDto.StockCode = stockInfo.StockCode;
 
-            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
+            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
-            else saleTicketDto.StockTypeName = stockTypeInfo.Name;
+
+            //kiểm tra hạn mức giao dịch tin bán
+            var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
+            if (stockPolicyList != null && stockPolicyList.Count > 0)
+            {
+                var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
+                if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
+                {
+                    return BadRequestResponse("quantity_ERR_LOW_THAN_POLICY", stockPolicy.MinSaleTrans);
+                }
+            }
 
             //kiểm tra số lượng CP có hợp lệ hay không
-            if(!saleTicketDto.IsNegotiate)
+            if (!ticketDto.IsNegotiate)
             {
                 var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+                if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
                 {
                     return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
                 }
             }
 
-            var ticket = context.Add(new SaleTicket
+            Guid ticketId;
+
+            if (ticketType == TicketType.Sale)
             {
-                Id = Guid.NewGuid(),
-                FullName = stockHolderInfo.FullName,
-                CreatedBy = loginContactId,
-                Status = 1,
-                ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
-                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
-                Email = stockHolderInfo.WorkingEmail,
-                EmployeeCode = stockHolderInfo.EmployeeCode,
-                Phone = stockHolderInfo.Phone
-            });
-
-            ticket.CurrentValues.SetValues(saleTicketDto);
-
-            await context.SaveChangesAsync();
-
-            #region gửi thông báo có tin đăng liên quan
-            TicketSearchCriteria ticketSearch = new()
-            {
-                IsPaging = false,
-                ByUserType = 2,
-                ByNewer = true,
-                TicketType = (int)TicketType.Buy,
-                DelTicketStatus = 1,
-                ExpTicketStatus = 1,
-                QuantityStatus = 2,
-                StockCodes = new List<string>() { saleTicketDto.StockCode },
-                Status = 1
-            };
-            var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
-            if (listUserRes.StatusCode != 200) return listUserRes;
-            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewBuyTickets>;
-
-            SuggestTicketDto suggestTicketDto = new()
-            {
-                UserId = loginContactId,
-                TicketId = ticket.Entity.Id,
-                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
-                TicketType = (int)TicketType.Sale,
-                StockCodes = ticket.Entity.StockCode,
-                Quantity = ticket.Entity.Quantity,
-                Price = ticket.Entity.PriceFrom,
-                IsNegotiate = ticket.Entity.IsNegotiate,
-                Title = ticket.Entity.Title
-            };
-            await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
-            #endregion
-
-            return SuccessResponse(data: ticket.Entity.Id);
-        }
-
-
-
-        /// <summary>
-        /// Tạo tin mua cổ phiếu
-        /// </summary>
-        /// <param name="buyTicketDto"></param>
-        /// <param name="loginContactId"></param>
-        /// <param name="loginContactName"></param>
-        /// <returns></returns>
-        public async Task<BaseResponse> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto, Guid loginContactId)
-        {
-            var context = new StockDealServiceContext();
-
-            //kiểm tra xem quá số lượng cho phép đăng tin 1 ngày hay không
-            var today = DateTime.Now.Date;
-            var totalTicketDaily = await context.Tickets.Where(x => x.CreatedDate.HasValue && x.CreatedDate.Value.Date == today && x.CreatedBy == loginContactId && x.DeletedDate == null).CountAsync();
-            var minTicketDaily = await SystemSettingDB.GetMinTicketDaily();
-            if (minTicketDaily != null && totalTicketDaily >= minTicketDaily && minTicketDaily > 0)
-            {
-                return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY", minTicketDaily);
-            }
-
-            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
-            if (stockHolderInfo == null) return BadRequestResponse();
-
-            // cho phép người dùng không phải nhân viên đăng bài
-            if (await SystemSettingDB.AllowCreateBuyTicketAsync() == false)
-            {
-                // nếu không phải nhân viên thì không cho đăng
-                if (stockHolderInfo.Status == 0) return BadRequestResponse("user_ERR_ONLY_STAFF_CREATE_BUY_TICKET");
-            }
-
-            //kiểm tra số lượng CP có hợp lệ hay không
-            if(buyTicketDto.Quantity != null)
-            {
-                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
+                var ticket = context.Add(new SaleTicket
                 {
-                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
-                }
+                    Id = Guid.NewGuid(),
+                    FullName = stockHolderInfo.FullName,
+                    CreatedBy = loginContactId,
+                    CreatedDate = DateTime.Now,
+                    Status = 1,
+                    ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
+                    Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
+                    Email = stockHolderInfo.WorkingEmail,
+                    EmployeeCode = stockHolderInfo.EmployeeCode,
+                    Phone = stockHolderInfo.Phone,
+                    StockCode = stockInfo.StockCode,
+                    StockTypeName = stockTypeInfo.Name
+                });
+
+                ticket.CurrentValues.SetValues(ticketDto);
+
+                ticketId = ticket.Entity.Id;
             }
-
-            var ticket = context.Add(new BuyTicket
+            else
             {
-                Id = Guid.NewGuid(),
-                FullName = stockHolderInfo.FullName,
-                CreatedBy = loginContactId,
-                Status = 1,
-                ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
-                Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
-                Email = stockHolderInfo.WorkingEmail,
-                EmployeeCode = stockHolderInfo.EmployeeCode,
-                Phone = stockHolderInfo.Phone,
-                StockCodes = string.Join(",", buyTicketDto.StockCode)
-            });
-
-            ticket.CurrentValues.SetValues(buyTicketDto);
-
-            //danh sách các mã CP đang có trong hệ thống
-            var stocks = await CallEventBus.GetStockList(true);
-
-            foreach(var item in buyTicketDto.StockCode)
-            {
-                var stock = stocks.Count > 0 ? stocks.FirstOrDefault(x => x.StockCode == item) : null;
-                if(stock == null)
+                var ticket = context.Add(new BuyTicket
                 {
-                    return BadRequestResponse("stockCode_ERR_INVALID_VALUE", item);
-                }
+                    Id = Guid.NewGuid(),
+                    FullName = stockHolderInfo.FullName,
+                    CreatedBy = loginContactId,
+                    CreatedDate = DateTime.Now,
+                    Status = 1,
+                    ExpDate = DateTime.Now.AddDays(await SystemSettingDB.GetTicketExpDateAsync()).Date,
+                    Code = $"TD{DateTime.Now:yyyyMMddHHmmssfff}",
+                    Email = stockHolderInfo.WorkingEmail,
+                    EmployeeCode = stockHolderInfo.EmployeeCode,
+                    Phone = stockHolderInfo.Phone,
+                    StockCodes = string.Join(",", stockInfo.StockCode)
+                });
+
+                ticket.CurrentValues.SetValues(ticketDto);
+
+                ticketId = ticket.Entity.Id;
+
                 var buyTicketDetail = new BuyTicketDetail()
                 {
                     Id = Guid.NewGuid(),
                     BuyTicketId = ticket.Entity.Id,
-                    StockId = stock.Id,
-                    StockCode = stock.StockCode,
-                    PriceFrom = buyTicketDto.PriceFrom,
-                    PriceTo = buyTicketDto.PriceTo,
-                    Quantity = buyTicketDto.Quantity,
-                    IsNegotiate = buyTicketDto.IsNegotiate,
-                    CreatedBy = loginContactId
+                    StockId = stockInfo.Id,
+                    StockCode = stockInfo.StockCode,
+                    StockTypeId = stockTypeInfo.Id,
+                    StockTypeName = stockTypeInfo.Name,
+                    PriceFrom = ticketDto.PriceFrom,
+                    PriceTo = ticketDto.PriceTo,
+                    Quantity = ticketDto.Quantity,
+                    IsNegotiate = ticketDto.IsNegotiate,
+                    CreatedBy = loginContactId,
+                    CreatedDate = DateTime.Now
                 };
                 context.Add(buyTicketDetail);
             }
 
             await context.SaveChangesAsync();
 
+
             #region gửi thông báo có tin đăng liên quan
             TicketSearchCriteria ticketSearch = new()
             {
                 IsPaging = false,
                 ByUserType = 2,
                 ByNewer = true,
-                TicketType = (int)TicketType.Sale,
+                TicketType = ticketType == TicketType.Sale ? (int)TicketType.Buy : (int)TicketType.Sale,
                 DelTicketStatus = 1,
                 ExpTicketStatus = 1,
                 QuantityStatus = 2,
-                StockCodes = buyTicketDto.StockCode,
+                StockTypeIds = new List<string>() { Convert.ToString(stockTypeInfo.Id) },
+                StockCodes = new List<string>() { stockInfo.StockCode },
                 Status = 1
             };
             var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
             if (listUserRes.StatusCode != 200) return listUserRes;
-            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewSaleTickets>;
+            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewTickets>;
 
             SuggestTicketDto suggestTicketDto = new()
             {
                 UserId = loginContactId,
-                TicketId = ticket.Entity.Id,
+                TicketId = ticketId,
                 ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
-                TicketType = (int)TicketType.Buy,
-                StockCodes = ticket.Entity.StockCodes,
-                Title = ticket.Entity.Title
+                TicketType = ticketType == TicketType.Sale ? (int)TicketType.Sale : (int)TicketType.Buy,
+                StockCodes = stockInfo.StockCode,
+                Quantity = ticketDto.Quantity,
+                Price = ticketDto.PriceFrom,
+                IsNegotiate = ticketDto.IsNegotiate,
+                Title = ticketDto.Title
             };
             await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             #endregion
 
-            return SuccessResponse(data: ticket.Entity.Id);
+            return SuccessResponse(data: ticketId);
         }
 
-
-
         /// <summary>
-        /// Cập nhật tin bán cổ phiếu
+        /// Cập nhật tin mua bán cổ phiếu
         /// </summary>
-        /// <param name="saleTicketDto"></param>
+        /// <param name="ticketDto"></param>
+        /// <param name="loginContactId"></param>
+        /// <param name="ticketType"></param>
         /// <returns></returns>
-        public async Task<BaseResponse> UpdateSaleTicketAsync(UpdateSaleTicketDto saleTicketDto, Guid loginContactId)
+        public async Task<BaseResponse> UpdateTicketAsync(UpdateTicketDto ticketDto, Guid loginContactId, TicketType ticketType)
         {
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, saleTicketDto.StockId.Value, saleTicketDto.StockTypeId.Value);
-            if (saleTicketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+            if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
 
-            var stockInfo = await CallEventBus.GetStockDetailById(saleTicketDto.StockId.Value);
+            var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
-            else saleTicketDto.StockCode = stockInfo.StockCode;
 
-            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(saleTicketDto.StockTypeId);
+            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
-            else saleTicketDto.StockTypeName = stockTypeInfo.Name;
+
+            //kiểm tra hạn mức giao dịch tin bán
+            var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
+            if (stockPolicyList != null && stockPolicyList.Count > 0)
+            {
+                var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
+                if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
+                {
+                    return BadRequestResponse("quantity_ERR_LOW_THAN_POLICY", stockPolicy.MinSaleTrans);
+                }
+            }
 
             //kiểm tra số lượng CP có hợp lệ hay không
-            if (!saleTicketDto.IsNegotiate)
+            if (!ticketDto.IsNegotiate)
             {
                 var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && saleTicketDto.Quantity % systemSetting != 0)
+                if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
                 {
                     return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
                 }
             }
 
             var context = new StockDealServiceContext();
-            var ticket = await context.SaleTickets
-                .Where(e => e.CreatedBy == loginContactId)
-                .Where(e => e.Id == saleTicketDto.Id.Value)
-                .FirstOrDefaultAsync();
 
-            if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
+            if (ticketType == TicketType.Sale)
+            {
+                var ticket = await context.SaleTickets.Where(e => e.Id == ticketDto.Id && e.CreatedBy == loginContactId).FirstOrDefaultAsync();
 
-            ticket.ModifiedBy = loginContactId;
-            ticket.ModifiedDate = DateTime.Now;
+                if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
 
-            var ticketDb = context.Update(ticket);
-            ticketDb.CurrentValues.SetValues(saleTicketDto);
+                ticket.ModifiedBy = loginContactId;
+                ticket.ModifiedDate = DateTime.Now;
+
+                var ticketDb = context.Update(ticket);
+                ticketDb.CurrentValues.SetValues(ticketDto);
+            }
+            else
+            {
+                var ticket = await context.BuyTickets.Where(e => e.Id == ticketDto.Id && e.CreatedBy == loginContactId).Include(X => X.BuyTicketDetail).FirstOrDefaultAsync();
+
+                if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
+
+                ticket.StockCodes = string.Join(",", stockInfo.StockCode);
+                ticket.ModifiedBy = loginContactId;
+                ticket.ModifiedDate = DateTime.Now;
+
+                ticket.BuyTicketDetail.StockId = stockInfo.Id;
+                ticket.BuyTicketDetail.StockCode = stockInfo.StockCode;
+                ticket.BuyTicketDetail.StockTypeId = stockTypeInfo.Id;
+                ticket.BuyTicketDetail.StockTypeName = stockTypeInfo.Name;
+                ticket.BuyTicketDetail.PriceFrom = ticketDto.PriceFrom;
+                ticket.BuyTicketDetail.PriceTo = ticketDto.PriceTo;
+                ticket.BuyTicketDetail.Quantity = ticketDto.Quantity;
+                ticket.BuyTicketDetail.IsNegotiate = ticketDto.IsNegotiate;
+                ticket.BuyTicketDetail.ModifiedBy = loginContactId;
+                ticket.BuyTicketDetail.ModifiedDate = DateTime.Now;
+
+                var ticketDb = context.Update(ticket);
+                ticketDb.CurrentValues.SetValues(ticketDto);
+            }
 
             await context.SaveChangesAsync();
 
-            return SuccessResponse(data: saleTicketDto.Id);
+            return SuccessResponse(data: ticketDto.Id);
         }
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buyTicketDto"></param>
-        /// <param name="loginContactId"></param>
-        /// <returns></returns>
-        public async Task<BaseResponse> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto, Guid loginContactId)
-        {
-            //kiểm tra số lượng CP có hợp lệ hay không
-            if (buyTicketDto.Quantity != null)
-            {
-                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && buyTicketDto.Quantity % systemSetting != 0)
-                {
-                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
-                }
-            }
-
-            var context = new StockDealServiceContext();
-            var ticket = await context.BuyTickets
-                .Where(e => e.CreatedBy == loginContactId)
-                .Where(e => e.Id == buyTicketDto.Id.Value)
-                .Include(x => x.BuyTicketDetails)
-                .FirstOrDefaultAsync();
-
-            if (ticket == null || ticket.DeletedDate.HasValue) return NotFoundResponse();
-
-            ticket.StockCodes = string.Join(",", buyTicketDto.StockCode);
-            ticket.ModifiedBy = loginContactId;
-            ticket.ModifiedDate = DateTime.Now;
-
-            //cập nhật danh sách mã CP
-
-            //danh sách các mã CP đang có trong hệ thống
-            var stocks = await CallEventBus.GetStockList(true);
-
-            //các mã CP được xóa đi
-            var stockCodeDeleted = ticket.BuyTicketDetails.Where(x => !buyTicketDto.StockCode.Contains(x.StockCode)).ToList();
-            context.RemoveRange(stockCodeDeleted);
-
-            //các mã CP được cập nhật hoặc thêm mới
-            var stockCodeUpdate = ticket.BuyTicketDetails.Where(x => buyTicketDto.StockCode.Contains(x.StockCode)).ToList();
-
-            foreach (var item in buyTicketDto.StockCode)
-            {
-                var stock = stocks.Count > 0 ? stocks.FirstOrDefault(x => x.StockCode == item) : null;
-                if (stock == null)
-                {
-                    return BadRequestResponse("stockCode_ERR_INVALID_VALUE", item);
-                }
-
-                var detailDB = stockCodeUpdate.Count > 0 ? stockCodeUpdate.FirstOrDefault(x => x.StockCode == item) : null;
-
-                if(detailDB == null)
-                {
-                    var buyTicketDetail = new BuyTicketDetail()
-                    {
-                        Id = Guid.NewGuid(),
-                        BuyTicketId = ticket.Id,
-                        StockId = stock.Id,
-                        StockCode = stock.StockCode,
-                        PriceFrom = buyTicketDto.PriceFrom,
-                        PriceTo = buyTicketDto.PriceTo,
-                        Quantity = buyTicketDto.Quantity,
-                        IsNegotiate = buyTicketDto.IsNegotiate,
-                        CreatedBy = loginContactId
-                    };
-                    context.Add(buyTicketDetail);
-                }
-                else
-                {
-                    detailDB.PriceFrom = buyTicketDto.PriceFrom;
-                    detailDB.PriceTo = buyTicketDto.PriceTo;
-                    detailDB.Quantity = buyTicketDto.Quantity;
-                    detailDB.IsNegotiate = buyTicketDto.IsNegotiate;
-                    detailDB.ModifiedBy = loginContactId;
-                    detailDB.ModifiedDate = DateTime.Now;
-
-                    context.Update(detailDB);
-                }
-            }
-
-            var ticketDb = context.Update(ticket);
-            ticketDb.CurrentValues.SetValues(buyTicketDto);
-
-            await context.SaveChangesAsync();
-
-            return SuccessResponse(buyTicketDto.Id);
-        }
-
-
 
         /// <summary>
         /// lấy chi tiết tin bằng id
@@ -436,43 +324,22 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> GetTicketAsync(Guid ticketId, Guid loginContactId)
         {
-            var ticketType = TicketType.Buy;
-            ViewBuyTickets ticketBuy = null;
-            ViewSaleTickets ticketSale = null;
-
             var ticket = await GetTicketAsync(ticketId, TicketType.Buy, loginContactId);
 
             if (ticket == null)
             {
                 ticket = await GetTicketAsync(ticketId, TicketType.Sale, loginContactId);
-                ticketType = TicketType.Sale;
             }
 
             if (ticket == null) return NotFoundResponse();
 
             //ktra nếu ticket đã bị ẩn thì chỉ có người đăng tin mới đc phép xem
-            if (ticketType == TicketType.Buy)
+            if (loginContactId == Guid.Empty || loginContactId != ticket.CreatedBy)
             {
-                ticketBuy = (ViewBuyTickets)ticket;
-                if (loginContactId == Guid.Empty || loginContactId != ticketBuy.CreatedBy)
+                if (ticket.Status != 1 || ticket.DeletedDate != null ||
+                      (ticket.IsExpTicket.HasValue && ticket.IsExpTicket.Value))
                 {
-                    if (ticketBuy.Status != 1 || ticketBuy.DeletedDate != null || 
-                          (ticketBuy.IsExpTicket.HasValue && ticketBuy.IsExpTicket.Value))
-                    {
-                        return BadRequestResponse("ticket_ERR_HIDDEN");
-                    }     
-                }
-            }
-            else
-            {
-                ticketSale = (ViewSaleTickets)ticket;
-                if (loginContactId == Guid.Empty || loginContactId != ticketSale.CreatedBy)
-                {
-                    if (ticketSale.Status != 1 || ticketSale.DeletedDate != null ||
-                          (ticketSale.IsExpTicket.HasValue && ticketSale.IsExpTicket.Value))
-                    {
-                        return BadRequestResponse("ticket_ERR_HIDDEN");
-                    }
+                    return BadRequestResponse("ticket_ERR_HIDDEN");
                 }
             }
 
@@ -486,19 +353,9 @@ namespace StockDealBusiness.Business
             };
             var list = await StockDealDB.ListStockDealAsync(stockDealSearch);
             var listResult = list.Select(e => new StockDealResponseDto(e)).ToList();
-            if (ticketType == TicketType.Buy)
-            {
-                ticketBuy.StockDeals = listResult;
-                return SuccessResponse(ticketBuy);
-            }
-            else
-            {
-                ticketSale.StockDeals = listResult;
-                return SuccessResponse(ticketSale);
-            }
+            ticket.StockDeals = listResult;
+            return SuccessResponse(ticket);
         }
-
-
 
         /// <summary>
         /// Xóa tin đăng
@@ -526,8 +383,6 @@ namespace StockDealBusiness.Business
 
             return SuccessResponse(data: ticketId);
         }
-
-
 
         /// <summary>
         /// Danh sách tin mua bán
@@ -561,30 +416,21 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            PaginateDto paginate = new();
+            var tickets = await TicketDB.ListTicketAsync(listTicketDto, loginContactId);
 
-            if (listTicketDto.TicketType == (int)TicketType.Buy)
+            if (tickets.Count == 0) return NotFoundResponse();
+
+            PaginateDto pagination = new()
             {
-                var query = await TicketDB.ListBuyTicketAsync(listTicketDto, loginContactId);
+                CurrentPage = listTicketDto.IsPaging ? listTicketDto.CurrentPage : 1,
+                TotalItems = tickets.FirstOrDefault().TotalCount,
+                Data = tickets
+            };
 
-                paginate.TotalItems = query.Select(e => e.TotalCount).FirstOrDefault();
-                paginate.Data = query;
-            }
-            else
-            {
-                var query = await TicketDB.ListSaleTicketAsync(listTicketDto, loginContactId);
+            pagination.PerPage = listTicketDto.IsPaging ? listTicketDto.PerPage : pagination.TotalItems;
 
-                paginate.TotalItems = query.Select(e => e.TotalCount).FirstOrDefault();
-                paginate.Data = query;
-            }
-
-            paginate.CurrentPage = listTicketDto.IsPaging ? listTicketDto.CurrentPage : 1;
-            paginate.PerPage = listTicketDto.IsPaging ? listTicketDto.PerPage : paginate.TotalItems;
-
-
-            return SuccessResponse(data: paginate);
+            return SuccessResponse(pagination);
         }
-
 
         /// <summary>
         /// Xóa nhiều tin mua bán hoặc tất cả bằng storeproduce

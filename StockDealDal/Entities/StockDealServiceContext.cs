@@ -5,6 +5,7 @@ using StockDealDal.Dto.StockDeal;
 using StockDealDal.Dto.Ticket;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +23,8 @@ namespace StockDealDal.Entities
         public DbSet<BuyTicketDetail> BuyTicketDetails { get; set; }
 
 
-        public DbSet<ViewBuyTickets> ViewBuyTickets { get; set;}
-        public DbSet<ViewSaleTickets> ViewSaleTickets { get; set;}
+        [NotMapped]
+        public DbSet<ViewTickets> ViewTickets { get; set;}
         public DbSet<ViewListStockDeals> ViewListStockDeals { get; set;}
 
 

@@ -32,6 +32,7 @@ namespace StockDealBusiness.EventBus
 
         public const string Method_CountUnreadDeal = "CountUnreadDeal";
         public const string METHOD_GetStockList = "GetStockList";
+        public const string METHOD_GetStockPolicyList = "GetStockPolicyList";
 
 
         public static readonly string Publisher_GetStockHolderDetailById = $"{CURRENT_SERVICE}.{SERVICE_MEMBER}.GetStockHolderDetailById.{REQUEST_METHOD}";
@@ -43,5 +44,6 @@ namespace StockDealBusiness.EventBus
         public static readonly string Publisher_NotificationSuggestTicket = $"{CURRENT_SERVICE}.{SERVICE_NOTIFY}.NotificationSuggestTicket.{REQUEST_METHOD}";
         public static readonly string Publisher_GetStockList = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockList.{REQUEST_METHOD}";
         public static readonly string Publisher_NotificationAdminHiddenTicket = $"{CURRENT_SERVICE}.{SERVICE_NOTIFY}.NotificationAdminHiddenTicket.{REQUEST_METHOD}";
+        public static readonly string Publisher_GetStockPolicyList = $"{CURRENT_SERVICE}.{SERVICE_STOCKTRANS}.GetStockPolicyList.{REQUEST_METHOD}";
     }
 }

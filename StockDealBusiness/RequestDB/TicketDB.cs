@@ -50,43 +50,21 @@ namespace StockDealBusiness.RequestDB
         }
 
 
-
         /// <summary>
-        /// lấy danh sách tin mua
+        /// Lấy danh sách tin mua bán
         /// </summary>
         /// <param name="listTicketDto"></param>
         /// <param name="loginContactId"></param>
         /// <returns></returns>
-        public static async Task<List<ViewSaleTickets>> ListSaleTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
+        public static async Task<List<ViewTickets>> ListTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
         {
             var ticketDb = new TicketDB();
             var context = new StockDealServiceContext();
 
             var sql = ticketDb.GetListTicketQuery(listTicketDto, loginContactId);
 
-            return await context.ViewSaleTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
+            return await context.ViewTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
         }
-
-
-
-        /// <summary>
-        /// Lấy danh sách tin bán
-        /// </summary>
-        /// <param name="listTicketDto"></param>
-        /// <param name="loginContactId"></param>
-        /// <param name="isBuyTicket"></param>
-        /// <returns></returns>
-        public static async Task<List<ViewBuyTickets>> ListBuyTicketAsync(TicketSearchCriteria listTicketDto, Guid loginContactId)
-        {
-            var ticketDb = new TicketDB();
-            var context = new StockDealServiceContext();
-
-            var sql = ticketDb.GetListTicketQuery(listTicketDto, loginContactId);
-
-            return await context.ViewBuyTickets.FromSqlRaw(sql).AsNoTracking().ToListAsync();
-        }
-
-
 
         /// <summary>
         /// Xóa tin mua bán

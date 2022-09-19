@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StockDealDal.Dto.Ticket;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,22 +22,7 @@ namespace StockDealDal.Dto.StockDeal
             LastUpdate = viewListStockDeal.LastUpdate;
             CountUnread = viewListStockDeal.CountUnread;
             Type = viewListStockDeal.Type;
-            Ticket = new()
-            {
-                Id = viewListStockDeal.TicketId,
-                Code = viewListStockDeal.TicketCode,
-                TicketType = viewListStockDeal.TicketType,
-                Title = viewListStockDeal.TicketTitle,
-                IsNegotiate = viewListStockDeal.TicketIsNegotiate,
-                PriceFrom = viewListStockDeal.TicketPrice,
-                Quantity = viewListStockDeal.TicketQuantity,
-                StockTypeName = viewListStockDeal.TicketStockTypeName,
-                StockCode = viewListStockDeal.TicketStockCode,
-                StockId = viewListStockDeal.TicketStockId,
-                StockTypeId = viewListStockDeal.TicketStockTypeId,
-                StockCodes = viewListStockDeal.TicketStockCodes,
-                DeletedDate = viewListStockDeal.TicketDeletedDate
-            };
+            Ticket = viewListStockDeal.Ticket;
             LastDealDetail = new()
             {
                 LastStockDetailId = viewListStockDeal.LastStockDetailId,
@@ -51,13 +37,13 @@ namespace StockDealDal.Dto.StockDeal
 
             if (isDetail)
             {
-                Ticket.QuantityStatus = viewListStockDeal.SaleTicket == null ? null : viewListStockDeal.SaleTicket.QuantityStatus;
-                Ticket.IsExpTicket = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsExpTicket : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsExpTicket : null;
-                Ticket.Status = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Status : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Status : null;
-                Ticket.IsNegotiate = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.IsNegotiate : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.IsNegotiate : null;
-                Ticket.PriceFrom = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.PriceFrom : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.PriceFrom : null;
-                Ticket.Quantity = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Quantity : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Quantity : null;
-                Ticket.Reason = viewListStockDeal.SaleTicket != null ? viewListStockDeal.SaleTicket.Reason : viewListStockDeal.BuyTicket != null ? viewListStockDeal.BuyTicket.Reason : "";
+                Ticket.QuantityStatus = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.QuantityStatus : 2;
+                Ticket.IsExpTicket = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.IsExpTicket : null;
+                Ticket.Status = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Status : 1;
+                Ticket.IsNegotiate = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.IsNegotiate : true;
+                Ticket.PriceFrom = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.PriceFrom : null;
+                Ticket.Quantity = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Quantity : null;
+                Ticket.Reason = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Reason : "";
             }
         }
 
@@ -73,7 +59,7 @@ namespace StockDealDal.Dto.StockDeal
         public int CountUnread { get; set; }
         public int Type { get; set; }
 
-        public TicketStockDealResponseDto Ticket { get; set; }
+        public ViewTickets Ticket { get; set; }
         public DealDetailStockDealResponseDto LastDealDetail { get; set; }
 
     }
@@ -93,56 +79,5 @@ namespace StockDealDal.Dto.StockDeal
         public decimal? UnitPrice { get; set; }
         public decimal? TotalPrice { get; set; }
         public bool? IsDeletedDealDetail { get; set; }
-    }
-
-    public class TicketStockDealResponseDto
-    {
-        public Guid? Id { get; set; }
-
-        public string Code { get; set; }
-
-        public string Title { get; set; }
-
-        public int? TicketType { get; set; }
-
-        public bool? IsExpTicket { get; set; }
-
-        public int? Status { get; set; }
-
-        public string Reason { get; set; }
-
-
-        // sale ticket
-        public Guid? StockId { get; set; }
-
-        public Guid? StockTypeId { get; set; }
-
-        public string StockCode { get; set; }
-
-        public string StockTypeName { get; set; }
-
-        public bool? IsNegotiate { get; set; }
-
-        public decimal? PriceFrom { get; set; }
-
-        public int? Quantity { get; set; }
-
-        public int? QuantityStatus { get; set; }
-
-        // buy ticket
-        public string StockCodes { get; set; }
-
-        public DateTime? DeletedDate { get; set; }
-        
-
-        public string StockCodeView
-        {
-            get
-            {
-                if (TicketType == 1) return StockCodes.Replace(",", ", ");
-                return StockCode;
-            }
-        }
-
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockDealBusiness.Business;
+using StockDealCommon;
 using StockDealDal.Dto;
 using StockDealDal.Dto.Ticket;
 using System;
@@ -84,11 +85,11 @@ namespace StockDealService.Controllers
         /// <param name="saleTicketDto"></param>
         /// <returns></returns>
         [HttpPost("v1/CreateSaleTicket")]
-        public async Task<ObjectResult> CreateSaleTicketAsync(CreateSaleTicketDto saleTicketDto)
+        public async Task<ObjectResult> CreateSaleTicketAsync(CreateTicketDto saleTicketDto)
         {
             try
             {
-                var result = await _ticketBusiness.CreateSaleTicketAsync(saleTicketDto, LoginedContactId);
+                var result = await _ticketBusiness.CreateTicketAsync(saleTicketDto, LoginedContactId, TicketType.Sale);
 
                 return ReturnData(result);
 
@@ -104,11 +105,11 @@ namespace StockDealService.Controllers
         /// <param name="buyTicketDto"></param>
         /// <returns></returns>
         [HttpPost("v1/CreateBuyTicket")]
-        public async Task<ObjectResult> CreateBuyTicketAsync(CreateBuyTicketDto buyTicketDto)
+        public async Task<ObjectResult> CreateBuyTicketAsync(CreateTicketDto buyTicketDto)
         {
             try
             {
-                var result = await _ticketBusiness.CreateBuyTicketAsync(buyTicketDto, LoginedContactId);
+                var result = await _ticketBusiness.CreateTicketAsync(buyTicketDto, LoginedContactId, TicketType.Buy);
 
                 return ReturnData(result);
 
@@ -125,11 +126,11 @@ namespace StockDealService.Controllers
         /// <param name="saleTicketDto"></param>
         /// <returns></returns>
         [HttpPost("v1/UpdateSaleTicket")]
-        public async Task<ObjectResult> UpdateSaleTicketAsync(UpdateSaleTicketDto saleTicketDto)
+        public async Task<ObjectResult> UpdateSaleTicketAsync(UpdateTicketDto saleTicketDto)
         {
             try
             {
-                var result = await _ticketBusiness.UpdateSaleTicketAsync(saleTicketDto, LoginedContactId);
+                var result = await _ticketBusiness.UpdateTicketAsync(saleTicketDto, LoginedContactId, TicketType.Sale);
 
                 return ReturnData(result);
 
@@ -146,11 +147,11 @@ namespace StockDealService.Controllers
         /// <param name="buyTicketDto"></param>
         /// <returns></returns>
         [HttpPost("v1/UpdateBuyTicket")]
-        public async Task<ObjectResult> UpdateBuyTicketAsync(UpdateBuyTicketDto buyTicketDto)
+        public async Task<ObjectResult> UpdateBuyTicketAsync(UpdateTicketDto buyTicketDto)
         {
             try
             {
-                var result = await _ticketBusiness.UpdateBuyTicketAsync(buyTicketDto, LoginedContactId);
+                var result = await _ticketBusiness.UpdateTicketAsync(buyTicketDto, LoginedContactId, TicketType.Buy);
 
                 return ReturnData(result);
 

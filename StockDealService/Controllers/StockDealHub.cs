@@ -193,7 +193,7 @@ namespace StockDealService.Controllers
             // chỉ gửi thông báo deal, ko gửi thông báo thương lượng và chờ phản hồi
 
             var stockCodes = "";
-            if (stockDeal.Ticket != null) stockCodes = stockDeal.Ticket.TicketType == (int)TicketType.Buy ? stockDeal.Ticket.StockCodes : stockDeal.Ticket.StockCode;
+            if (stockDeal.Ticket != null) stockCodes = stockDeal.Ticket.StockCode;
 
             var sendDealNofifyDto = new SendDealNofifyDto()
             {

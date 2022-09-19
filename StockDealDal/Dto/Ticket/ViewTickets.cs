@@ -9,13 +9,18 @@ using System.Threading.Tasks;
 
 namespace StockDealDal.Dto.Ticket
 {
-    public class ViewSaleTickets
+    public class ViewTickets
     {
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
+
         public DateTime? ModifiedDate { get; set; }
+
         public DateTime? DeletedDate { get; set; }
+
         public Guid? CreatedBy { get; set; }
+
         public Guid? ModifiedBy { get; set; }
+
         public Guid? DeletedBy { get; set; }
 
         public Guid? StockId { get; set; }
@@ -72,6 +77,7 @@ namespace StockDealDal.Dto.Ticket
 
         public int TicketType { get; set; }
 
+        [NotMapped]
         public string StockCodeView { get { return StockCode; } }
 
         public bool? IsExpTicket { get; set; }

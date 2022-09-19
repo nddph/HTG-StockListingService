@@ -55,10 +55,7 @@ namespace StockDealDal.Dto.StockDeal
         public int Type { get; set; }
 
         [NotMapped]
-        public ViewBuyTickets BuyTicket { get; set; }
-
-        [NotMapped]
-        public ViewSaleTickets SaleTicket { get; set; }
+        public ViewTickets Ticket { get; set; }
 
     }
 }
