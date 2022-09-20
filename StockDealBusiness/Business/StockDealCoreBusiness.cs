@@ -147,18 +147,11 @@ namespace StockDealBusiness.Business
             {
                 var ticketBusiness = new TicketBusiness();
                 var ticket = await ticketBusiness.GetTicketAsync(stockDeal.TicketId.Value, TicketType.Buy, loginedContactId);
-                if (ticket != null)
-                {
-                    stockDeal.Ticket = JsonConvert.DeserializeObject<ViewTickets>(JsonConvert.SerializeObject(ticket));
-                }
-                else
+                if (ticket == null)
                 {
                     ticket = await ticketBusiness.GetTicketAsync(stockDeal.TicketId.Value, TicketType.Sale, loginedContactId);
-                    if (ticket != null)
-                    {
-                        stockDeal.Ticket = JsonConvert.DeserializeObject<ViewTickets>(JsonConvert.SerializeObject(ticket));
-                    }
                 }
+                stockDeal.Ticket = ticket;
             }
             return SuccessResponse(new StockDealResponseDto(stockDeal, true));
         }
