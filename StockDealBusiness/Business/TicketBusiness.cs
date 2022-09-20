@@ -210,22 +210,24 @@ namespace StockDealBusiness.Business
                 Status = 1
             };
             var listUserRes = await ListTicketsAsync(ticketSearch, loginContactId);
-            if (listUserRes.StatusCode != 200) return listUserRes;
-            var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewTickets>;
-
-            SuggestTicketDto suggestTicketDto = new()
+            if (listUserRes.StatusCode == 200 && listUserRes.Data != null)
             {
-                UserId = loginContactId,
-                TicketId = ticketId,
-                ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
-                TicketType = ticketType == TicketType.Sale ? (int)TicketType.Sale : (int)TicketType.Buy,
-                StockCodes = stockInfo.StockCode,
-                Quantity = ticketDto.Quantity,
-                Price = ticketDto.PriceFrom,
-                IsNegotiate = ticketDto.IsNegotiate,
-                Title = ticketDto.Title
-            };
-            await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+                var listUser = (listUserRes.Data as PaginateDto).Data as List<ViewTickets>;
+
+                SuggestTicketDto suggestTicketDto = new()
+                {
+                    UserId = loginContactId,
+                    TicketId = ticketId,
+                    ListReceiverUser = listUser.Select(e => e.CreatedBy.Value).Distinct().ToList(),
+                    TicketType = ticketType == TicketType.Sale ? (int)TicketType.Sale : (int)TicketType.Buy,
+                    StockCodes = stockInfo.StockCode,
+                    Quantity = ticketDto.Quantity,
+                    Price = ticketDto.PriceFrom,
+                    IsNegotiate = ticketDto.IsNegotiate,
+                    Title = ticketDto.Title
+                };
+                await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+            }
             #endregion
 
             return SuccessResponse(data: ticketId);
