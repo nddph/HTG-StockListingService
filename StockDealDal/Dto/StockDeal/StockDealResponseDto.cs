@@ -128,20 +128,7 @@ namespace StockDealDal.Dto.StockDeal
 
         public int? QuantityStatus { get; set; }
 
-        // buy ticket
-        public string StockCodes { get; set; }
-
         public DateTime? DeletedDate { get; set; }
-
-
-        public string StockCodeView
-        {
-            get
-            {
-                if (TicketType == 1) return StockCodes.Replace(",", ", ");
-                return StockCode;
-            }
-        }
 
     }
 
