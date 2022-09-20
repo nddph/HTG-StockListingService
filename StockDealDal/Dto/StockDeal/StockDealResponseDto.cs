@@ -22,7 +22,21 @@ namespace StockDealDal.Dto.StockDeal
             LastUpdate = viewListStockDeal.LastUpdate;
             CountUnread = viewListStockDeal.CountUnread;
             Type = viewListStockDeal.Type;
-            Ticket = viewListStockDeal.Ticket;
+            Ticket = new()
+            {
+                Id = viewListStockDeal.TicketId.GetValueOrDefault(),
+                Code = viewListStockDeal.TicketCode,
+                TicketType = viewListStockDeal.TicketType.GetValueOrDefault(),
+                Title = viewListStockDeal.TicketTitle,
+                IsNegotiate = viewListStockDeal.TicketIsNegotiate.GetValueOrDefault(),
+                PriceFrom = viewListStockDeal.TicketPrice,
+                Quantity = viewListStockDeal.TicketQuantity,
+                StockTypeName = viewListStockDeal.TicketStockTypeName,
+                StockCode = viewListStockDeal.TicketStockCode,
+                StockId = viewListStockDeal.TicketStockId,
+                StockTypeId = viewListStockDeal.TicketStockTypeId,
+                DeletedDate = viewListStockDeal.TicketDeletedDate
+            };
             LastDealDetail = new()
             {
                 LastStockDetailId = viewListStockDeal.LastStockDetailId,
@@ -59,7 +73,7 @@ namespace StockDealDal.Dto.StockDeal
         public int CountUnread { get; set; }
         public int Type { get; set; }
 
-        public ViewTickets Ticket { get; set; }
+        public TicketStockDealResponseDto Ticket { get; set; }
         public DealDetailStockDealResponseDto LastDealDetail { get; set; }
 
     }
@@ -80,4 +94,55 @@ namespace StockDealDal.Dto.StockDeal
         public decimal? TotalPrice { get; set; }
         public bool? IsDeletedDealDetail { get; set; }
     }
+    public class TicketStockDealResponseDto
+    {
+        public Guid? Id { get; set; }
+
+        public string Code { get; set; }
+
+        public string Title { get; set; }
+
+        public int? TicketType { get; set; }
+
+        public bool? IsExpTicket { get; set; }
+
+        public int? Status { get; set; }
+
+        public string Reason { get; set; }
+
+
+        // sale ticket
+        public Guid? StockId { get; set; }
+
+        public Guid? StockTypeId { get; set; }
+
+        public string StockCode { get; set; }
+
+        public string StockTypeName { get; set; }
+
+        public bool? IsNegotiate { get; set; }
+
+        public decimal? PriceFrom { get; set; }
+
+        public int? Quantity { get; set; }
+
+        public int? QuantityStatus { get; set; }
+
+        // buy ticket
+        public string StockCodes { get; set; }
+
+        public DateTime? DeletedDate { get; set; }
+
+
+        public string StockCodeView
+        {
+            get
+            {
+                if (TicketType == 1) return StockCodes.Replace(",", ", ");
+                return StockCode;
+            }
+        }
+
+    }
+
 }
