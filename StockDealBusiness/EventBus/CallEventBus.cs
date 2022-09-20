@@ -102,7 +102,7 @@ namespace StockDealBusiness.EventBus
                         JsonConvert.SerializeObject(request), ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
 
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return 0;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return 0;
 
             return int.Parse(resData.Data.ToString());
         }
@@ -121,7 +121,7 @@ namespace StockDealBusiness.EventBus
                 ConstEventBus.Publisher_GetStockHolderDetailById, stockHolderId.ToString(), 
                 ConstEventBus.EXCHANGE_MEMBER, isReply);
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return null;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
 
             return JsonConvert.DeserializeObject<StockHolderDto>(resData.Data.ToString());
         }
@@ -140,7 +140,7 @@ namespace StockDealBusiness.EventBus
                 ConstEventBus.Publisher_GetStockDetailById, stockId.ToString(),
                 ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return null;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
 
             return JsonConvert.DeserializeObject<StockDto>(resData.Data.ToString());
         }
@@ -159,7 +159,7 @@ namespace StockDealBusiness.EventBus
                 ConstEventBus.Publisher_GetStockTypeDetailById, stockTypeId.HasValue ? stockTypeId.ToString() : "",
                 ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return null;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
 
             return JsonConvert.DeserializeObject<StockTypeDto>(resData.Data.ToString());
         }
@@ -180,7 +180,7 @@ namespace StockDealBusiness.EventBus
             string bodyString = JsonConvert.SerializeObject(request);
             var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_GetStockPolicyList, bodyString, ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return null;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
 
             return JsonConvert.DeserializeObject<List<DTOStockPolicyResponse>>(resData.Data.ToString());
         }
@@ -196,7 +196,7 @@ namespace StockDealBusiness.EventBus
                 ConstEventBus.Publisher_GetStockList, "",
                 ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
             var resData = ReturnData(res, isReply);
-            if (resData.StatusCode != 200) return null;
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
 
             return JsonConvert.DeserializeObject<List<StockDto>>(resData.Data.ToString());
         }
