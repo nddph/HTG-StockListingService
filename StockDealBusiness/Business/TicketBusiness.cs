@@ -99,8 +99,11 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
-            if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            if (ticketType == TicketType.Sale)
+            {
+                var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+                if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            }
 
             var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
@@ -245,8 +248,11 @@ namespace StockDealBusiness.Business
             var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
-            var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
-            if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            if (ticketType == TicketType.Sale)
+            {
+                var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+                if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
+            }
 
             var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
