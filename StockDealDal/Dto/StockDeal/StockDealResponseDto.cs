@@ -59,6 +59,17 @@ namespace StockDealDal.Dto.StockDeal
                 IsOnwerLastDealDetail = false,
                 StockDetailType = viewListStockDeal.NotByUserStockDetailType
             };
+            DealDetailByUser = new()
+            {
+                LastStockDetailId = viewListStockDeal.ByUserLastStockDetailId,
+                Description = viewListStockDeal.ByUserDescription,
+                Quantity = viewListStockDeal.ByUserQuantity,
+                TotalPrice = viewListStockDeal.ByUserTotalPrice,
+                UnitPrice = viewListStockDeal.ByUserUnitPrice,
+                IsDeletedDealDetail = viewListStockDeal.ByUserIsDeletedDealDetail,
+                IsOnwerLastDealDetail = true,
+                StockDetailType = viewListStockDeal.ByUserStockDetailType
+            };
             if (isDetail)
             {
                 Ticket.QuantityStatus = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.QuantityStatus : 2;
@@ -86,6 +97,7 @@ namespace StockDealDal.Dto.StockDeal
         public TicketStockDealResponseDto Ticket { get; set; }
         public DealDetailStockDealResponseDto LastDealDetail { get; set; }
         public DealDetailStockDealResponseDto DealDetailNotByUser { get; set; }
+        public DealDetailStockDealResponseDto DealDetailByUser { get; set; }
 
     }
 
