@@ -361,7 +361,7 @@ namespace StockDealBusiness.Business
             };
             var list = await StockDealDB.ListStockDealAsync(stockDealSearch);
             var listResult = list.Select(e => new StockDealResponseDto(e)).ToList();
-            ticket.StockDeals = listResult;
+            ticket.StockDeals = listResult.Where(x => x.DealDetailNotByUser.LastStockDetailId != null).OrderByDescending(x => x.DealDetailNotByUser.Quantity).ToList();
             return SuccessResponse(ticket);
         }
 

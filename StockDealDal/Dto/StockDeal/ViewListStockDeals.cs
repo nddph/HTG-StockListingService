@@ -47,6 +47,17 @@ namespace StockDealDal.Dto.StockDeal
         public decimal? UnitPrice { get; set; }
         public decimal? TotalPrice { get; set; }
         public bool? IsDeletedDealDetail { get; set; }
+
+        // deal detail not by user
+        public Guid? NotByUserLastStockDetailId { get; set; }
+        public int? NotByUserStockDetailType { get; set; }
+        public int? NotByUserReceiverType { get; set; }
+        public string NotByUserDescription { get; set; }
+        public int? NotByUserQuantity { get; set; }
+        public decimal? NotByUserUnitPrice { get; set; }
+        public decimal? NotByUserTotalPrice { get; set; }
+        public bool? NotByUserIsDeletedDealDetail { get; set; }
+
         public DateTime? LastUpdate { get; set; }
         public int CountUnread { get; set; }
         public int TotalUnread { get; set; }
