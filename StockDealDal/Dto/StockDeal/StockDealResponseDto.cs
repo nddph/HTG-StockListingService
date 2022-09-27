@@ -76,6 +76,7 @@ namespace StockDealDal.Dto.StockDeal
                 Ticket.IsExpTicket = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.IsExpTicket : null;
                 Ticket.Status = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Status : 1;
                 Ticket.IsNegotiate = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.IsNegotiate : true;
+                Ticket.AllowDeal = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.AllowDeal : true;
                 Ticket.PriceFrom = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.PriceFrom : null;
                 Ticket.Quantity = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Quantity : null;
                 Ticket.Reason = viewListStockDeal.Ticket != null ? viewListStockDeal.Ticket.Reason : "";
@@ -144,6 +145,8 @@ namespace StockDealDal.Dto.StockDeal
         public string StockTypeName { get; set; }
 
         public bool? IsNegotiate { get; set; }
+
+        public bool? AllowDeal { get; set; }
 
         public decimal? PriceFrom { get; set; }
 

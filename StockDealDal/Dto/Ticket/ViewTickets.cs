@@ -35,6 +35,8 @@ namespace StockDealDal.Dto.Ticket
 
         public bool IsNegotiate { get; set; } = false;
 
+        public bool AllowDeal { get; set; } = false;
+
         public decimal? PriceFrom { get; set; }
 
         public decimal? PriceTo { get; set; }

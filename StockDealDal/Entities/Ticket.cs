@@ -40,6 +40,7 @@ namespace StockDealDal.Entities
 
         public string Reason { get; set; }
 
+        public bool? AllowDeal { get; set; }
 
         /// <summary>
         /// 1 mua: 2 bán

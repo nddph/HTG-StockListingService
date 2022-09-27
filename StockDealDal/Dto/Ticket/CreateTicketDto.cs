@@ -31,6 +31,8 @@ namespace StockDealDal.Dto.Ticket
 
         public bool IsNegotiate { get; set; } = false;
 
+        public bool AllowDeal { get; set; } = true;
+
         [MaxLength(300, ErrorMessage = "ERR_MAX_LENGTH_300")]
         public string Description { get; set; }
 
@@ -51,6 +53,7 @@ namespace StockDealDal.Dto.Ticket
             else
             {
                 PriceFrom = PriceTo = null;
+                AllowDeal = true;
             }
         }
 

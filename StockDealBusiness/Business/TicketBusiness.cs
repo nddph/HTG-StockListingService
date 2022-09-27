@@ -291,6 +291,8 @@ namespace StockDealBusiness.Business
 
                 ticket.ModifiedBy = loginContactId;
                 ticket.ModifiedDate = DateTime.Now;
+                ticket.StockCode = stockInfo.StockCode;
+                ticket.StockTypeName = stockTypeInfo.Name;
 
                 var ticketDb = context.Update(ticket);
                 ticketDb.CurrentValues.SetValues(ticketDto);
