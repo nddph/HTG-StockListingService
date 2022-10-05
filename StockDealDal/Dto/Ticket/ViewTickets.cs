@@ -86,6 +86,8 @@ namespace StockDealDal.Dto.Ticket
 
         public string Reason { get; set; }
 
+        public int? HasDeal { get; set; }
+
         [NotMapped]
         public List<StockDealResponseDto> StockDeals { get; set; } = new List<StockDealResponseDto>();
 
