@@ -111,9 +111,13 @@ namespace StockDealBusiness.Business
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
 
-            //kiểm tra hạn mức giao dịch tin bán
+            //kiểm tra hạn mức giao dịch tin rao
             var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
-            if (stockPolicyList != null && stockPolicyList.Count > 0)
+            if (stockPolicyList == null || stockPolicyList.Count == 0)
+            {
+                return BadRequestResponse("stockPolicy_ERR_DATA_NOT_FOUND");
+            }
+            else
             {
                 var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
                 if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
@@ -260,9 +264,13 @@ namespace StockDealBusiness.Business
             var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
 
-            //kiểm tra hạn mức giao dịch tin bán
+            //kiểm tra hạn mức giao dịch tin rao
             var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
-            if (stockPolicyList != null && stockPolicyList.Count > 0)
+            if (stockPolicyList == null || stockPolicyList.Count == 0)
+            {
+                return BadRequestResponse("stockPolicy_ERR_DATA_NOT_FOUND");
+            }
+            else
             {
                 var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
                 if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
