@@ -295,6 +295,24 @@ namespace StockDealBusiness.Business
             if (stockDeal == null) return BadRequestResponse("stockDealId_ERR_INVALID_VALUE");
             if (stockDeal.Ticket.DeletedDate.HasValue) return BadRequestResponse("ticketId_ERR_INACTIVE");
 
+            //ktra xem ticket này có cho phép thương lượng hay không
+            if (stockDeal.Ticket.AllowDeal.HasValue && !stockDeal.Ticket.AllowDeal.Value)
+            {
+                //nếu không cho thương lượng
+
+                //chỉ có người không phải chủ tin đăng đc nhắn type = 1, không được nhắn type = 4
+                if (senderId != stockDeal.Ticket.CreatedBy && input.Type == (int) TypeStockDealDetail.DealChat)
+                {
+                    return BadRequestResponse("type_ERR_INVALID_VALUE");
+                }
+
+                //chỉ có người là chủ tin đăng đc nhắn type = 4, không được nhắn type = 1
+                if (senderId == stockDeal.Ticket.CreatedBy && input.Type == (int)TypeStockDealDetail.DealDetail)
+                {
+                    return BadRequestResponse("type_ERR_INVALID_VALUE");
+                }
+            }
+
             var receiverInfo = await CallEventBus.GetStockHolderDetail(stockDeal.ReceiverId);
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
 

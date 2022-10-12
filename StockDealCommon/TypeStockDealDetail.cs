@@ -15,6 +15,9 @@ namespace StockDealCommon
         WaitingForResponse = 2,
 
         // tin nhắn tạo deal
-        CreateDeal = 3
+        CreateDeal = 3,
+
+        // tin nhắn thường để trả lời
+        DealChat = 4
     }
 }

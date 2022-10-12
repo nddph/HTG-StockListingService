@@ -11,9 +11,10 @@ namespace StockDealDal.Dto.StockDeal
     public class CreateStockDetailDto : IValidatableObject
     {
         /// <summary>
-        /// 1: tin nhắn thường
+        /// 1: tin nhắn thương lượng
         /// 2: tin nhắn chờ phản hồi
         /// 3: tin nhắn tạo thương lượng
+        /// 4: tin nhắn thường
         /// </summary>
 
         [EnumDataType(typeof(TypeStockDealDetail), ErrorMessage = "ERR_INVALID_VALUE")]
