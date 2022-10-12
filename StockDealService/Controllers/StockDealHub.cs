@@ -205,7 +205,7 @@ namespace StockDealService.Controllers
                 StockDealId = groupId
             };
 
-            if (stockDealDetail.Type == (int?)TypeStockDealDetail.DealDetail)
+            if (stockDealDetail.Type == (int?)TypeStockDealDetail.DealDetail || stockDealDetail.Type == (int?)TypeStockDealDetail.DealChat)
             {
                 await CallEventBus.SendDealNofify(sendDealNofifyDto, false);
             }
