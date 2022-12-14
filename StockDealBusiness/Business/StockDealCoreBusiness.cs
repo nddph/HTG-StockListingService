@@ -301,7 +301,18 @@ namespace StockDealBusiness.Business
                 .FirstOrDefaultAsync();
 
             if (stockDeal == null) return BadRequestResponse("stockDealId_ERR_INVALID_VALUE");
+
+            if (stockDeal.Ticket == null)
+            {
+                return BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
+            }
+
             if (stockDeal.Ticket.DeletedDate.HasValue) return BadRequestResponse("ticketId_ERR_INACTIVE");
+
+            if (stockDeal.Ticket.Status != 1 || stockDeal.Ticket.ExpDate.Value.Date < DateTime.Now.Date || stockDeal.Ticket.DeletedDate.HasValue)
+            {
+                return BadRequestResponse($"tickeId_ERR_HIDDEN");
+            }
 
             //ktra xem ticket này có cho phép thương lượng hay không
             if (stockDeal.Ticket.AllowDeal.HasValue && !stockDeal.Ticket.AllowDeal.Value)
