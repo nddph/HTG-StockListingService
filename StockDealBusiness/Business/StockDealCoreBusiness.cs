@@ -177,8 +177,16 @@ namespace StockDealBusiness.Business
 
             var context = new StockDealServiceContext();
 
-            if (input.TicketId != null && !context.Tickets.Any(e => e.Id == input.TicketId))
-                return BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
+            var ticket = await context.Tickets.FirstOrDefaultAsync(x => x.Id == input.TicketId);
+            if (ticket == null)
+            {
+                BadRequestResponse($"tickeId_ERR_INVALID_VALUE");
+            }
+
+            if (ticket.Status != 1 || ticket.ExpDate.Value.Date < DateTime.Now.Date || ticket.DeletedDate.HasValue)
+            {
+                BadRequestResponse($"tickeId_ERR_HIDDEN");
+            }
 
             var stockDeal = await context.StockDeals.FirstOrDefaultAsync(e =>
                 ((e.SenderId == input.SenderId && e.ReceiverId == input.ReceiverId)
