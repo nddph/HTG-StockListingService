@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace StockDealBusiness.EventBus
 {
@@ -201,6 +202,13 @@ namespace StockDealBusiness.EventBus
             return JsonConvert.DeserializeObject<List<StockDto>>(resData.Data.ToString());
         }
 
+        public static async Task<List<Company>> GetCompanyList(bool isReply = true)
+        {
+            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.CONSUMER_GetCompanyList, "", ConstEventBus.EXCHANGE_STOCKTRANS, isReply);
+            var resData = ReturnData(res, isReply);
+            if (resData.StatusCode != 200 || (resData.StatusCode == 200 && resData.Data == null)) return null;
+            return JsonConvert.DeserializeObject<List<Company>>(resData.Data.ToString());
+        }
 
         public static BaseResponse ReturnData(string res, bool isReply = true)
         {

@@ -126,13 +126,24 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            //kiểm tra số lượng CP có hợp lệ hay không
-            if (!ticketDto.IsNegotiate)
+            var companyList = await CallEventBus.GetCompanyList();
+            if (companyList != null || stockPolicyList.Count > 0)
             {
-                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
+                var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
+                if (company != null && (company.VoucherTransaction.HasValue && company.VoucherTransaction.Value && company.TransactionMultiple.HasValue))
                 {
-                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                    if (ticketDto.Quantity.Value % company.TransactionMultiple.Value != 0)
+                    {
+                        return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", company.TransactionMultiple.Value);
+                    }
+                }
+                else
+                {
+                    var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                    if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
+                    {
+                        return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", systemSetting);
+                    }
                 }
             }
 
@@ -279,13 +290,24 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            //kiểm tra số lượng CP có hợp lệ hay không
-            if (!ticketDto.IsNegotiate)
+            var companyList = await CallEventBus.GetCompanyList();
+            if (companyList != null || stockPolicyList.Count > 0)
             {
-                var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
+                var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
+                if (company != null && (company.VoucherTransaction.HasValue && company.VoucherTransaction.Value && company.TransactionMultiple.HasValue))
                 {
-                    return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES");
+                    if (ticketDto.Quantity.Value % company.TransactionMultiple.Value != 0)
+                    {
+                        return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", company.TransactionMultiple.Value);
+                    }
+                }
+                else
+                {
+                    var systemSetting = await SystemSettingDB.GetTransactionMultiple();
+                    if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
+                    {
+                        return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", systemSetting);
+                    }
                 }
             }
 
