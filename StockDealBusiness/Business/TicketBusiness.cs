@@ -127,7 +127,7 @@ namespace StockDealBusiness.Business
             }
 
             var companyList = await CallEventBus.GetCompanyList();
-            if (companyList != null || stockPolicyList.Count > 0)
+            if (companyList != null && companyList.Count > 0)
             {
                 var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
                 if (company != null && (company.VoucherTransaction.HasValue && company.VoucherTransaction.Value && company.TransactionMultiple.HasValue))
