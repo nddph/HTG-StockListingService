@@ -81,5 +81,25 @@ namespace StockDealBusiness.RequestDB
             return null;
         }
 
+        /// <summary>
+        /// ds user bị chặn bán
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<List<string>> GetUserForbiddenSale()
+        {
+            SystemSettingBusiness systemSettingBusiness = new();
+
+            var list = new List<string>();
+
+            var systemSetting = await systemSettingBusiness.GetSystemSettingItem(Constants.ForbiddenSale, 0);
+
+            if (systemSetting != null && !string.IsNullOrWhiteSpace(systemSetting.DisplayValue))
+            {
+                list = systemSetting.DisplayValue.Split(";").ToList();
+            }
+
+            return list;
+        }
+
     }
 }

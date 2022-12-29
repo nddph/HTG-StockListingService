@@ -19,6 +19,8 @@ namespace NewsCommon.Utilities
         public const string AllowCreateBuyTicket = "AllowCreateBuyTicket";
         public const string TransactionMultiple = "TransactionMultiple";
 
+        public const string ForbiddenSale = "ForbiddenSale"; //những id định danh bị chặn bán
+
     }
 
 

@@ -101,6 +101,15 @@ namespace StockDealBusiness.Business
 
             if (ticketType == TicketType.Sale)
             {
+                //ktra cho đăng tin bán hay không
+                var saleCode = Helper.LowerString(stockHolderInfo.EmployeeCode);
+                var userForbiddenSale = await SystemSettingDB.GetUserForbiddenSale();
+                var checkForbidden = userForbiddenSale.Any(x => x.ToLower().Equals(saleCode, StringComparison.OrdinalIgnoreCase));
+                if (checkForbidden)
+                {
+                    return BadRequestResponse("saler_ERR_FORBIDDEN");
+                }
+
                 var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
                 if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
             }
