@@ -79,7 +79,7 @@ namespace StockDealBusiness.EventBus
                 _logger.LogInformation($"------ Handle request ----- {ea.RoutingKey}");
                 _logger.LogInformation($"------ Handle response ----- {sendKey}");
 
-                var _rabbitHandleMessage = new EventBusHandleMessage();
+                var _rabbitHandleMessage = new EventBusHandleMessage(_logger);
                 Byte[] responseBytes = await _rabbitHandleMessage.ResponseResult(method, message);
 
                 // send Result to rabbitMQ
