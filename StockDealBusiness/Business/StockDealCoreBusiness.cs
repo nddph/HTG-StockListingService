@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
@@ -17,6 +18,13 @@ namespace StockDealBusiness.Business
 {
     public class StockDealCoreBusiness : BaseBusiness
     {
+        private readonly ILogger _logger;
+
+        public StockDealCoreBusiness(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public async Task<BaseResponse> ListStockDealDetailByTimeAsync(Guid stockDealId, DateTime nextQueryTime, int perPage, Guid loginedContactId)
         {
             var context = new StockDealServiceContext();
@@ -145,7 +153,7 @@ namespace StockDealBusiness.Business
             //lấy thông tin chi tiết của tin đăng
             if (stockDeal.TicketId.HasValue)
             {
-                var ticketBusiness = new TicketBusiness();
+                var ticketBusiness = new TicketBusiness(_logger);
                 var ticket = await ticketBusiness.GetTicketAsync(stockDeal.TicketId.Value, TicketType.Buy, loginedContactId);
                 if (ticket == null)
                 {
@@ -167,11 +175,13 @@ namespace StockDealBusiness.Business
         {
             if (input.SenderId == input.ReceiverId) return BadRequestResponse("receiverId_ERR_DUPLICATE");
 
-            var senderInfo = await CallEventBus.GetStockHolderDetail(input.SenderId.GetValueOrDefault());
+            var callEventBus = new CallEventBus(_logger);
+
+            var senderInfo = await callEventBus.GetStockHolderDetail(input.SenderId.GetValueOrDefault());
             if (senderInfo == null) return BadRequestResponse($"senderId_ERR_INVALID_VALUE");
             else input.ReceiverName = senderInfo.FullName;
 
-            var receiverInfo = await CallEventBus.GetStockHolderDetail(input.ReceiverId.GetValueOrDefault());
+            var receiverInfo = await callEventBus.GetStockHolderDetail(input.ReceiverId.GetValueOrDefault());
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
             else input.ReceiverName = receiverInfo.FullName;
 
@@ -332,7 +342,9 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var receiverInfo = await CallEventBus.GetStockHolderDetail(stockDeal.ReceiverId);
+            var callEventBus = new CallEventBus(_logger);
+
+            var receiverInfo = await callEventBus.GetStockHolderDetail(stockDeal.ReceiverId);
             if (receiverInfo == null) return BadRequestResponse($"receiverId_ERR_INVALID_VALUE");
 
             var stockDetail = new StockDealDetail()

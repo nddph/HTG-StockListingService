@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
 using StockDealCommon;
@@ -20,6 +21,14 @@ namespace StockDealBusiness.Business
 {
     public class TicketBusiness : BaseBusiness
     {
+        private readonly ILogger _logger;
+
+        public TicketBusiness(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+
         public async Task<ViewTickets> GetTicketAsync(Guid ticketId, TicketType ticketType, Guid loginContactId)
         {
             var ticketSearchCriteria = new TicketSearchCriteria()
@@ -86,7 +95,9 @@ namespace StockDealBusiness.Business
                 return BadRequestResponse("ticket_ERR_MIN_TICKET_DAILY", minTicketDaily);
             }
 
-            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
+            var callEventBus = new CallEventBus(_logger);
+
+            var stockHolderInfo = await callEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
             if (ticketType == TicketType.Buy)
@@ -110,18 +121,18 @@ namespace StockDealBusiness.Business
                     return BadRequestResponse("saler_ERR_FORBIDDEN");
                 }
 
-                var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+                var stockLimit = await callEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
                 if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
             }
 
-            var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
+            var stockInfo = await callEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
 
-            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
+            var stockTypeInfo = await callEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
 
             //kiểm tra hạn mức giao dịch tin rao
-            var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
+            var stockPolicyList = await callEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
             if (stockPolicyList == null || stockPolicyList.Count == 0)
             {
                 return BadRequestResponse("stockPolicy_ERR_DATA_NOT_FOUND");
@@ -135,7 +146,7 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var companyList = await CallEventBus.GetCompanyList();
+            var companyList = await callEventBus.GetCompanyList();
             if (companyList != null && companyList.Count > 0)
             {
                 var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
@@ -253,7 +264,8 @@ namespace StockDealBusiness.Business
                     IsNegotiate = ticketDto.IsNegotiate,
                     Title = ticketDto.Title
                 };
-                await CallEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
+
+                await callEventBus.NotificationSuggestTicketAsync(suggestTicketDto, false);
             }
             #endregion
 
@@ -269,23 +281,25 @@ namespace StockDealBusiness.Business
         /// <returns></returns>
         public async Task<BaseResponse> UpdateTicketAsync(UpdateTicketDto ticketDto, Guid loginContactId, TicketType ticketType)
         {
-            var stockHolderInfo = await CallEventBus.GetStockHolderDetail(loginContactId);
+            var callEventBus = new CallEventBus(_logger);
+
+            var stockHolderInfo = await callEventBus.GetStockHolderDetail(loginContactId);
             if (stockHolderInfo == null) return BadRequestResponse();
 
             if (ticketType == TicketType.Sale)
             {
-                var stockLimit = await CallEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
+                var stockLimit = await callEventBus.GetStockHolderLimitAsync(loginContactId, ticketDto.StockId.Value, ticketDto.StockTypeId.Value);
                 if (ticketDto.Quantity.Value > stockLimit) return BadRequestResponse($"quantity_ERR_INVALID_VALUE");
             }
 
-            var stockInfo = await CallEventBus.GetStockDetailById(ticketDto.StockId.Value);
+            var stockInfo = await callEventBus.GetStockDetailById(ticketDto.StockId.Value);
             if (stockInfo == null) return BadRequestResponse($"stockId_ERR_INVALID_VALUE");
 
-            var stockTypeInfo = await CallEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
+            var stockTypeInfo = await callEventBus.GetStockTypeDetailOrDefault(ticketDto.StockTypeId);
             if (stockTypeInfo == null) return BadRequestResponse($"stockTypeId_ERR_INVALID_VALUE");
 
             //kiểm tra hạn mức giao dịch tin rao
-            var stockPolicyList = await CallEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
+            var stockPolicyList = await callEventBus.GetStockPolicyList(ticketDto.StockId.GetValueOrDefault(), ticketDto.StockTypeId.GetValueOrDefault());
             if (stockPolicyList == null || stockPolicyList.Count == 0)
             {
                 return BadRequestResponse("stockPolicy_ERR_DATA_NOT_FOUND");
@@ -299,7 +313,7 @@ namespace StockDealBusiness.Business
                 }
             }
 
-            var companyList = await CallEventBus.GetCompanyList();
+            var companyList = await callEventBus.GetCompanyList();
             if (companyList != null || stockPolicyList.Count > 0)
             {
                 var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
@@ -559,7 +573,8 @@ namespace StockDealBusiness.Business
             #region gửi thông báo có tin đăng liên quan
             if (!updateTicketsDto.IsDelete)
             {
-                await CallEventBus.NotificationAdminHiddenTicketAsync(adminHiddenTickets, false);
+                var callEventBus = new CallEventBus(_logger);
+                await callEventBus.NotificationAdminHiddenTicketAsync(adminHiddenTickets, false);
             }
             #endregion
 
