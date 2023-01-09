@@ -26,6 +26,7 @@ namespace StockDealService.Controllers
             _ticketBusiness = new();
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("v1/healthy")]
         public BaseResponse Health()
