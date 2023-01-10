@@ -157,7 +157,7 @@ namespace StockDealBusiness.EventBus
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _channel.BasicCancel(consumerTag);
-            _channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
+            //_channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
             //_channel.QueueDelete(currentQueue);
 
             _channel?.Close();

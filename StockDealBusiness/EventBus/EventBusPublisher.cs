@@ -73,13 +73,13 @@ namespace StockDealBusiness.EventBus
                 var correlationId = props.CorrelationId;
                 pendingMessageQueues.TryGetValue(correlationId, out TaskCompletionSource<string> pendingMessage);
 
-                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-
                 if (pendingMessage == null)
                 {
                     _logger.LogError($"RabbitMQPublisher OnReceiverResult {correlationId} tcs is null");
                     return;
                 }
+
+                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
                 pendingMessage.SetResult(response);
 
@@ -184,7 +184,7 @@ namespace StockDealBusiness.EventBus
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _channel.BasicCancel(consumerTag);
-            _channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
+            //_channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
             //_channel.QueueDelete(currentQueue);
 
             _channel?.Close();
