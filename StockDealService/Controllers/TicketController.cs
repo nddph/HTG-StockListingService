@@ -23,9 +23,10 @@ namespace StockDealService.Controllers
         public TicketController(ILogger<TicketController> logger)
         {
             _logger = logger;
-            _ticketBusiness = new();
+            _ticketBusiness = new(logger);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("v1/healthy")]
         public BaseResponse Health()

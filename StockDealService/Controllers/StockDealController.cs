@@ -22,7 +22,7 @@ namespace StockDealService.Controllers
         public StockDealController(ILogger<StockDealController> logger)
         {
             _logger = logger;
-            _stockDealBusiness = new();
+            _stockDealBusiness = new(logger);
         }
 
         /// <summary>

@@ -62,7 +62,7 @@ namespace StockDealService.Controllers
         public StockDealHub(ILogger<StockDealHub> logger)
         {
             _stockDealHubBusiness = new();
-            _stockDealCoreBusiness = new();
+            _stockDealCoreBusiness = new(logger);
             _logger = logger;
         }
 
@@ -207,7 +207,8 @@ namespace StockDealService.Controllers
 
             if (stockDealDetail.Type == (int?)TypeStockDealDetail.DealDetail || stockDealDetail.Type == (int?)TypeStockDealDetail.DealChat)
             {
-                await CallEventBus.SendDealNofify(sendDealNofifyDto, false);
+                var callEventBus = new CallEventBus(_logger);
+                await callEventBus.SendDealNofify(sendDealNofifyDto, false);
             }
 
             return new BaseResponse();
