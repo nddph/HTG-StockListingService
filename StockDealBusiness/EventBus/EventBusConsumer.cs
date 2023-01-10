@@ -28,11 +28,11 @@ namespace StockDealBusiness.EventBus
         private string currentQueue;
         private string currentRouting;
 
-#if DEBUG
-        private const bool _autoDelete = true;
-#else
+//#if DEBUG
+//        private const bool _autoDelete = true;
+//#else
         private const bool _autoDelete = false;
-#endif
+//#endif
 
         static IConnection InitializeConnection()
         {
@@ -93,7 +93,9 @@ namespace StockDealBusiness.EventBus
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                _logger?.LogError($"----- response exception --------");
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
 
                 var errorMessage = new BaseResponse
                 {
@@ -156,7 +158,7 @@ namespace StockDealBusiness.EventBus
         {
             _channel.BasicCancel(consumerTag);
             _channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
-            _channel.QueueDelete(currentQueue);
+            //_channel.QueueDelete(currentQueue);
 
             _channel?.Close();
             _connection?.Close();

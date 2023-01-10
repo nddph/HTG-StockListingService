@@ -32,11 +32,11 @@ namespace StockDealBusiness.EventBus
 
         private static readonly ConcurrentDictionary<string, TaskCompletionSource<string>> pendingMessageQueues = new();
 
-#if DEBUG
-        private const bool _autoDelete = true;
-#else
+//#if DEBUG
+//        private const bool _autoDelete = true;
+//#else
         private const bool _autoDelete = false;
-#endif
+//#endif
 
 
         static IConnection InitializeConnection()
@@ -84,9 +84,11 @@ namespace StockDealBusiness.EventBus
                 pendingMessage.SetResult(response);
 
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e.ToString());
+                _logger?.LogError($"----- response exception --------");
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
             }
 
         }
@@ -128,7 +130,9 @@ namespace StockDealBusiness.EventBus
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger?.LogError($"----- response exception --------");
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
             }
         }
 
@@ -181,7 +185,7 @@ namespace StockDealBusiness.EventBus
         {
             _channel.BasicCancel(consumerTag);
             _channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
-            _channel.QueueDelete(currentQueue);
+            //_channel.QueueDelete(currentQueue);
 
             _channel?.Close();
             _connection?.Close();

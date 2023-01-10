@@ -20,12 +20,15 @@ namespace StockDealBusiness.EventBus
         /// <returns></returns>
         public static async Task<BaseResponse> NotificationSuggestTicketAsync(SuggestTicketDto suggestTicketDto, bool isReply = false)
         {
-            var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationSuggestTicket,
-                        JsonConvert.SerializeObject(suggestTicketDto), ConstEventBus.EXCHANGE_NOTIFY, isReply);
+            // TODO: check issue Unacked
+            //var res = await EventBusPublisher.CallEventBusAsync(ConstEventBus.Publisher_NotificationSuggestTicket,
+            //            JsonConvert.SerializeObject(suggestTicketDto), ConstEventBus.EXCHANGE_NOTIFY, isReply);
 
-            var resData = ReturnData(res, isReply);
+            //var resData = ReturnData(res, isReply);
 
-            return resData;
+            //return resData;
+
+            return new BaseResponse();
         }
 
 
