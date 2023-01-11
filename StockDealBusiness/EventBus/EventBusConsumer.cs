@@ -22,7 +22,7 @@ namespace StockDealBusiness.EventBus
         private readonly ILogger _logger;
 
         private static readonly IConnection _connection = InitializeConnection();
-        private static readonly IModel _channel = InitializeChannel();
+        private static IModel _channel = InitializeChannel();
 
         private string consumerTag = "";
         private string currentQueue;
@@ -41,22 +41,16 @@ namespace StockDealBusiness.EventBus
             return connectionFactory.CreateConnection();
         }
 
-
-
         static IModel InitializeChannel()
         {
             return _connection.CreateModel();
         }
-
-
 
         public EventBusConsumer()
         {
             var loggerFactory = LoggerFactory.Create(e => e.AddConsole().AddFile("Logs/logs.txt"));
             _logger = loggerFactory.CreateLogger<EventBusConsumer>();
         }
-
-
 
         public async Task OnReceiverRequest(object model, BasicDeliverEventArgs ea)
         {
@@ -72,8 +66,6 @@ namespace StockDealBusiness.EventBus
                 var message = Encoding.UTF8.GetString(body);
 
                 var method = topic[2];
-                // SECURITY.CALENDAR.DoSomething.REQUEST
-                // CALENDAR.SECURITY.DoSomething.RESPONSE
                 sendKey = string.Format("{0}.{1}.{2}.{3}", topic[1], topic[0], topic[2], "RESPONSE");
 
                 _logger.LogInformation($"------ Handle request ----- {ea.RoutingKey}");
@@ -82,6 +74,8 @@ namespace StockDealBusiness.EventBus
                 var _rabbitHandleMessage = new EventBusHandleMessage(_logger);
                 Byte[] responseBytes = await _rabbitHandleMessage.ResponseResult(method, message);
 
+                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+
                 // send Result to rabbitMQ
                 // response to service
                 if (props.ReplyTo != null)
@@ -89,7 +83,6 @@ namespace StockDealBusiness.EventBus
                     _logger.LogInformation($"------ response successful ----- {props.ReplyTo} {sendKey} responseBytes.Length: {responseBytes.Length}");
                     SendResult(props, sendKey, responseBytes);
                 }
-                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
@@ -113,8 +106,6 @@ namespace StockDealBusiness.EventBus
 
         }
 
-
-
         private void SendResult(IBasicProperties props, string sendKey, Byte[] responseBytes)
         {
             var replyProps = _channel.CreateBasicProperties();
@@ -123,48 +114,74 @@ namespace StockDealBusiness.EventBus
             _channel.BasicPublish(exchange: props.ReplyTo, routingKey: sendKey, basicProperties: replyProps, body: responseBytes);
         }
 
-
-
         public Task StartAsync(CancellationToken cancellationToken)
         {
-
             currentQueue = $"Q_{ConstEventBus.CURRENT_SERVICE}_{ConstEventBus.REQUEST_METHOD}";
             currentRouting = $"*.{ConstEventBus.CURRENT_SERVICE}.*.{ConstEventBus.REQUEST_METHOD}";
 
-            _logger.LogInformation("Consumer StartAsync");
+            _logger?.LogInformation("Consumer StartAsync");
 
-            _channel.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
+            // Put below code inside try catch section. If queue or exchange doesn't exist then it will throw error. if exists it will not do anything.
 
-            // tao Queue
-            _channel.QueueDeclare(queue: currentQueue, durable: false, exclusive: false, autoDelete: _autoDelete);
+            //exchange
+            try
+            {
+                _logger?.LogInformation($"Consumer StartAsync Exchange exits");
+                _channel?.ExchangeDeclarePassive(exchange: ConstEventBus.CURRENT_EXCHANGE);
+            }
+            catch
+            {
+                _logger?.LogInformation("Consumer StartAsync Exchange not exits");
+                _channel = InitializeChannel();
+                _channel?.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
+            }
 
-            _channel.BasicQos(0, 1, false);
+            //queue
+            try
+            {
+                _logger?.LogInformation($"Consumer StartAsync Queue exits");
+                _channel?.QueueDeclarePassive(queue: currentQueue);
+            }
+            catch
+            {
+                _logger?.LogInformation("Consumer StartAsync Queue not exits");
+                _channel = InitializeChannel();
+                _channel?.QueueDeclare(queue: currentQueue, durable: false, exclusive: false, autoDelete: _autoDelete, arguments: null);
+            }
 
-            // Bind Queue to Exchange & RoutingKey
-            _channel.QueueBind(queue: currentQueue, exchange: ConstEventBus.CURRENT_EXCHANGE, routingKey: currentRouting);
+            try
+            {
+                _channel?.BasicQos(0, 1, false);
 
-            var consumer = new AsyncEventingBasicConsumer(_channel);
+                // Bind Queue to Exchange & RoutingKey
+                _channel?.QueueBind(queue: currentQueue, exchange: ConstEventBus.CURRENT_EXCHANGE, routingKey: currentRouting);
+                _logger?.LogInformation($"Consumer Binding Queue to Exchange: " + currentQueue);
+                var consumer = new AsyncEventingBasicConsumer(_channel);
 
-            consumer.Received += OnReceiverRequest;
+                consumer.Received += OnReceiverRequest;
 
-            consumerTag = _channel.BasicConsume(queue: currentQueue, autoAck: false, consumer: consumer);
+                consumerTag = _channel.BasicConsume(queue: currentQueue, autoAck: false, consumer: consumer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Consumer exception");
+                _logger.LogError(ex.Message);
+                _logger.LogError(ex.StackTrace);
+            }
 
             return Task.CompletedTask;
         }
 
-
-
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _channel.BasicCancel(consumerTag);
-            //_channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
-            //_channel.QueueDelete(currentQueue);
+            _channel?.BasicCancel(consumerTag);
+            //_channel?.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
+            //_channel?.QueueDelete(currentQueue);
 
             _channel?.Close();
             _connection?.Close();
 
             return Task.CompletedTask;
         }
-
     }
 }

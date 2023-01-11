@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using StockDealBusiness.EventBus;
 using StockDealBusiness.RequestDB;
 using StockDealCommon;
@@ -7,6 +8,7 @@ using StockDealDal.Dto;
 using StockDealDal.Dto.EventBus;
 using StockDealDal.Dto.StockDeal;
 using StockDealDal.Dto.Ticket;
+using StockDealDal.DTO;
 using StockDealDal.Entities;
 using System;
 using System.Collections;
@@ -147,12 +149,18 @@ namespace StockDealBusiness.Business
             }
 
             var companyList = await callEventBus.GetCompanyList();
+
+            _logger.LogInformation(String.Format("----- CreateTicketAsync ---- CompanyList ---- {0}", JsonConvert.SerializeObject(companyList)));
+
             if (companyList != null && companyList.Count > 0)
             {
                 var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
+
+                _logger.LogInformation(String.Format("----- CreateTicketAsync ---- Company ---- {0}", JsonConvert.SerializeObject(company)));
+
                 if (company != null && (company.VoucherTransaction.HasValue && company.VoucherTransaction.Value && company.TransactionMultiple.HasValue))
                 {
-                    if (ticketDto.Quantity.Value % company.TransactionMultiple.Value != 0)
+                    if ((ticketDto.Quantity.Value % company.TransactionMultiple.Value) != 0)
                     {
                         return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", company.TransactionMultiple.Value);
                     }
@@ -160,7 +168,7 @@ namespace StockDealBusiness.Business
                 else
                 {
                     var systemSetting = await SystemSettingDB.GetTransactionMultiple();
-                    if (systemSetting != null && ticketDto.Quantity % systemSetting != 0)
+                    if (systemSetting != null && (ticketDto.Quantity % systemSetting) != 0)
                     {
                         return BadRequestResponse("quantity_ERR_TRANS_MULTIPLES", systemSetting);
                     }

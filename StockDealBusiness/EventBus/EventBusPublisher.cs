@@ -24,7 +24,7 @@ namespace StockDealBusiness.EventBus
         private readonly ILogger _logger;
 
         private static readonly IConnection _connection = InitializeConnection();
-        private static readonly IModel _channel = InitializeChannel();
+        private static IModel _channel = InitializeChannel();
 
         private string consumerTag;
         private string currentQueue;
@@ -38,7 +38,6 @@ namespace StockDealBusiness.EventBus
         private const bool _autoDelete = false;
 //#endif
 
-
         static IConnection InitializeConnection()
         {
             var connectionFactory = new ConnectionFactory() { DispatchConsumersAsync = true };
@@ -46,21 +45,16 @@ namespace StockDealBusiness.EventBus
             return connectionFactory.CreateConnection();
         }
 
-
         static IModel InitializeChannel()
         {
             return _connection.CreateModel();
         }
-
-
 
         public EventBusPublisher()
         {
             var loggerFactory = LoggerFactory.Create(e => e.AddConsole().AddFile("Logs/logs.txt"));
             _logger = loggerFactory.CreateLogger<EventBusPublisher>();
         }
-
-
 
         public async Task OnReceiverResult(object model, BasicDeliverEventArgs ea)
         {
@@ -93,8 +87,6 @@ namespace StockDealBusiness.EventBus
 
         }
 
-
-
         public async Task<string> SendAsync(string topic, string messagestring, string exchangeName, bool isReply)
         {
             string res = "";
@@ -111,8 +103,6 @@ namespace StockDealBusiness.EventBus
             pendingMessageQueues.TryRemove(correlationId, out _);
             return res;
         }
-
-
 
         private void Publish(string topic, string messagestring, string exchangeName, string correlationId, bool isReply)
         {
@@ -136,15 +126,11 @@ namespace StockDealBusiness.EventBus
             }
         }
 
-
-
         public static async Task<string> CallEventBusAsync(string routingKey, string messagestring, string exchangeName, bool isReply)
         {
             var rabbitMQPublisher = new EventBusPublisher();
             return await rabbitMQPublisher.SendAsync(routingKey, messagestring, exchangeName, isReply);
         }
-
-
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -157,40 +143,68 @@ namespace StockDealBusiness.EventBus
 
             _logger.LogInformation("Publisher StartAsync");
 
-            _channel.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
+            // Put below code inside try catch section. If queue or exchange doesn't exist then it will throw error. if exists it will not do anything.
 
-            _channel.QueueDeclare(
-                queue: currentQueue,
-                durable: false,
-                exclusive: false,
-                autoDelete: _autoDelete,
-                arguments: null
-            );
+            //exchange
+            try
+            {
+                _logger?.LogInformation($"Publisher StartAsync Exchange exits");
+                _channel?.ExchangeDeclarePassive(exchange: ConstEventBus.CURRENT_EXCHANGE);
+            }
+            catch
+            {
+                _logger?.LogInformation("Publisher StartAsync Exchange not exits");
+                _channel = InitializeChannel();
+                _channel?.ExchangeDeclare(exchange: ConstEventBus.CURRENT_EXCHANGE, type: "topic");
+            }
 
-            _channel.QueueBind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
-            _channel.BasicQos(0, 1, false);
+            //queue
+            try
+            {
+                _logger?.LogInformation($"Publisher StartAsync Queue exits");
+                _channel?.QueueDeclarePassive(queue: currentQueue);
+            }
+            catch
+            {
+                _logger?.LogInformation("Publisher StartAsync Queue not exits");
+                _channel = InitializeChannel();
+                _channel?.QueueDeclare(queue: currentQueue, durable: false, exclusive: false, autoDelete: _autoDelete, arguments: null);
+            }
 
-            var consumer = new AsyncEventingBasicConsumer(_channel);
-            consumer.Received += OnReceiverResult;
+            try
+            {
+                _channel?.BasicQos(0, 1, false);
 
-            consumerTag = _channel.BasicConsume(currentQueue, false, consumer);
+                // Bind Queue to Exchange & RoutingKey
+                _channel?.QueueBind(queue: currentQueue, exchange: ConstEventBus.CURRENT_EXCHANGE, routingKey: currentRouting);
+                _logger?.LogInformation($"Publisher Binding Queue to Exchange: " + currentQueue);
+
+                var consumer = new AsyncEventingBasicConsumer(_channel);
+                consumer.Received += OnReceiverResult;
+
+                consumerTag = _channel.BasicConsume(currentQueue, false, consumer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Publisher exception");
+                _logger.LogError(ex.Message);
+                _logger.LogError(ex.StackTrace);
+            }
 
             return Task.CompletedTask;
 
         }
 
-
-
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _channel.BasicCancel(consumerTag);
-            //_channel.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
-            //_channel.QueueDelete(currentQueue);
+            _channel?.BasicCancel(consumerTag);
+            //_channel?.QueueUnbind(currentQueue, ConstEventBus.CURRENT_EXCHANGE, currentRouting);
+            //_channel?.QueueDelete(currentQueue);
 
             _channel?.Close();
             _connection?.Close();
 
-            pendingMessageQueues.Clear();
+            pendingMessageQueues?.Clear();
 
             return Task.CompletedTask;
         }
