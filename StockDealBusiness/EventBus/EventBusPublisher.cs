@@ -70,6 +70,7 @@ namespace StockDealBusiness.EventBus
                 if (pendingMessage == null)
                 {
                     _logger.LogError($"RabbitMQPublisher OnReceiverResult {correlationId} tcs is null");
+                    _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
                     return;
                 }
 
