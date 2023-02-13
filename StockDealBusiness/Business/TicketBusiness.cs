@@ -141,22 +141,25 @@ namespace StockDealBusiness.Business
             }
             else
             {
+                //số lượng nhỏ nhất
                 var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
                 if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
                 {
                     return BadRequestResponse("quantity_ERR_LOW_THAN_POLICY", stockPolicy.MinSaleTrans);
                 }
+
+                //giá nhỏ nhất
+                if (!ticketDto.IsNegotiate && ticketDto.PriceFrom.Value < stockPolicy.MinPrice)
+                {
+                    return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPrice);
+                }
             }
 
             var companyList = await callEventBus.GetCompanyList();
 
-            _logger.LogInformation(String.Format("----- CreateTicketAsync ---- CompanyList ---- {0}", JsonConvert.SerializeObject(companyList)));
-
             if (companyList != null && companyList.Count > 0)
             {
                 var company = companyList.FirstOrDefault(x => x.Id == stockInfo.CompanyId);
-
-                _logger.LogInformation(String.Format("----- CreateTicketAsync ---- Company ---- {0}", JsonConvert.SerializeObject(company)));
 
                 if (company != null && (company.VoucherTransaction.HasValue && company.VoucherTransaction.Value && company.TransactionMultiple.HasValue))
                 {
@@ -314,10 +317,17 @@ namespace StockDealBusiness.Business
             }
             else
             {
+                //số lượng nhỏ nhất
                 var stockPolicy = stockPolicyList.OrderBy(x => x.EffectDate).FirstOrDefault();
                 if (ticketDto.Quantity.Value < stockPolicy.MinSaleTrans)
                 {
                     return BadRequestResponse("quantity_ERR_LOW_THAN_POLICY", stockPolicy.MinSaleTrans);
+                }
+
+                //giá nhỏ nhất
+                if (!ticketDto.IsNegotiate && ticketDto.PriceFrom.Value < stockPolicy.MinPrice)
+                {
+                    return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPrice);
                 }
             }
 
