@@ -151,11 +151,13 @@ namespace StockDealBusiness.Business
                 //giá nhỏ nhất
                 if (!ticketDto.IsNegotiate)
                 {
-                    if (ticketType == TicketType.Buy && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy)
+                    if (ticketType == TicketType.Buy && stockPolicy.MinPriceBuy.HasValue 
+                        && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy.Value)
                     {
                         return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceBuy);
                     }
-                    if (ticketType == TicketType.Sale && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale)
+                    if (ticketType == TicketType.Sale && stockPolicy.MinPriceSale.HasValue 
+                        && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale.Value)
                     {
                         return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceSale);
                     }
@@ -334,11 +336,13 @@ namespace StockDealBusiness.Business
                 //giá nhỏ nhất
                 if (!ticketDto.IsNegotiate)
                 {
-                    if (ticketType == TicketType.Buy && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy)
+                    if (ticketType == TicketType.Buy && stockPolicy.MinPriceBuy.HasValue
+                        && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy.Value)
                     {
                         return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceBuy);
                     }
-                    if (ticketType == TicketType.Sale && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale)
+                    if (ticketType == TicketType.Sale && stockPolicy.MinPriceSale.HasValue
+                        && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale.Value)
                     {
                         return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceSale);
                     }
