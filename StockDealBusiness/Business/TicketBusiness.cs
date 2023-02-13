@@ -149,9 +149,16 @@ namespace StockDealBusiness.Business
                 }
 
                 //giá nhỏ nhất
-                if (!ticketDto.IsNegotiate && ticketDto.PriceFrom.Value < stockPolicy.MinPrice)
+                if (!ticketDto.IsNegotiate)
                 {
-                    return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPrice);
+                    if (ticketType == TicketType.Buy && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy)
+                    {
+                        return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceBuy);
+                    }
+                    if (ticketType == TicketType.Sale && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale)
+                    {
+                        return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceSale);
+                    }
                 }
             }
 
@@ -325,9 +332,16 @@ namespace StockDealBusiness.Business
                 }
 
                 //giá nhỏ nhất
-                if (!ticketDto.IsNegotiate && ticketDto.PriceFrom.Value < stockPolicy.MinPrice)
+                if (!ticketDto.IsNegotiate)
                 {
-                    return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPrice);
+                    if (ticketType == TicketType.Buy && ticketDto.PriceFrom.Value < stockPolicy.MinPriceBuy)
+                    {
+                        return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceBuy);
+                    }
+                    if (ticketType == TicketType.Sale && ticketDto.PriceFrom.Value < stockPolicy.MinPriceSale)
+                    {
+                        return BadRequestResponse("price_ERR_LOW_THAN_POLICY", stockPolicy.MinPriceSale);
+                    }
                 }
             }
 

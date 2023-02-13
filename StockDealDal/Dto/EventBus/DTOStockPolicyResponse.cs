@@ -19,8 +19,10 @@ namespace StockDealDal.DTO
         public string StockTypeName { get; set; }
         public int? MinSaleTrans { get; set; }
         public int? MaxSaleTrans { get; set; }
-        public long? MinPrice { get; set; }
-        public long? MaxPrice { get; set; }
+        public long? MinPriceSale { get; set; }
+        public long? MinPriceBuy { get; set; }
+        public long? MaxPriceSale { get; set; }
+        public long? MaxPriceBuy { get; set; }
         public DateTime? EffectDate { get; set; }
         public DateTime? CreatedDate { get; set; }
         public Guid? CreatedBy { get; set; }
